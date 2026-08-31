@@ -20,6 +20,7 @@ import {
   UploadCloud,
   FileSpreadsheet,
   X,
+  Calculator,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -29,6 +30,7 @@ import { UnitStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 import { ProjectUnit, UnitStatus, Project } from "@/types/crm";
 import { UnitDetailModal } from "@/components/crm/unit-detail-modal";
+import { CostSheetModal } from "@/components/crm/cost-sheet-modal";
 import { toast } from "sonner";
 
 export function ProjectsPage() {
@@ -62,6 +64,8 @@ export function ProjectsPage() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [selectedDossierUnit, setSelectedDossierUnit] = React.useState<ProjectUnit | null>(null);
   const [isDossierOpen, setIsDossierOpen] = React.useState(false);
+  const [costSheetUnit, setCostSheetUnit] = React.useState<ProjectUnit | null>(null);
+  const [isCostSheetOpen, setIsCostSheetOpen] = React.useState(false);
 
   // Form State - Project
   const [projName, setProjName] = React.useState("");
@@ -657,21 +661,37 @@ export function ProjectsPage() {
                   </div>
                 )}
 
-                {/* Status Dropdown Controller */}
-                <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs" onClick={(e) => e.stopPropagation()}>
-                  <span className="text-[10px] text-muted-foreground font-medium">Update Status:</span>
-                  <select
-                    value={unit.status}
-                    onChange={(e) => updateUnitStatus(unit.id, e.target.value as UnitStatus)}
-                    className="h-6 text-[10px] font-bold rounded border border-border bg-secondary px-1.5 text-foreground focus:outline-none"
+                {/* Status Dropdown Controller & Quick Cost Sheet */}
+                <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-muted-foreground font-medium">Status:</span>
+                    <select
+                      value={unit.status}
+                      onChange={(e) => updateUnitStatus(unit.id, e.target.value as UnitStatus)}
+                      className="h-6 text-[10px] font-bold rounded border border-border bg-secondary px-1 text-foreground focus:outline-none"
+                    >
+                      <option value="available">Available</option>
+                      <option value="hold">Hold</option>
+                      <option value="site_visit">Site Visit</option>
+                      <option value="negotiation">Negotiation</option>
+                      <option value="booked">Booked</option>
+                      <option value="sold">Sold</option>
+                    </select>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCostSheetUnit(unit);
+                      setIsCostSheetOpen(true);
+                    }}
+                    className="h-6 px-2 text-[10px] font-bold gap-1 border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
                   >
-                    <option value="available">Available</option>
-                    <option value="hold">Hold</option>
-                    <option value="site_visit">Site Visit</option>
-                    <option value="negotiation">Negotiation</option>
-                    <option value="booked">Booked</option>
-                    <option value="sold">Sold</option>
-                  </select>
+                    <Calculator className="h-3 w-3" />
+                    <span>Cost Sheet</span>
+                  </Button>
                 </div>
               </Card>
             );
@@ -1026,6 +1046,16 @@ export function ProjectsPage() {
         onClose={() => {
           setIsDossierOpen(false);
           setSelectedDossierUnit(null);
+        }}
+      />
+
+      {/* Standalone Cost Sheet & Payment Plan Modal */}
+      <CostSheetModal
+        unit={costSheetUnit}
+        isOpen={isCostSheetOpen}
+        onClose={() => {
+          setIsCostSheetOpen(false);
+          setCostSheetUnit(null);
         }}
       />
     </div>

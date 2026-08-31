@@ -28,6 +28,7 @@ import {
   HelpCircle,
   FileText,
   Share2,
+  Calculator,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
@@ -36,6 +37,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UnitStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
+import { CostSheetModal } from "@/components/crm/cost-sheet-modal";
 import type {
   ProjectUnit,
   EntityRelationship,
@@ -74,7 +76,8 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
     logUnitPriceChange,
   } = useCRM();
 
-  const [activeTab, setActiveTab] = React.useState<"overview" | "people" | "facts" | "pricing" | "buyers">("overview");
+  const [activeTab, setActiveTab] = React.useState<"overview" | "people" | "facts" | "pricing" | "buyers" | "cost_sheet">("overview");
+  const [isCostSheetOpen, setIsCostSheetOpen] = React.useState(false);
 
   // Edit State
   const [isEditingPrice, setIsEditingPrice] = React.useState(false);
@@ -207,6 +210,7 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
   };
 
   return (
+    <>
     <ResponsiveModal
       open={isOpen}
       onOpenChange={(open) => !open && onClose()}
@@ -275,7 +279,15 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => setIsCostSheetOpen(true)}
+                  className="h-8 gap-1.5 bg-amber-600 hover:bg-amber-500 text-slate-950 text-xs font-bold shadow-sm"
+                >
+                  <Calculator className="h-3.5 w-3.5" />
+                  <span>Cost Sheet & Plan</span>
+                </Button>
                 <Button
                   size="sm"
                   onClick={handleWhatsAppShare}
@@ -320,6 +332,7 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
           <div className="flex items-center gap-2 mt-6 overflow-x-auto pb-1 border-b border-border/40">
             {[
               { key: "overview", label: "Specs & Intelligence", icon: Building2 },
+              { key: "cost_sheet", label: "Cost Sheet & Payment Plan", icon: Calculator },
               { key: "people", label: `People & Owners (${unitRelationships.length})`, icon: Users },
               { key: "facts", label: `Sales Memory (${unitFacts.length})`, icon: Sparkles },
               { key: "pricing", label: `Price History (${unitHistory.length})`, icon: TrendingUp },
@@ -330,7 +343,13 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
               return (
                 <button
                   key={t.key}
-                  onClick={() => setActiveTab(t.key as any)}
+                  onClick={() => {
+                    if (t.key === "cost_sheet") {
+                      setIsCostSheetOpen(true);
+                    } else {
+                      setActiveTab(t.key as any);
+                    }
+                  }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-sm"
@@ -857,5 +876,11 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
         </div>
       </div>
     </ResponsiveModal>
+    <CostSheetModal
+      unit={unit}
+      isOpen={isCostSheetOpen}
+      onClose={() => setIsCostSheetOpen(false)}
+    />
+    </>
   );
 }

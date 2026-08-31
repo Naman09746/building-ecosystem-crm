@@ -203,6 +203,10 @@
     "mtime": 1787766630.5107524,
     "hash": "f09ef60632736675b9a9f846639a7cab"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/properties/units/[id]/cost-sheet/route.ts": {
+    "mtime": 1788173595.8785603,
+    "hash": "127a1263da0ec4153a3b2be75e329ee0"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/properties/towers/route.ts": {
     "mtime": 1787766592.6860027,
     "hash": "e6544208ec089ba6f49a17799bd0bdf1"
@@ -511,6 +515,10 @@
     "mtime": 1788169063.7863867,
     "hash": "0e3b5ff2ec23af38f6bd807f2f8a3cce"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/cost-sheet-modal.tsx": {
+    "mtime": 1788173697.133533,
+    "hash": "dafffa445be3cfdbc63102f0b3a69c70"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/ai-resurrection-modal.tsx": {
     "mtime": 1787390617.053503,
     "hash": "8ffc29b58aa6921a89ec269f28530cf6"
@@ -520,8 +528,8 @@
     "hash": "01b991394a46581db3142582f07c8532"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/unit-detail-modal.tsx": {
-    "mtime": 1788169563.3246686,
-    "hash": "dca1cd95cfc1686e9c710edf2c165e95"
+    "mtime": 1788173497.9708138,
+    "hash": "3f654672e4f363c25d2d4f07843d7246"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/quick-activity-modal.tsx": {
     "mtime": 1788169390.1658933,
@@ -620,8 +628,8 @@
     "hash": "d589315df490ed88112336ae765fd912"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/pages/projects-page.tsx": {
-    "mtime": 1787766831.5584023,
-    "hash": "c5bd95adca619268e044cb30cae50bdb"
+    "mtime": 1788173572.7294807,
+    "hash": "90fc626bb2b019ae38295707268e66ef"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/pages/billing-page.tsx": {
     "mtime": 1787384882.5942202,
@@ -654,6 +662,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/phase9-analytics.test.ts": {
     "mtime": 1787389878.0671046,
     "hash": "8952a4454d05fc950576876cc0706760"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/cost-sheet-calculator.test.ts": {
+    "mtime": 1788173379.6076255,
+    "hash": "b96c27af70b4a1a1770eec2a73a85b2e"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/role-mapping.test.ts": {
     "mtime": 1787369850.4249182,
@@ -746,6 +758,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/hooks/use-device.ts": {
     "mtime": 1788169019.2887406,
     "hash": "a3cbfc6d1ddd036e247444debb255a47"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/lib/cost-sheet-calculator.ts": {
+    "mtime": 1788173397.5732477,
+    "hash": "caf67d77d1bbfea923017f062c8c68d2"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/lib/utils.ts": {
     "mtime": 1787317058.5140195,
