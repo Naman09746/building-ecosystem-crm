@@ -26,6 +26,7 @@ import {
   Key,
   ShieldCheck,
   FileText,
+  Workflow,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ import { MeetingSummaryModal } from "@/components/crm/meeting-summary-modal";
 import { NegotiationModal } from "@/components/crm/negotiation-modal";
 import { SiteVisitDispatchModal } from "@/components/crm/site-visit-dispatch-modal";
 import { CommissionModal } from "@/components/crm/commission-modal";
+import { N8nIntegrationDrawer } from "@/components/crm/n8n-integration-drawer";
 
 interface SalespersonHomeProps {
   onOpenQuickLog: (leadId?: string) => void;
@@ -67,6 +69,7 @@ export function SalespersonHome({
   const [isNegotiationOpen, setIsNegotiationOpen] = React.useState(false);
   const [isDispatchOpen, setIsDispatchOpen] = React.useState(false);
   const [isCommissionOpen, setIsCommissionOpen] = React.useState(false);
+  const [isN8nDrawerOpen, setIsN8nDrawerOpen] = React.useState(false);
   const [selectedActionLead, setSelectedActionLead] = React.useState<Lead | null>(null);
   const [selectedActionUnit, setSelectedActionUnit] = React.useState<ProjectUnit | null>(null);
   const [activeBriefing, setActiveBriefing] = React.useState<SiteVisitBriefing | null>(null);
@@ -214,6 +217,16 @@ export function SalespersonHome({
           >
             <FileSpreadsheet className="h-4 w-4" />
             <span>Commission Ledger</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsN8nDrawerOpen(true)}
+            className="h-10 px-3 text-xs font-semibold border-blue-500/40 text-blue-400 hover:bg-blue-500/10 flex items-center gap-1.5 rounded-xl"
+          >
+            <Workflow className="h-4 w-4" />
+            <span>n8n Automations</span>
           </Button>
 
           <Button
@@ -691,6 +704,12 @@ export function SalespersonHome({
         onOpenChange={setIsCommissionOpen}
         lead={selectedActionLead}
         unit={selectedActionUnit}
+      />
+
+      {/* n8n Automation & Integration Orchestrator Drawer */}
+      <N8nIntegrationDrawer
+        open={isN8nDrawerOpen}
+        onOpenChange={setIsN8nDrawerOpen}
       />
     </div>
   );
