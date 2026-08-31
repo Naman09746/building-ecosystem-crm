@@ -52,6 +52,8 @@ Aria 2.0 exposes a suite of strictly tenant-scoped server tools:
 
 | Tool | Purpose | Key Inputs | Security & Tenant Guarantee |
 | :--- | :--- | :--- | :--- |
+| `generatePropertyBriefing` | Property 360° sales & access dossier briefing | `unitId`, `unitNumber`, `tower`, `projectId` | Returns verified architectural specs, commercial appraisal, institutional sales memory facts with verification tiers, and gate access protocols |
+| `matchBuyersForUnit` | Active qualified buyer lead matching | `unitId`, `maxMatches` | Matches active buyer leads against unit configuration, budget, and timeline with personalized WhatsApp pitches |
 | `searchAvailableInventory` | Explainable multi-criteria inventory matching | `bhk`, `minimumBudget`, `maximumBudget`, `preferredFloor`, `minimumArea`, `facing`, `region` | Strictly scoped to `org_id`. Computes weighted match score (Location 30%, Budget 25%, Config 20%, Area 10%, Floor 5%, Facing 5%) |
 | `lookupExistingBuyer` | Search contact directory & active deals | `phone`, `email`, `name` | Normalizes phone (+91 E.164); detects active deals, previous lost leads, or existing clients to prevent duplicate leads |
 | `searchProjects` | Project stats & unit availability | `query`, `regionId`, `status` | Strictly factual aggregations on `projects` and `project_units` |
@@ -115,19 +117,75 @@ In luxury real estate, many lost leads go cold due to timing, inventory shortage
 
 ---
 
-## 5. Automation 4: Real-Time Event Sync
+## 5. Automation 4: Seller Intelligence & Opportunity Engine
+
+### Purpose
+Proactively monitors ownership timelines, rental tenancy expiry dates, and unit vacancy to capture seller mandates before properties reach open-market portals.
+
+### Signal Triggers (`/api/seller-opportunities` & `lib/server/seller-intelligence.ts`)
+1. **Expiring Tenancies**: Flags active tenant lease agreements expiring within 60 days. Allows agents to pitch capital gains realization or re-leasing.
+2. **Prolonged Vacant Units**: Identifies unrented units incurring maintenance holding costs.
+3. **Investor 3-Year Exit Windows**: Detects units held for $\ge 3$ years qualifying for long-term capital gains tax benefits.
+4. **1-Click Mandate Conversion**: `convertOpportunityToResaleListing` converts the signal into an active resale listing and auto-attaches current market valuation.
+
+---
+
+## 6. Automation 5: 100-Point Bi-Directional Matching Engine
+
+### Scoring Pillars (`lib/server/aria-tools.ts`)
+$$\text{Match Score (100 pts)} = \text{Location (30)} + \text{Budget (30)} + \text{Config (20)} + \text{Floor/Facing (10)} + \text{Mandate (10)}$$
+
+- **Bi-Directional**:
+  - Buyer $\rightarrow$ Units: Finds all matching units for a buyer requirement.
+  - Unit $\rightarrow$ Buyers: When a unit is onboarded or repriced, instantly ranks all qualified active buyers in the pipeline.
+
+---
+
+## 7. Automation 6: 30-Minute Pre-Site-Visit Briefing Synthesizer
+
+### Operational Cockpit (`/api/properties/site-briefings` & `lib/server/site-visit-briefing.ts`)
+Triggered automatically 30 minutes before client arrival or on-demand from the salesperson cockpit:
+- **Security & Gate Pass Protocol**: Digital visitor pass PIN, Gate 2 registration rules, and key location.
+- **Designated Parking**: Parking bay assignment (e.g., Basement 1, Bay #42).
+- **Owner Price Non-Negotiables**: Price floors, payment milestone flexibility, and previous owner objections.
+- **Tailored Talking Points & Objections**: Highlighting vastu, floor view advantages, and objection battlecards.
+
+---
+
+## 8. Automation 7: Free-Text & Voice Meeting Structurer (Human-in-the-Loop)
+
+### Strict Trust Guarantee (`/api/activities/meeting-summary` & `meeting-summary-modal.tsx`)
+1. Sales rep dictates or types freeform notes in English or Hinglish.
+2. AI extracts:
+   - Primary Objections (e.g., "Price sensitivity", "Under construction timeline")
+   - Buying Signals (e.g., "Loved golf course view", "Immediate cheque ready")
+   - Suggested Pipeline Stage & Next Move
+3. **Zero Autonomous Writes**: The AI only returns a proposed draft. The sales rep must review, edit if desired, and click **"Approve & Save Activity"** to commit changes to the CRM.
+
+---
+
+## 9. Automation 8: Stale Property Knowledge Re-Verification
+
+### 180-Day Freshness Guard (`/api/automation/stale-facts`)
+- Database procedure `scan_and_flag_stale_property_knowledge` periodically scans all `property_facts` and `project_units`.
+- Any facts unverified for $>180$ days are flagged as `is_stale = true` and surfaced in the sales rep re-verification queue.
+
+---
+
+## 10. Automation 9: Real-Time Event Sync
 
 ### Implementation (actual)
 - One Supabase Realtime channel (`crm-realtime`) subscribed to `postgres_changes` on:
   - `leads` — pipeline/stage/score updates
   - `tasks` — queue changes and completions
   - `activities` — new touchpoints
+  - `project_units` & `seller_opportunities` — inventory & mandate updates
 - Any event triggers a **debounced refetch (1.5s)** of that entity rather than patch merging — simple, correct ordering, no merge bugs.
-- Combined with optimistic local mutations + write-through persistence (`lib/persistence/crm-sync.ts`) and an automatic retry queue (`lib/persistence/retry-queue.ts`: flushes on network-online, tab focus, and 30s sweep; abandons loudly after 5 attempts), all sessions/devices converge without refreshes.
+- Combined with optimistic local mutations + write-through persistence (`lib/persistence/crm-sync.ts`) and an automatic retry queue (`lib/persistence/retry-queue.ts`), all sessions/devices converge without refreshes.
 
 ---
 
-## 6. Business Impact Model
+## 11. Business Impact Model
 
 The following are **design targets**, not measured guarantees — instrument your own deployment before quoting numbers externally:
 

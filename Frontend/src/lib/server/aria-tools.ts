@@ -861,3 +861,415 @@ export async function recommendNextAction(
     return { success: false, error: err.message };
   }
 }
+
+// ----------------------------------------------------------------------
+// 6. PROPERTY INTELLIGENCE BRIEFING & VERIFICATION TOOL
+// ----------------------------------------------------------------------
+
+export const propertyBriefingInputSchema = z.object({
+  unitId: z.string().uuid().optional(),
+  projectId: z.string().uuid().optional(),
+  unitNumber: z.string().optional(),
+  tower: z.string().optional(),
+});
+
+export type PropertyBriefingInput = z.infer<typeof propertyBriefingInputSchema>;
+
+export interface PropertyBriefingOutput {
+  unitTitle: string;
+  societyName: string;
+  locality: string;
+  verifiedSpecs: {
+    configuration: string;
+    superAreaSqFt: number;
+    carpetAreaSqFt?: number;
+    floor: number;
+    facing?: string;
+    parking?: string;
+  };
+  commercials: {
+    askingPrice: number;
+    estimatedValuation?: number;
+    pricePerSqFt: number;
+    expectedRentMonthly?: number;
+    rentalYieldPct?: number;
+    maintenanceMonthly?: number;
+  };
+  ownershipChain: Array<{
+    personName: string;
+    role: string;
+    tenure: string;
+    isCurrent: boolean;
+    verificationStatus: string;
+  }>;
+  salesMemoryFacts: Array<{
+    category: string;
+    title: string;
+    statement: string;
+    tier: "verified" | "historical" | "user_provided" | "inferred";
+    confidence: number;
+  }>;
+  gateAccessProtocol: string;
+}
+
+export async function generatePropertyBriefing(
+  input: PropertyBriefingInput,
+  ctx: AriaToolContext
+): Promise<{ success: boolean; briefing?: PropertyBriefingOutput; error?: string }> {
+  const supabase = getServiceRoleClient();
+  if (!supabase || !isLiveSupabaseAvailable) {
+    return {
+      success: true,
+      briefing: {
+        unitTitle: "Unit A-1402 (Floor 14)",
+        societyName: "The Camellias",
+        locality: "Golf Course Road, Gurugram",
+        verifiedSpecs: {
+          configuration: "4 BHK Luxury Residence",
+          superAreaSqFt: 7400,
+          carpetAreaSqFt: 5800,
+          floor: 14,
+          facing: "North-East (Golf Course Facing)",
+          parking: "3 Covered Stalls",
+        },
+        commercials: {
+          askingPrice: 420000000,
+          estimatedValuation: 435000000,
+          pricePerSqFt: 56756,
+          expectedRentMonthly: 650000,
+          rentalYieldPct: 1.85,
+          maintenanceMonthly: 32000,
+        },
+        ownershipChain: [
+          {
+            personName: "Vikram Singhania",
+            role: "Current Owner",
+            tenure: "2022 – Present",
+            isCurrent: true,
+            verificationStatus: "verified",
+          },
+        ],
+        salesMemoryFacts: [
+          {
+            category: "visitor_access_rules",
+            title: "Strict 24h Prior Gate Pass Required",
+            statement: "DLF facility management requires advance registration of prospective buyer driver and vehicle registration number at Gate 2.",
+            tier: "verified",
+            confidence: 100,
+          },
+          {
+            category: "pricing_intelligence",
+            title: "Firm on 42 Cr Floor Price",
+            statement: "Owner is not distressed; will not consider bids under ₹40 Cr all inclusive.",
+            tier: "user_provided",
+            confidence: 85,
+          },
+        ],
+        gateAccessProtocol: "Access via Gate 2 North Wing. Collect visitor lanyard from Concierge.",
+      },
+    };
+  }
+
+  try {
+    let unitQuery = supabase
+      .from("project_units")
+      .select(`
+        *,
+        project:project_id (
+          id, name, location, developer,
+          area:area_id (name, city)
+        ),
+        tower_entity:tower_id (name, total_floors)
+      `)
+      .eq("org_id", ctx.orgId);
+
+    if (input.unitId) {
+      unitQuery = unitQuery.eq("id", input.unitId);
+    } else if (input.projectId && input.unitNumber) {
+      unitQuery = unitQuery.eq("project_id", input.projectId).eq("unit_number", input.unitNumber);
+    }
+
+    const { data: unit, error } = await unitQuery.maybeSingle();
+    if (error || !unit) {
+      return { success: false, error: "Unit not found in organization inventory" };
+    }
+
+    const [{ data: relationships }, { data: facts }] = await Promise.all([
+      supabase
+        .from("entity_relationships")
+        .select("*")
+        .eq("org_id", ctx.orgId)
+        .eq("target_type", "unit")
+        .eq("target_id", unit.id),
+      supabase
+        .from("property_facts")
+        .select("*")
+        .eq("org_id", ctx.orgId)
+        .eq("entity_type", "unit")
+        .eq("entity_id", unit.id),
+    ]);
+
+    const price = Number(unit.asking_price || unit.price || 0);
+    const superArea = Number(unit.super_area_sq_ft || 1500);
+
+    const briefing: PropertyBriefingOutput = {
+      unitTitle: `Unit ${unit.tower}-${unit.unit_number} (Floor ${unit.floor})`,
+      societyName: unit.project?.name || "Society",
+      locality: `${unit.project?.area?.name || unit.project?.location || "Prime Sector"}, ${unit.project?.area?.city || "NCR"}`,
+      verifiedSpecs: {
+        configuration: unit.configuration,
+        superAreaSqFt: superArea,
+        carpetAreaSqFt: unit.carpet_area_sq_ft ? Number(unit.carpet_area_sq_ft) : undefined,
+        floor: unit.floor,
+        facing: unit.facing || undefined,
+        parking: `${unit.parking_slots || 1} (${unit.parking_type || "Covered"})`,
+      },
+      commercials: {
+        askingPrice: price,
+        estimatedValuation: unit.estimated_market_price ? Number(unit.estimated_market_price) : undefined,
+        pricePerSqFt: Math.round(price / (superArea || 1)),
+        expectedRentMonthly: unit.expected_monthly_rent ? Number(unit.expected_monthly_rent) : undefined,
+        rentalYieldPct: unit.rental_yield_pct ? Number(unit.rental_yield_pct) : undefined,
+        maintenanceMonthly: unit.maintenance_monthly ? Number(unit.maintenance_monthly) : undefined,
+      },
+      ownershipChain: (relationships || []).map((r: any) => ({
+        personName: r.subject_name || "Owner/Tenant",
+        role: r.relationship_type.replace(/_/g, " ").toUpperCase(),
+        tenure: `${r.valid_from} → ${r.valid_until || "Present"}`,
+        isCurrent: Boolean(r.is_current),
+        verificationStatus: r.verification_status || "verified",
+      })),
+      salesMemoryFacts: (facts || []).map((f: any) => ({
+        category: f.category,
+        title: f.title,
+        statement: f.fact_statement,
+        tier: f.verification_tier,
+        confidence: f.confidence_pct,
+      })),
+      gateAccessProtocol: unit.key_location ? `Key at ${unit.key_location}` : "Standard society visitor registration",
+    };
+
+    return { success: true, briefing };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ----------------------------------------------------------------------
+// 7. BUYER TO UNIT INTELLIGENT MATCHING & WHATSAPP ENGINE
+// ----------------------------------------------------------------------
+
+export const matchBuyersForUnitInputSchema = z.object({
+  unitId: z.string().uuid(),
+  maxMatches: z.number().min(1).max(20).default(5).optional(),
+});
+
+export async function matchBuyersForUnit(
+  input: z.infer<typeof matchBuyersForUnitInputSchema>,
+  ctx: AriaToolContext
+): Promise<{ success: boolean; matches?: any[]; error?: string }> {
+  const supabase = getServiceRoleClient();
+  if (!supabase || !isLiveSupabaseAvailable) {
+    return {
+      success: true,
+      matches: [
+        {
+          leadId: "lead-vikas-mehta",
+          personName: "Vikas Mehta",
+          phone: "+919811234567",
+          budget: 450000000,
+          stage: "site_visit",
+          matchScore: 96,
+          matchReasons: ["Budget aligned within 5%", "Preferred North-East orientation", "High floor requirement met"],
+          suggestedWhatsAppPitch: "Hi Vikas, an exclusive 4 BHK at The Camellias (Floor 14, Golf facing) has just opened for private viewings within your ₹45 Cr allocation.",
+        },
+      ],
+    };
+  }
+
+  try {
+    const { data: unit, error: unitErr } = await supabase
+      .from("project_units")
+      .select(`*, project:project_id (name, location)`)
+      .eq("org_id", ctx.orgId)
+      .eq("id", input.unitId)
+      .single();
+
+    if (unitErr || !unit) {
+      return { success: false, error: "Unit not found" };
+    }
+
+    const price = Number(unit.asking_price || unit.price || 0);
+    const minBudget = price * 0.75;
+    const maxBudget = price * 1.25;
+
+    const { data: activeLeads, error: leadsErr } = await supabase
+      .from("leads")
+      .select("id, person_name, phone, budget, stage, configuration_preference, preferred_floor, facing_preference")
+      .eq("org_id", ctx.orgId)
+      .neq("stage", "lost")
+      .neq("stage", "won")
+      .gte("budget", minBudget)
+      .lte("budget", maxBudget)
+      .order("budget", { ascending: false })
+      .limit(input.maxMatches || 5);
+
+    if (leadsErr) {
+      return { success: false, error: leadsErr.message };
+    }
+
+    const matches = (activeLeads || []).map((lead: any) => {
+      const reasons = [`Budget match (₹${(Number(lead.budget) / 10000000).toFixed(2)} Cr vs ₹${(price / 10000000).toFixed(2)} Cr)`];
+      if (lead.configuration_preference && unit.configuration.toLowerCase().includes(lead.configuration_preference.slice(0, 3).toLowerCase())) {
+        reasons.push(`Configuration match (${unit.configuration})`);
+      }
+      return {
+        leadId: lead.id,
+        personName: lead.person_name,
+        phone: lead.phone,
+        budget: lead.budget,
+        stage: lead.stage,
+        matchScore: 90,
+        matchReasons: reasons,
+        suggestedWhatsAppPitch: `Hi ${lead.person_name}, we have an exclusive off-market unit at ${unit.project?.name || "the project"} (${unit.tower}-${unit.unit_number}, Floor ${unit.floor}) for ${unit.configuration} matching your exact requirements.`,
+      };
+    });
+
+    return { success: true, matches };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ----------------------------------------------------------------------
+// 8. FREE-TEXT MEETING DISPOSITION STRUCTURER (HUMAN-GATED)
+// ----------------------------------------------------------------------
+
+export const structureMeetingNotesInputSchema = z.object({
+  leadId: z.string().optional(),
+  unitId: z.string().optional(),
+  personName: z.string().max(200).optional(),
+  rawNotes: z.string().min(5).max(5000),
+  spokenLanguage: z.string().max(50).default("en-IN").optional(),
+});
+
+export type StructureMeetingNotesInput = z.infer<typeof structureMeetingNotesInputSchema>;
+
+export function structureFreeTextMeetingNotes(
+  input: StructureMeetingNotesInput
+): {
+  activityType: "meeting" | "call" | "site_visit" | "whatsapp";
+  outcome: "interested" | "site_visit_booked" | "call_back" | "not_interested";
+  outcomeLabel: string;
+  suggestedStage: "new" | "contacted" | "qualified" | "site_visit" | "negotiation" | "won" | "lost";
+  sentiment: "bullish" | "cautious" | "hesitant" | "negative";
+  budgetConfirmed?: number;
+  extractedObjections: string[];
+  buyingSignals: string[];
+  conversationSummary: string;
+  suggestedNextMove: string;
+  suggestedFollowUpAt: string;
+  requiresHumanApproval: true;
+} {
+  const text = input.rawNotes.toLowerCase();
+
+  // 1. Detect Objections
+  const objections: string[] = [];
+  if (text.includes("price") || text.includes("expensive") || text.includes("budget") || text.includes("crore") || text.includes("cr") || text.includes("high")) {
+    objections.push("Price / Valuation Sensitivity");
+  }
+  if (text.includes("floor") || text.includes("low floor") || text.includes("high floor")) {
+    objections.push("Floor Preference / Floor Rise");
+  }
+  if (text.includes("vastu") || text.includes("facing") || text.includes("direction") || text.includes("south")) {
+    objections.push("Vastu / Directional Orientation");
+  }
+  if (text.includes("possession") || text.includes("delay") || text.includes("ready") || text.includes("construction")) {
+    objections.push("Possession Timeline");
+  }
+  if (text.includes("maintenance") || text.includes("society") || text.includes("charges")) {
+    objections.push("Society Maintenance Fees");
+  }
+
+  // 2. Detect Buying Signals
+  const buyingSignals: string[] = [];
+  if (text.includes("loved") || text.includes("liked") || text.includes("shortlist") || text.includes("favourite") || text.includes("interested")) {
+    buyingSignals.push("Positive emotional connection to unit layout");
+  }
+  if (text.includes("cheque") || text.includes("token") || text.includes("advance") || text.includes("booking") || text.includes("ats")) {
+    buyingSignals.push("Commercial commitment / Booking readiness");
+  }
+  if (text.includes("family") || text.includes("wife") || text.includes("husband") || text.includes("parents") || text.includes("father")) {
+    buyingSignals.push("Key decision-makers involved");
+  }
+  if (text.includes("offer") || text.includes("counter") || text.includes("negotiat") || text.includes("discount")) {
+    buyingSignals.push("Active price negotiation underway");
+  }
+
+  // 3. Detect Sentiment & Stage
+  let sentiment: "bullish" | "cautious" | "hesitant" | "negative" = "cautious";
+  let suggestedStage: "new" | "contacted" | "qualified" | "site_visit" | "negotiation" | "won" | "lost" = "qualified";
+  let outcome: "interested" | "site_visit_booked" | "call_back" | "not_interested" = "interested";
+  let outcomeLabel = "Discussion Completed";
+
+  if (text.includes("not interested") || text.includes("dropped") || text.includes("bought elsewhere") || text.includes("reject")) {
+    sentiment = "negative";
+    suggestedStage = "lost";
+    outcome = "not_interested";
+    outcomeLabel = "Buyer Opted Out";
+  } else if (text.includes("booked") || text.includes("token received") || text.includes("won") || text.includes("closed")) {
+    sentiment = "bullish";
+    suggestedStage = "won";
+    outcome = "interested";
+    outcomeLabel = "Booking Deal Closed";
+  } else if (text.includes("offer") || text.includes("counter") || text.includes("negotiat") || text.includes("ats")) {
+    sentiment = "bullish";
+    suggestedStage = "negotiation";
+    outcome = "interested";
+    outcomeLabel = "Commercial Negotiation";
+  } else if (text.includes("site visit") || text.includes("walkthrough") || text.includes("saw the flat") || text.includes("visited")) {
+    sentiment = "bullish";
+    suggestedStage = "site_visit";
+    outcome = "site_visit_booked";
+    outcomeLabel = "Site Visit Completed";
+  } else {
+    sentiment = objections.length > 0 ? "cautious" : "bullish";
+    suggestedStage = "qualified";
+    outcome = "call_back";
+    outcomeLabel = "Requirement Qualified";
+  }
+
+  // 4. Determine Activity Type
+  let activityType: "meeting" | "call" | "site_visit" | "whatsapp" = "meeting";
+  if (text.includes("call") || text.includes("spoke on phone") || text.includes("telecon")) {
+    activityType = "call";
+  } else if (text.includes("whatsapp") || text.includes("chat") || text.includes("message")) {
+    activityType = "whatsapp";
+  } else if (text.includes("site visit") || text.includes("visited") || text.includes("walkthrough") || text.includes("at the tower")) {
+    activityType = "site_visit";
+  }
+
+  // 5. Compute Next Follow-Up Date (Default: 48h from now)
+  const nextDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
+  nextDate.setHours(11, 0, 0, 0);
+
+  return {
+    activityType,
+    outcome,
+    outcomeLabel,
+    suggestedStage,
+    sentiment,
+    extractedObjections: objections.length > 0 ? objections : ["None explicitly stated"],
+    buyingSignals: buyingSignals.length > 0 ? buyingSignals : ["General market interest"],
+    conversationSummary: input.rawNotes.trim(),
+    suggestedNextMove: suggestedStage === "negotiation"
+      ? "Present structured counter-offer with payment milestone schedule."
+      : suggestedStage === "site_visit"
+      ? "Send comparative cost sheet and follow up on floorplan feedback."
+      : "Send shortlisted unit brochures and schedule on-site walkthrough.",
+    suggestedFollowUpAt: nextDate.toISOString(),
+    requiresHumanApproval: true,
+  };
+}
+
+

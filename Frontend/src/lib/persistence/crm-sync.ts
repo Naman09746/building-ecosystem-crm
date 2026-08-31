@@ -9,7 +9,13 @@ import type {
   Person,
   PipelineStage,
   Project,
+  ProjectTower,
   ProjectUnit,
+  PropertyArea,
+  ExternalOrganization,
+  EntityRelationship,
+  PropertyFact,
+  UnitPriceHistory,
   Region,
   Task,
   User,
@@ -59,6 +65,7 @@ export function mapLeadRow(row: AnyRow): Lead {
     stage: (row.stage ?? "new") as PipelineStage,
     stageId: row.stage_id ? str(row.stage_id) : undefined,
     source: str(row.source ?? "Portal Inbound"),
+    dealType: row.deal_type ?? "primary_sale",
     leadScore: num(row.lead_score),
     leadScoreLabel: (row.lead_score_label ?? "Warm") as Lead["leadScoreLabel"],
     dealHealth: (row.deal_health ?? "neutral") as Lead["dealHealth"],
@@ -71,6 +78,7 @@ export function mapLeadRow(row: AnyRow): Lead {
     configurationPreference: row.configuration_preference ? str(row.configuration_preference) : undefined,
     preferredFloor: row.preferred_floor ? str(row.preferred_floor) : undefined,
     facingPreference: row.facing_preference ? str(row.facing_preference) : undefined,
+    parkingRequirement: row.parking_requirement ? str(row.parking_requirement) : undefined,
     buyerIntent: row.buyer_intent ? str(row.buyer_intent) : undefined,
     decisionMakers: row.decision_makers ? str(row.decision_makers) : undefined,
     buyingSignals: Array.isArray(row.buying_signals) ? row.buying_signals : undefined,
@@ -79,6 +87,7 @@ export function mapLeadRow(row: AnyRow): Lead {
     suggestedNextMove: row.suggested_next_move ? str(row.suggested_next_move) : undefined,
     assignedUnitId: row.assigned_unit_id ? str(row.assigned_unit_id) : undefined,
     assignedUnitNumber: row.assigned_unit_number ? str(row.assigned_unit_number) : undefined,
+    unitId: row.unit_id ? str(row.unit_id) : undefined,
     daysInStage: num(row.days_in_stage),
     stageEnteredAt: row.stage_entered_at ? str(row.stage_entered_at) : undefined,
     lastActivityText: str(row.last_activity_text ?? "Lead created"),
@@ -89,12 +98,12 @@ export function mapLeadRow(row: AnyRow): Lead {
     lostReason: row.lost_reason ? str(row.lost_reason) : undefined,
     lastResurrectedAt: row.last_resurrected_at ? str(row.last_resurrected_at) : undefined,
     resurrectionCount: typeof row.resurrection_count === "number" ? row.resurrection_count : 0,
+    notes: row.notes ? str(row.notes) : undefined,
     createdAt: str(row.created_at ?? new Date().toISOString()),
   };
 }
 
-const LEAD_SELECT = `*,
-  salesperson:salesperson_id (full_name)`;
+const LEAD_SELECT = `*, salesperson:salesperson_id (full_name)`;
 
 export async function fetchLeads(): Promise<Lead[] | null> {
   const supabase = getSupabaseClient();
@@ -111,7 +120,6 @@ export async function fetchLeads(): Promise<Lead[] | null> {
   return (data || []).map(mapLeadRow);
 }
 
-// Lead columns we persist from the client domain model.
 export function leadToRow(lead: Partial<Lead>): AnyRow {
   const row: AnyRow = {};
   const set = (col: string, val: any) => {
@@ -129,6 +137,7 @@ export function leadToRow(lead: Partial<Lead>): AnyRow {
   set("budget", lead.budget);
   set("stage", lead.stage);
   set("source", lead.source);
+  set("deal_type", lead.dealType || "primary_sale");
   set("lead_score", lead.leadScore);
   set("lead_score_label", lead.leadScoreLabel);
   set("deal_health", lead.dealHealth);
@@ -148,6 +157,7 @@ export function leadToRow(lead: Partial<Lead>): AnyRow {
   set("suggested_next_move", lead.suggestedNextMove || null);
   set("assigned_unit_id", lead.assignedUnitId || null);
   set("assigned_unit_number", lead.assignedUnitNumber || null);
+  set("unit_id", lead.unitId || lead.assignedUnitId || null);
   set("days_in_stage", lead.daysInStage);
   set("last_activity_text", lead.lastActivityText);
   set("last_activity_at", lead.lastActivityAt);
@@ -171,44 +181,26 @@ export async function updateLeadRemote(leadId: string, patch: Partial<Lead>): Pr
   return true;
 }
 
-// ------------------------------------------------------------ Activities ----
-
-export function activityToRow(
-  activity: Partial<Activity> & { userId: string; userName: string; personName: string; type: ActivityType }
-): AnyRow {
-  return {
-    lead_id: activity.leadId || null,
-    project_id: activity.projectId || null,
-    person_id: activity.personId || null,
-    user_id: activity.userId,
-    user_name: activity.userName,
-    person_name: activity.personName,
-    type: activity.type === ("ai_agent" as ActivityType) ? "note" : activity.type,
-    duration_seconds: activity.durationSeconds ?? 0,
-    outcome: activity.outcome || null,
-    outcome_label: activity.outcomeLabel || null,
-    notes: activity.notes || null,
-    scheduled_follow_up_at: activity.scheduledFollowUpAt || null,
-  };
-}
+// ------------------------------------------------------------- Activities ----
 
 export function mapActivityRow(row: AnyRow): Activity {
   return {
     id: str(row.id),
     orgId: str(row.org_id),
-    leadId: str(row.lead_id ?? ""),
+    leadId: str(row.lead_id),
     projectId: row.project_id ? str(row.project_id) : undefined,
+    unitId: row.unit_id ? str(row.unit_id) : undefined,
     personId: row.person_id ? str(row.person_id) : undefined,
     personName: str(row.person_name),
     userId: str(row.user_id),
     userName: str(row.user_name),
     type: mapActivityType(str(row.type)),
     durationSeconds: num(row.duration_seconds),
-    outcome: row.outcome ?? undefined,
+    outcome: row.outcome ? (row.outcome as Activity["outcome"]) : undefined,
     outcomeLabel: row.outcome_label ? str(row.outcome_label) : undefined,
     notes: row.notes ? str(row.notes) : undefined,
     scheduledFollowUpAt: row.scheduled_follow_up_at ? str(row.scheduled_follow_up_at) : undefined,
-    occurredAt: row.occurred_at ? str(row.occurred_at) : undefined,
+    occurredAt: str(row.occurred_at ?? row.created_at),
     createdAt: str(row.created_at ?? new Date().toISOString()),
   };
 }
@@ -220,7 +212,7 @@ export async function fetchActivities(): Promise<Activity[] | null> {
     .from("activities")
     .select("*")
     .order("occurred_at", { ascending: false })
-    .limit(300);
+    .limit(500);
   if (error) {
     console.error("[SYNC] Failed to load activities:", error.code);
     return null;
@@ -228,14 +220,29 @@ export async function fetchActivities(): Promise<Activity[] | null> {
   return (data || []).map(mapActivityRow);
 }
 
-export async function insertActivityRemote(
-  activity: Partial<Activity> & { userId: string; userName: string; personName: string; type: ActivityType },
-  orgId?: string
-): Promise<boolean> {
+export function activityToRow(act: Omit<Activity, "id" | "createdAt"> & { id?: string }): AnyRow {
+  return {
+    lead_id: act.leadId || null,
+    project_id: act.projectId || null,
+    unit_id: act.unitId || null,
+    person_id: act.personId || null,
+    user_id: act.userId,
+    user_name: act.userName,
+    person_name: act.personName,
+    type: act.type,
+    duration_seconds: act.durationSeconds || 0,
+    outcome: act.outcome || null,
+    outcome_label: act.outcomeLabel || null,
+    notes: act.notes || null,
+    scheduled_follow_up_at: act.scheduledFollowUpAt || null,
+    occurred_at: act.occurredAt || new Date().toISOString(),
+  };
+}
+
+export async function insertActivityRemote(activity: Omit<Activity, "id" | "createdAt"> & { id?: string }): Promise<boolean> {
   const supabase = getSupabaseClient();
   if (!supabase) return false;
-  // org_id is NOT NULL — without it every activity insert fails under RLS.
-  const org_id = activity.orgId || orgId;
+  const org_id = activity.orgId;
   if (!org_id) {
     console.error("[SYNC] Activity insert rejected: missing org_id");
     return false;
@@ -288,7 +295,7 @@ export async function insertTaskRemote(task: Omit<Task, "id"> & { id?: string })
   const supabase = getSupabaseClient();
   if (!supabase) return false;
   const { error } = await supabase.from("tasks").insert({
-    org_id: task.orgId, // NOT NULL — required for tenant-scoped task queue
+    org_id: task.orgId,
     lead_id: task.leadId,
     salesperson_id: task.salespersonId,
     person_name: task.personName,
@@ -327,17 +334,95 @@ export function mapUnitRow(row: AnyRow, projectName?: string): ProjectUnit {
     orgId: str(row.org_id),
     projectId: str(row.project_id),
     projectName: projectName || "",
+    towerId: row.tower_id ? str(row.tower_id) : undefined,
     tower: str(row.tower),
     unitNumber: str(row.unit_number),
     floor: num(row.floor),
     configuration: str(row.configuration),
+    unitType: row.unit_type ?? "apartment",
     sizeSqFt: num(row.super_area_sq_ft),
+    superAreaSqFt: row.super_area_sq_ft ? num(row.super_area_sq_ft) : undefined,
+    carpetAreaSqFt: row.carpet_area_sq_ft ? num(row.carpet_area_sq_ft) : undefined,
+    builtUpAreaSqFt: row.built_up_area_sq_ft ? num(row.built_up_area_sq_ft) : undefined,
+    balconiesCount: row.balconies_count !== null && row.balconies_count !== undefined ? num(row.balconies_count) : 1,
+    bathroomsCount: row.bathrooms_count !== null && row.bathrooms_count !== undefined ? num(row.bathrooms_count) : 2,
+    parkingSlots: row.parking_slots !== null && row.parking_slots !== undefined ? num(row.parking_slots) : 1,
+    parkingType: row.parking_type ?? "covered",
+    isCornerUnit: Boolean(row.is_corner_unit),
+    furnishingStatus: row.furnishing_status ?? "semi_furnished",
+    physicalCondition: row.physical_condition ?? "good",
+    viewType: row.view_type ? str(row.view_type) : undefined,
     price: num(row.price),
+    askingPrice: row.asking_price ? num(row.asking_price) : undefined,
+    estimatedMarketPrice: row.estimated_market_price ? num(row.estimated_market_price) : undefined,
+    lastTransactedPrice: row.last_transacted_price ? num(row.last_transacted_price) : undefined,
+    lastTransactedDate: row.last_transacted_date ? str(row.last_transacted_date) : undefined,
+    maintenanceMonthly: row.maintenance_monthly ? num(row.maintenance_monthly) : undefined,
+    expectedMonthlyRent: row.expected_monthly_rent ? num(row.expected_monthly_rent) : undefined,
+    rentalYieldPct: row.rental_yield_pct ? num(row.rental_yield_pct) : undefined,
     status: row.status ?? "available",
+    occupancyStatus: row.occupancy_status ?? "unknown",
+    sellerIntent: row.seller_intent ?? "unknown",
+    sellerTargetTimeline: row.seller_target_timeline ? str(row.seller_target_timeline) : undefined,
+    listingStatus: row.listing_status ?? "unlisted",
+    verificationStatus: row.verification_status ?? "unverified",
+    lastVerifiedAt: row.last_verified_at ? str(row.last_verified_at) : undefined,
+    verifiedByUserId: row.verified_by_user_id ? str(row.verified_by_user_id) : undefined,
+    keyLocation: row.key_location ? str(row.key_location) : undefined,
+    unitAmenities: Array.isArray(row.unit_amenities) ? row.unit_amenities : undefined,
+    notes: row.notes ? str(row.notes) : undefined,
     assignedLeadId: row.assigned_lead_id ? str(row.assigned_lead_id) : undefined,
     assignedBuyerName: row.assigned_buyer_name ? str(row.assigned_buyer_name) : undefined,
     facing: row.facing ? str(row.facing) : undefined,
+    createdAt: row.created_at ? str(row.created_at) : undefined,
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
   };
+}
+
+export function unitToRow(unit: Partial<ProjectUnit>): AnyRow {
+  const row: AnyRow = {};
+  const set = (col: string, val: any) => {
+    if (val !== undefined) row[col] = val;
+  };
+  set("project_id", unit.projectId);
+  set("tower_id", unit.towerId || null);
+  set("tower", unit.tower);
+  set("unit_number", unit.unitNumber);
+  set("floor", unit.floor);
+  set("configuration", unit.configuration);
+  set("unit_type", unit.unitType || "apartment");
+  set("super_area_sq_ft", unit.superAreaSqFt || unit.sizeSqFt);
+  set("carpet_area_sq_ft", unit.carpetAreaSqFt || null);
+  set("built_up_area_sq_ft", unit.builtUpAreaSqFt || null);
+  set("balconies_count", unit.balconiesCount);
+  set("bathrooms_count", unit.bathroomsCount);
+  set("parking_slots", unit.parkingSlots);
+  set("parking_type", unit.parkingType);
+  set("is_corner_unit", unit.isCornerUnit);
+  set("furnishing_status", unit.furnishingStatus);
+  set("physical_condition", unit.physicalCondition);
+  set("view_type", unit.viewType || null);
+  set("price", unit.price);
+  set("asking_price", unit.askingPrice || unit.price);
+  set("estimated_market_price", unit.estimatedMarketPrice || null);
+  set("last_transacted_price", unit.lastTransactedPrice || null);
+  set("last_transacted_date", unit.lastTransactedDate || null);
+  set("maintenance_monthly", unit.maintenanceMonthly || null);
+  set("expected_monthly_rent", unit.expectedMonthlyRent || null);
+  set("rental_yield_pct", unit.rentalYieldPct || null);
+  set("status", unit.status);
+  set("occupancyStatus", unit.occupancyStatus);
+  set("seller_intent", unit.sellerIntent);
+  set("seller_target_timeline", unit.sellerTargetTimeline || null);
+  set("listing_status", unit.listingStatus);
+  set("verification_status", unit.verificationStatus);
+  set("facing", unit.facing || null);
+  set("assigned_lead_id", unit.assignedLeadId || null);
+  set("assigned_buyer_name", unit.assignedBuyerName || null);
+  set("key_location", unit.keyLocation || null);
+  set("unit_amenities", unit.unitAmenities || null);
+  set("notes", unit.notes || null);
+  return row;
 }
 
 export async function fetchUnits(): Promise<ProjectUnit[] | null> {
@@ -356,20 +441,46 @@ export async function fetchUnits(): Promise<ProjectUnit[] | null> {
 
 export async function updateUnitRemote(
   unitId: string,
-  patch: { status?: ProjectUnit["status"]; assignedLeadId?: string | null; assignedBuyerName?: string | null }
+  patch: Partial<ProjectUnit>
 ): Promise<boolean> {
   const supabase = getSupabaseClient();
   if (!supabase) return false;
-  const { error } = await supabase
-    .from("project_units")
-    .update({
-      ...(patch.status ? { status: patch.status } : {}),
-      ...(patch.assignedLeadId !== undefined ? { assigned_lead_id: patch.assignedLeadId } : {}),
-      ...(patch.assignedBuyerName !== undefined ? { assigned_buyer_name: patch.assignedBuyerName } : {}),
-    })
-    .eq("id", unitId);
+  const { error } = await supabase.from("project_units").update(unitToRow(patch)).eq("id", unitId);
   if (error) {
     console.error("[SYNC] Failed to update unit:", error.code);
+    return false;
+  }
+  return true;
+}
+
+export async function insertUnitRemote(
+  unit: Omit<ProjectUnit, "id" | "orgId" | "projectName" | "sizeSqFt">,
+  orgId: string
+): Promise<ProjectUnit | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("project_units")
+    .insert({
+      org_id: orgId,
+      ...unitToRow(unit as Partial<ProjectUnit>),
+    })
+    .select(`*, project:project_id (name)`)
+    .single();
+
+  if (error || !data) {
+    console.error("[SYNC] Failed to insert unit:", error?.code);
+    return null;
+  }
+  return mapUnitRow(data, data.project?.name);
+}
+
+export async function deleteUnitRemote(unitId: string): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
+  const { error } = await supabase.from("project_units").delete().eq("id", unitId);
+  if (error) {
+    console.error("[SYNC] Failed to delete unit:", error.code);
     return false;
   }
   return true;
@@ -385,7 +496,7 @@ export function mapDocumentRow(row: AnyRow): CRMDocument {
     leadId: row.lead_id ? str(row.lead_id) : undefined,
     title: str(row.title),
     fileUrl: str(row.file_url),
-    type: row.type ?? "other",
+    type: row.type ?? "brochure",
     createdAt: str(row.created_at ?? new Date().toISOString()),
   };
 }
@@ -453,9 +564,14 @@ export function mapPersonRow(row: AnyRow): Person {
     email: row.email ? str(row.email) : undefined,
     city: row.city ? str(row.city) : undefined,
     source: row.source ? str(row.source) : undefined,
+    occupation: row.occupation ? str(row.occupation) : undefined,
+    address: row.address ? str(row.address) : undefined,
+    vipTier: row.vip_tier ?? "standard",
+    tags: Array.isArray(row.tags) ? row.tags : undefined,
     preferredConfiguration: row.preferred_configuration ? str(row.preferred_configuration) : undefined,
     budget: row.budget !== null && row.budget !== undefined ? num(row.budget) : undefined,
     createdAt: str(row.created_at ?? new Date().toISOString()),
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
   };
 }
 
@@ -474,29 +590,9 @@ export async function fetchPeople(): Promise<Person[] | null> {
   return (data || []).map(mapPersonRow);
 }
 
-// ------------------------------------------------------------- Full load ----
+// ------------------------------------------------------------- Projects ----
 
-export interface CrmHydration {
-  orgId: string | null;
-  leads: Lead[];
-  activities: Activity[];
-  tasks: Task[];
-  units: ProjectUnit[];
-  documents: CRMDocument[];
-  people: Person[];
-  projects: Project[];
-  regions: Region[];
-  users: User[];
-}
-
-export function mapDbRoleToClient(dbRole: string | null | undefined): UserRole {
-  if (!dbRole) return "salesperson";
-  if (["owner", "admin", "boss"].includes(dbRole)) return "boss";
-  if (["manager", "closer"].includes(dbRole)) return "manager";
-  return "salesperson";
-}
-
-export function mapProjectRow(row: AnyRow, regionName?: string): Project {
+export function mapProjectRow(row: AnyRow, regionName?: string, areaName?: string): Project {
   return {
     id: str(row.id),
     orgId: str(row.org_id),
@@ -505,6 +601,17 @@ export function mapProjectRow(row: AnyRow, regionName?: string): Project {
     location: str(row.location),
     regionId: str(row.region_id ?? ""),
     regionName: regionName || "",
+    areaId: row.area_id ? str(row.area_id) : undefined,
+    areaName: areaName || row.area?.name || "",
+    societyType: row.society_type ?? "gated_community",
+    totalTowers: row.total_towers ? num(row.total_towers) : 1,
+    totalUnitsCount: row.total_units_count ? num(row.total_units_count) : 0,
+    possessionYear: row.possession_year ? num(row.possession_year) : undefined,
+    gatedSecurityType: row.gated_security_type ?? "3_tier",
+    reraRegistrationNumber: row.rera_registration_number ? str(row.rera_registration_number) : undefined,
+    masterAmenities: Array.isArray(row.master_amenities) ? row.master_amenities : undefined,
+    maintenanceContactPhone: row.maintenance_contact_phone ? str(row.maintenance_contact_phone) : undefined,
+    societyOfficeAddress: row.society_office_address ? str(row.society_office_address) : undefined,
     priceRange: row.price_range ? str(row.price_range) : "",
     status: (row.status ?? "active") as Project["status"],
     activeLeadsCount: num(row.active_leads_count),
@@ -512,60 +619,68 @@ export function mapProjectRow(row: AnyRow, regionName?: string): Project {
   };
 }
 
+export function projectToRow(p: Partial<Project>): AnyRow {
+  const row: AnyRow = {};
+  const set = (col: string, val: any) => {
+    if (val !== undefined) row[col] = val;
+  };
+  set("name", p.name);
+  set("developer", p.developer);
+  set("location", p.location);
+  set("region_id", p.regionId || null);
+  set("area_id", p.areaId || null);
+  set("society_type", p.societyType || "gated_community");
+  set("total_towers", p.totalTowers || 1);
+  set("total_units_count", p.totalUnitsCount || 0);
+  set("possession_year", p.possessionYear || null);
+  set("gated_security_type", p.gatedSecurityType || "3_tier");
+  set("rera_registration_number", p.reraRegistrationNumber || null);
+  set("master_amenities", p.masterAmenities || null);
+  set("maintenance_contact_phone", p.maintenanceContactPhone || null);
+  set("society_office_address", p.societyOfficeAddress || null);
+  set("price_range", p.priceRange || null);
+  set("status", p.status || "active");
+  return row;
+}
+
 export async function fetchProjects(): Promise<Project[] | null> {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("projects")
-    .select(`*, region:region_id (name)`)
+    .select(`*, region:region_id (name), area:area_id (name)`)
     .order("name")
     .limit(200);
   if (error) {
     console.error("[SYNC] Failed to load projects:", error.code);
     return null;
   }
-  return (data || []).map((row: AnyRow) => mapProjectRow(row, row.region?.name));
+  return (data || []).map((row: AnyRow) => mapProjectRow(row, row.region?.name, row.area?.name));
 }
 
-export async function insertProjectRemote(
-  p: { name: string; developer: string; location: string; regionId?: string; priceRange?: string; status?: string },
-  orgId: string
-): Promise<Project | null> {
+export async function insertProjectRemote(p: Partial<Project>, orgId: string): Promise<Project | null> {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("projects")
     .insert({
       org_id: orgId,
-      name: p.name,
-      developer: p.developer,
-      location: p.location,
-      region_id: p.regionId || null,
-      price_range: p.priceRange || null,
-      status: p.status || "active",
+      ...projectToRow(p),
     })
-    .select(`*, region:region_id (name)`)
+    .select(`*, region:region_id (name), area:area_id (name)`)
     .single();
 
   if (error || !data) {
     console.error("[SYNC] Failed to insert project:", error?.code);
     return null;
   }
-  return mapProjectRow(data, data.region?.name);
+  return mapProjectRow(data, data.region?.name, data.area?.name);
 }
 
 export async function updateProjectRemote(projectId: string, patch: Partial<Project>): Promise<boolean> {
   const supabase = getSupabaseClient();
   if (!supabase) return false;
-  const updatePayload: Record<string, any> = {};
-  if (patch.name !== undefined) updatePayload.name = patch.name;
-  if (patch.developer !== undefined) updatePayload.developer = patch.developer;
-  if (patch.location !== undefined) updatePayload.location = patch.location;
-  if (patch.regionId !== undefined) updatePayload.region_id = patch.regionId;
-  if (patch.priceRange !== undefined) updatePayload.price_range = patch.priceRange;
-  if (patch.status !== undefined) updatePayload.status = patch.status;
-
-  const { error } = await supabase.from("projects").update(updatePayload).eq("id", projectId);
+  const { error } = await supabase.from("projects").update(projectToRow(patch)).eq("id", projectId);
   if (error) {
     console.error("[SYNC] Failed to update project:", error.code);
     return false;
@@ -584,48 +699,194 @@ export async function deleteProjectRemote(projectId: string): Promise<boolean> {
   return true;
 }
 
-export async function insertUnitRemote(
-  unit: Omit<ProjectUnit, "id" | "orgId" | "projectName" | "sizeSqFt">,
-  orgId: string
-): Promise<ProjectUnit | null> {
+// ------------------------------------------------------------- Areas ----
+
+export function mapAreaRow(row: AnyRow, regionName?: string): PropertyArea {
+  return {
+    id: str(row.id),
+    orgId: str(row.org_id),
+    regionId: row.region_id ? str(row.region_id) : undefined,
+    regionName: regionName || row.region?.name || "",
+    name: str(row.name),
+    slug: str(row.slug),
+    city: str(row.city ?? "Gurugram"),
+    state: str(row.state ?? "Haryana"),
+    pincode: row.pincode ? str(row.pincode) : undefined,
+    tier: row.tier ?? "luxury",
+    description: row.description ? str(row.description) : undefined,
+    createdAt: row.created_at ? str(row.created_at) : undefined,
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
+  };
+}
+
+export async function fetchAreas(): Promise<PropertyArea[] | null> {
   const supabase = getSupabaseClient();
   if (!supabase) return null;
   const { data, error } = await supabase
-    .from("project_units")
-    .insert({
-      org_id: orgId,
-      project_id: unit.projectId,
-      tower: unit.tower,
-      unit_number: unit.unitNumber,
-      floor: unit.floor,
-      configuration: unit.configuration,
-      super_area_sq_ft: unit.superAreaSqFt || 1500,
-      price: unit.price,
-      status: unit.status || "available",
-      facing: unit.facing || null,
-      assigned_lead_id: unit.assignedLeadId || null,
-      assigned_buyer_name: unit.assignedBuyerName || null,
-    })
-    .select(`*, project:project_id (name)`)
-    .single();
-
-  if (error || !data) {
-    console.error("[SYNC] Failed to insert unit:", error?.code);
+    .from("property_areas")
+    .select(`*, region:region_id (name)`)
+    .order("name");
+  if (error) {
+    console.error("[SYNC] Failed to load property areas:", error.code);
     return null;
   }
-  return mapUnitRow(data, data.project?.name);
+  return (data || []).map((row: AnyRow) => mapAreaRow(row, row.region?.name));
 }
 
-export async function deleteUnitRemote(unitId: string): Promise<boolean> {
-  const supabase = getSupabaseClient();
-  if (!supabase) return false;
-  const { error } = await supabase.from("project_units").delete().eq("id", unitId);
-  if (error) {
-    console.error("[SYNC] Failed to delete unit:", error.code);
-    return false;
-  }
-  return true;
+// ------------------------------------------------------------- Towers ----
+
+export function mapTowerRow(row: AnyRow, projectName?: string): ProjectTower {
+  return {
+    id: str(row.id),
+    orgId: str(row.org_id),
+    projectId: str(row.project_id),
+    projectName: projectName || row.project?.name || "",
+    name: str(row.name),
+    towerCode: row.tower_code ? str(row.tower_code) : undefined,
+    totalFloors: num(row.total_floors || 1),
+    unitsPerFloor: row.units_per_floor ? num(row.units_per_floor) : 4,
+    elevatorsCount: row.elevators_count ? num(row.elevators_count) : 2,
+    possessionDate: row.possession_date ? str(row.possession_date) : undefined,
+    constructionStatus: row.construction_status ?? "ready",
+    facingDirection: row.facing_direction ? str(row.facing_direction) : undefined,
+    notes: row.notes ? str(row.notes) : undefined,
+    createdAt: row.created_at ? str(row.created_at) : undefined,
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
+  };
 }
+
+export async function fetchTowers(): Promise<ProjectTower[] | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("project_towers")
+    .select(`*, project:project_id (name)`)
+    .order("name");
+  if (error) {
+    console.error("[SYNC] Failed to load towers:", error.code);
+    return null;
+  }
+  return (data || []).map((row: AnyRow) => mapTowerRow(row, row.project?.name));
+}
+
+// -------------------------------------------------- External Organizations ----
+
+export function mapExternalOrgRow(row: AnyRow): ExternalOrganization {
+  return {
+    id: str(row.id),
+    orgId: str(row.org_id),
+    name: str(row.name),
+    orgType: row.org_type ?? "developer",
+    phone: row.phone ? str(row.phone) : undefined,
+    email: row.email ? str(row.email) : undefined,
+    website: row.website ? str(row.website) : undefined,
+    officeAddress: row.office_address ? str(row.office_address) : undefined,
+    city: row.city ? str(row.city) : undefined,
+    gstin: row.gstin ? str(row.gstin) : undefined,
+    reraId: row.rera_id ? str(row.rera_id) : undefined,
+    notes: row.notes ? str(row.notes) : undefined,
+    createdAt: row.created_at ? str(row.created_at) : undefined,
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
+  };
+}
+
+export async function fetchExternalOrgs(): Promise<ExternalOrganization[] | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("external_organizations")
+    .select("*")
+    .order("name");
+  if (error) {
+    console.error("[SYNC] Failed to load external orgs:", error.code);
+    return null;
+  }
+  return (data || []).map(mapExternalOrgRow);
+}
+
+// -------------------------------------------------- Entity Relationships ----
+
+export function mapRelationshipRow(row: AnyRow): EntityRelationship {
+  return {
+    id: str(row.id),
+    orgId: str(row.org_id),
+    subjectType: row.subject_type,
+    subjectId: str(row.subject_id),
+    subjectName: row.subject_name ? str(row.subject_name) : undefined,
+    subjectPhone: row.subject_phone ? str(row.subject_phone) : undefined,
+    relationshipType: row.relationship_type,
+    targetType: row.target_type,
+    targetId: str(row.target_id),
+    targetName: row.target_name ? str(row.target_name) : undefined,
+    validFrom: row.valid_from ? str(row.valid_from) : undefined,
+    validUntil: row.valid_until ? str(row.valid_until) : undefined,
+    isCurrent: Boolean(row.is_current),
+    confidenceScore: num(row.confidence_score ?? 100),
+    verificationStatus: row.verification_status ?? "verified",
+    provenanceSource: str(row.provenance_source ?? "salesperson_entry"),
+    verifiedAt: row.verified_at ? str(row.verified_at) : undefined,
+    verifiedBy: row.verified_by ? str(row.verified_by) : undefined,
+    commercialTerms: row.commercial_terms || {},
+    notes: row.notes ? str(row.notes) : undefined,
+    createdBy: row.created_by ? str(row.created_by) : undefined,
+    createdAt: str(row.created_at ?? new Date().toISOString()),
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
+  };
+}
+
+export async function fetchRelationships(): Promise<EntityRelationship[] | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("entity_relationships")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  if (error) {
+    console.error("[SYNC] Failed to load entity relationships:", error.code);
+    return null;
+  }
+  return (data || []).map(mapRelationshipRow);
+}
+
+// -------------------------------------------------- Property Facts / Memory ----
+
+export function mapFactRow(row: AnyRow): PropertyFact {
+  return {
+    id: str(row.id),
+    orgId: str(row.org_id),
+    entityType: row.entity_type,
+    entityId: str(row.entity_id),
+    category: row.category,
+    title: str(row.title),
+    factStatement: str(row.fact_statement),
+    verificationTier: row.verification_tier ?? "verified",
+    confidencePct: num(row.confidence_pct ?? 100),
+    sourceReference: row.source_reference ? str(row.source_reference) : undefined,
+    expiresAt: row.expires_at ? str(row.expires_at) : undefined,
+    createdBy: row.created_by ? str(row.created_by) : undefined,
+    createdByName: row.profile?.full_name ? str(row.profile.full_name) : undefined,
+    createdAt: str(row.created_at ?? new Date().toISOString()),
+    updatedAt: row.updated_at ? str(row.updated_at) : undefined,
+  };
+}
+
+export async function fetchPropertyFacts(): Promise<PropertyFact[] | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("property_facts")
+    .select(`*, profile:created_by (full_name)`)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) {
+    console.error("[SYNC] Failed to load property facts:", error.code);
+    return null;
+  }
+  return (data || []).map(mapFactRow);
+}
+
+// -------------------------------------------------- Regions & Users ----
 
 export function mapRegionRow(row: AnyRow): Region {
   return {
@@ -693,6 +954,13 @@ export async function deleteRegionRemote(regionId: string): Promise<boolean> {
   return true;
 }
 
+export function mapDbRoleToClient(dbRole: string | null | undefined): UserRole {
+  if (!dbRole) return "salesperson";
+  if (["owner", "admin", "boss"].includes(dbRole)) return "boss";
+  if (["manager", "closer"].includes(dbRole)) return "manager";
+  return "salesperson";
+}
+
 function mapProfileRow(row: AnyRow, regionName?: string): User {
   return {
     id: str(row.user_id),
@@ -704,8 +972,6 @@ function mapProfileRow(row: AnyRow, regionName?: string): User {
     regionId: row.region_id ? str(row.region_id) : undefined,
     regionName: regionName,
     avatarUrl: row.avatar_url ? str(row.avatar_url) : undefined,
-    followUpCompletionRate: undefined,
-    avgResponseTimeHours: undefined,
   };
 }
 
@@ -739,12 +1005,6 @@ async function fetchCurrentOrgId(): Promise<string | null> {
   return data?.org_id ? str(data.org_id) : null;
 }
 
-/**
- * First-run seeding: a brand-new organization has an empty workspace. This
- * calls the security-definer RPC `seed_organization_sample_data()` which
- * populates the CURRENT user's org only with a representative luxury real
- * estate dataset so the cockpit is usable immediately.
- */
 async function seedIfEmpty(): Promise<void> {
   const supabase = getSupabaseClient();
   if (!supabase) return;
@@ -753,7 +1013,7 @@ async function seedIfEmpty(): Promise<void> {
     .from("projects")
     .select("id", { count: "exact", head: true });
 
-  if (error) return; // RLS or connectivity issue — hydration will surface it
+  if (error) return;
   if ((count ?? 0) > 0) return;
 
   const { error: rpcError } = await supabase.rpc("seed_organization_sample_data");
@@ -762,26 +1022,65 @@ async function seedIfEmpty(): Promise<void> {
   }
 }
 
+// ------------------------------------------------------------- Full load ----
+
+export interface CrmHydration {
+  orgId: string | null;
+  leads: Lead[];
+  activities: Activity[];
+  tasks: Task[];
+  units: ProjectUnit[];
+  documents: CRMDocument[];
+  people: Person[];
+  projects: Project[];
+  regions: Region[];
+  users: User[];
+  areas?: PropertyArea[];
+  towers?: ProjectTower[];
+  externalOrgs?: ExternalOrganization[];
+  relationships?: EntityRelationship[];
+  propertyFacts?: PropertyFact[];
+}
+
 export async function hydrateCrmData(): Promise<CrmHydration | null> {
   if (!isSyncEnabled()) return null;
   try {
     await seedIfEmpty();
 
-    const [orgId, leads, activities, tasks, units, documents, people, projects, regions, users] =
-      await Promise.all([
-        fetchCurrentOrgId(),
-        fetchLeads(),
-        fetchActivities(),
-        fetchTasks(),
-        fetchUnits(),
-        fetchDocuments(),
-        fetchPeople(),
-        fetchProjects(),
-        fetchRegions(),
-        fetchUsers(),
-      ]);
-    // If the primary table failed to load entirely, treat hydration as failed
-    // so the app can surface an error rather than a half-empty workspace.
+    const [
+      orgId,
+      leads,
+      activities,
+      tasks,
+      units,
+      documents,
+      people,
+      projects,
+      regions,
+      users,
+      areas,
+      towers,
+      externalOrgs,
+      relationships,
+      propertyFacts,
+    ] = await Promise.all([
+      fetchCurrentOrgId(),
+      fetchLeads(),
+      fetchActivities(),
+      fetchTasks(),
+      fetchUnits(),
+      fetchDocuments(),
+      fetchPeople(),
+      fetchProjects(),
+      fetchRegions(),
+      fetchUsers(),
+      fetchAreas().catch(() => null),
+      fetchTowers().catch(() => null),
+      fetchExternalOrgs().catch(() => null),
+      fetchRelationships().catch(() => null),
+      fetchPropertyFacts().catch(() => null),
+    ]);
+
     if (leads === null || projects === null) return null;
     return {
       orgId,
@@ -794,6 +1093,11 @@ export async function hydrateCrmData(): Promise<CrmHydration | null> {
       projects,
       regions: regions || [],
       users: users || [],
+      areas: areas || [],
+      towers: towers || [],
+      externalOrgs: externalOrgs || [],
+      relationships: relationships || [],
+      propertyFacts: propertyFacts || [],
     };
   } catch (e) {
     console.error("[SYNC] Hydration failed");

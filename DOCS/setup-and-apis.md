@@ -37,8 +37,8 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 ```
 
 **Setup steps after creating the project:**
-1. Apply migrations in order — SQL Editor → paste each file from `supabase/migrations/` (`0001_init.sql` through `0006_billing_quotas.sql`). This creates all tables, RLS policies, triggers, and quota enforcement.
-2. Enable **Realtime**: Database → Replication → enable `postgres_changes` for tables `leads`, `tasks`, `activities`.
+1. Apply migrations in order — SQL Editor → paste each file from `supabase/migrations/` (`0001_init.sql` through `0019_phase13_intelligence_automation.sql`). This creates all tables, RLS policies, triggers, quota enforcement, Property Intelligence, and Seller Opportunities Automation.
+2. Enable **Realtime**: Database → Replication → enable `postgres_changes` for tables `leads`, `tasks`, `activities`, `property_areas`, `projects`, `project_units`, `entity_relationships`, `property_facts`, `seller_opportunities`.
 3. Auth providers: Email/password is on by default; add Google OAuth (Authentication → Providers) if you want the "Log in with Google" button to work.
 4. If you allow open signups, consider enabling email confirmation (Auth → Providers → Email → "Confirm email").
 
@@ -155,6 +155,19 @@ When provider secret keys are absent, CallCRM automatically uses **Secure Sandbo
 | `GET` | `/api/billing/invoices/:id/receipt` | Authenticated User | Download GST-ready tax invoice receipt |
 | `POST` | `/api/billing/customer` | Manager/Owner | Update legal entity name, Indian GSTIN, and billing address |
 | `POST` | `/api/billing/sandbox-confirm` | Manager/Owner (Signed token) | Authorize and confirm sandbox test checkout sessions |
+
+---
+
+### Real Estate Intelligence & Automation Endpoints
+
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `GET` | `/api/seller-opportunities` | Authenticated User | List proactively detected seller signals (tenancy expiry, vacancy, investor exit) |
+| `POST` | `/api/seller-opportunities` | Authenticated User | Create seller opportunity or trigger scan |
+| `GET` | `/api/properties/site-briefings` | Authenticated User | Fetch synthesized 30-min pre-site-visit briefing (gate pass PIN, parking, owner price) |
+| `POST` | `/api/properties/site-briefings` | Authenticated User | On-demand synthesize site visit briefing |
+| `POST` | `/api/activities/meeting-summary` | Authenticated User | Structure raw speech/notes (proposal) OR save confirmed meeting disposition |
+| `POST` | `/api/automation/stale-facts` | Manager/Owner | Trigger 180-day stale property knowledge scan and flagging |
 
 ---
 

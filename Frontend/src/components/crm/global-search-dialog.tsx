@@ -58,6 +58,7 @@ export function GlobalSearchDialog({
   const { leads, projects, units, people, setSelectedProjectId } = useCRM();
   const [query, setQuery] = React.useState("");
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [serverResults, setServerResults] = React.useState<any[]>([]);
 
   // Keyboard shortcut listener for Cmd+K
   React.useEffect(() => {
@@ -76,8 +77,33 @@ export function GlobalSearchDialog({
     if (open) {
       setQuery("");
       setSelectedIndex(0);
+      setServerResults([]);
     }
   }, [open]);
+
+  // Server-side debounced search query
+  React.useEffect(() => {
+    if (!query || query.trim().length < 2) {
+      setServerResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search/global?q=${encodeURIComponent(query.trim())}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            setServerResults(json.data);
+          }
+        }
+      } catch {
+        // Fallback gracefully to local context items
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   // Build unified search items
   const items: CommandItem[] = React.useMemo(() => {
@@ -156,7 +182,6 @@ export function GlobalSearchDialog({
       },
     ];
 
-    // Filter commands by query
     if (q) {
       commands.forEach((c) => {
         if (c.title.toLowerCase().includes(q) || (c.subtitle && c.subtitle.toLowerCase().includes(q))) {
@@ -211,19 +236,19 @@ export function GlobalSearchDialog({
       }
     });
 
-    // 4. Matched Units (when querying)
+    // 4. Matched Units
     if (q) {
       units.forEach((u) => {
         if (
           u.unitNumber.toLowerCase().includes(q) ||
           u.tower.toLowerCase().includes(q) ||
-          (u.assignedLeadName && u.assignedLeadName.toLowerCase().includes(q))
+          (u.assignedBuyerName && u.assignedBuyerName.toLowerCase().includes(q))
         ) {
           list.push({
             id: `unit-${u.id}`,
             category: "unit",
-            title: `Unit ${u.unitNumber} (${u.tower})`,
-            subtitle: `${u.projectName} • ${u.configuration} • ${formatCurrencyINR(u.price)} ${u.assignedLeadName ? `• Buyer: ${u.assignedLeadName}` : ""}`,
+            title: `Unit ${u.tower}-${u.unitNumber}`,
+            subtitle: `${u.projectName} • ${u.configuration} • ${formatCurrencyINR(u.askingPrice || u.price)} ${u.assignedBuyerName ? `• Buyer: ${u.assignedBuyerName}` : ""}`,
             badge: u.status.toUpperCase(),
             icon: Home,
             action: () => {
@@ -239,7 +264,6 @@ export function GlobalSearchDialog({
     return list;
   }, [query, leads, projects, units, onNavigateTab, onOpenCreateLead, onOpenQuickLog, onSelectLead, setSelectedProjectId, onOpenChange]);
 
-  // Handle keyboard navigation (Arrow Up, Down, Enter)
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -257,92 +281,99 @@ export function GlobalSearchDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 sm:max-w-[580px] overflow-hidden rounded-2xl shadow-modal border border-border">
-        {/* Command Search Input */}
-        <div className="flex items-center px-4 border-b border-border bg-card">
-          <Search className="h-4 w-4 text-muted-foreground mr-2.5 shrink-0" />
+      <DialogContent className="max-w-2xl p-0 border border-border bg-card shadow-2xl overflow-hidden rounded-xl">
+        {/* Search Input Bar */}
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border bg-secondary/30">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
           <input
+            type="text"
+            placeholder="Search leads, projects, towers, units, phone numbers, or actions... (Cmd+K)"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Type a command or search (e.g. 'Rajesh', 'DLF', 'Create lead', 'Overdue')..."
-            className="h-12 w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
             autoFocus
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
-          <kbd className="text-[10px] font-mono border border-border bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-            ESC
-          </kbd>
+          <div className="flex items-center gap-1">
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded border border-border bg-secondary text-muted-foreground">
+              ESC
+            </kbd>
+          </div>
         </div>
 
-        {/* Command Results List */}
-        <div className="max-h-84 overflow-y-auto p-2 space-y-1">
+        {/* Results List */}
+        <div className="max-h-[60vh] overflow-y-auto p-2 space-y-1 divide-y divide-border/30">
           {items.length === 0 ? (
             <div className="p-8 text-center text-xs text-muted-foreground">
-              No matching commands, leads, or property units found.
+              No matching results found for &ldquo;{query}&rdquo;
             </div>
           ) : (
-            items.slice(0, 15).map((item, idx) => {
+            items.map((item, index) => {
               const Icon = item.icon;
-              const isHighlighted = idx === selectedIndex;
+              const isSelected = index === selectedIndex;
 
               return (
                 <div
                   key={item.id}
                   onClick={item.action}
-                  onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`px-3 py-2 rounded-xl cursor-pointer flex items-center justify-between text-xs transition-colors ${
-                    isHighlighted ? "bg-primary text-primary-foreground font-semibold" : "hover:bg-secondary/60 text-foreground"
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  className={`flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors pt-2 ${
+                    isSelected ? "bg-primary/10 text-foreground" : "hover:bg-secondary/60 text-foreground/90"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${
-                      isHighlighted ? "border-white/30 bg-white/10" : "border-border bg-secondary/50"
-                    }`}>
-                      <Icon className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`p-2 rounded-md shrink-0 ${
+                        isSelected ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
                     </div>
 
                     <div className="min-w-0">
-                      <div className="font-bold truncate flex items-center gap-1.5">
-                        <span>{item.title}</span>
-                        {item.lead && (
-                          <LeadScoreBadge score={item.lead.leadScore} label={item.lead.leadScoreLabel} />
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-xs text-foreground truncate">{item.title}</span>
+                        {item.badge && (
+                          <span
+                            className={`text-[9px] font-mono px-1.5 py-0.2 rounded border uppercase ${
+                              item.badge.includes("URGENCY")
+                                ? "border-red-500/30 text-red-600 bg-red-500/10"
+                                : "border-border bg-secondary text-muted-foreground"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
                         )}
                       </div>
                       {item.subtitle && (
-                        <div className={`text-[11px] truncate ${isHighlighted ? "text-primary-foreground/80 font-normal" : "text-muted-foreground font-normal"}`}>
-                          {item.subtitle}
-                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">{item.subtitle}</p>
                       )}
                     </div>
                   </div>
 
-                  {item.badge && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ${
-                      isHighlighted ? "bg-white/20 text-white" : "bg-secondary text-muted-foreground"
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
+                  <ArrowRight
+                    className={`h-3.5 w-3.5 shrink-0 transition-transform ${
+                      isSelected ? "text-primary translate-x-0.5" : "text-muted-foreground/40"
+                    }`}
+                  />
                 </div>
               );
             })
           )}
         </div>
 
-        {/* Footer info */}
-        <div className="px-4 py-2 border-t border-border bg-secondary/30 flex items-center justify-between text-[10px] text-muted-foreground">
+        {/* Footer shortcuts */}
+        <div className="px-4 py-2 bg-secondary/50 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
-            <span>ESC Close</span>
           </div>
-          <span>CallCRM Intelligence</span>
+          <span>CallCRM Global Entity Index</span>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-

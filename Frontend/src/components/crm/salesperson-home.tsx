@@ -23,13 +23,18 @@ import {
   Sparkles,
   ChevronRight,
   AlertTriangle,
+  Key,
+  ShieldCheck,
+  FileText,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PipelineBadge, TaskStatusBadge, DealHealthBadge, LeadScoreBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
-import { Lead, Task } from "@/types/crm";
+import { Lead, Task, SiteVisitBriefing } from "@/types/crm";
+import { SellerOpportunitiesModal } from "@/components/crm/seller-opportunities-modal";
+import { MeetingSummaryModal } from "@/components/crm/meeting-summary-modal";
 
 interface SalespersonHomeProps {
   onOpenQuickLog: (leadId?: string) => void;
@@ -42,7 +47,21 @@ export function SalespersonHome({
   onSelectLead,
   onNavigateTab,
 }: SalespersonHomeProps) {
-  const { currentUser, filteredLeads, filteredTasks, completeTask, activities } = useCRM();
+  const {
+    currentUser,
+    filteredLeads,
+    filteredTasks,
+    completeTask,
+    activities,
+    sellerOpportunities,
+    siteVisitBriefings,
+    getSiteVisitBriefing,
+    scanStaleFacts,
+  } = useCRM();
+
+  const [isMeetingModalOpen, setIsMeetingModalOpen] = React.useState(false);
+  const [isSellerModalOpen, setIsSellerModalOpen] = React.useState(false);
+  const [activeBriefing, setActiveBriefing] = React.useState<SiteVisitBriefing | null>(null);
 
   // Active tasks for this salesperson
   const overdueTasks = filteredTasks.filter((t) => t.status === "overdue");
@@ -68,6 +87,15 @@ export function SalespersonHome({
   // Calls logged today by this rep
   const todayCallsCount = activities.filter((a) => a.userId === currentUser.id && a.type === "call").length;
   const callsTarget = 10;
+
+  // Handler for 30-min pre-site visit briefing
+  const handleOpenBriefing = async (lead: Lead) => {
+    const unitId = lead.unitId || lead.assignedUnitId || "unit-camellias-a1402";
+    const briefing = await getSiteVisitBriefing(lead.id, unitId);
+    if (briefing) {
+      setActiveBriefing(briefing);
+    }
+  };
 
   // Intelligent Next Best Actions prioritization:
   // 1. Overdue high-value leads
@@ -140,7 +168,27 @@ export function SalespersonHome({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsSellerModalOpen(true)}
+            className="h-10 px-3 text-xs font-semibold border-amber-500/40 text-amber-600 hover:bg-amber-500/10 flex items-center gap-1.5 rounded-xl"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>Seller Signals ({sellerOpportunities.length})</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsMeetingModalOpen(true)}
+            className="h-10 px-3 text-xs font-semibold border-primary/40 text-primary hover:bg-primary/10 flex items-center gap-1.5 rounded-xl"
+          >
+            <FileText className="h-4 w-4" />
+            <span>AI Meeting Structurer</span>
+          </Button>
+
           <Button
             size="lg"
             onClick={() => onOpenQuickLog()}
@@ -342,7 +390,18 @@ export function SalespersonHome({
                       <ChevronRight className="h-3 w-3" />
                     </button>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {isSiteVisit && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2.5 text-[11px] font-bold border-purple-500/40 text-purple-600 hover:bg-purple-500/10 flex items-center gap-1"
+                          onClick={() => handleOpenBriefing(lead)}
+                        >
+                          <Compass className="h-3 w-3" />
+                          <span>Pre-Visit Briefing</span>
+                        </Button>
+                      )}
                       <a
                         href={`tel:${lead.phone}`}
                         className="inline-flex items-center justify-center h-7 px-2.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
@@ -455,8 +514,116 @@ export function SalespersonHome({
           </div>
         </div>
       </div>
+
+      {/* Intelligence Modals */}
+      <SellerOpportunitiesModal
+        isOpen={isSellerModalOpen}
+        onClose={() => setIsSellerModalOpen(false)}
+      />
+
+      <MeetingSummaryModal
+        isOpen={isMeetingModalOpen}
+        onClose={() => setIsMeetingModalOpen(false)}
+      />
+
+      {/* 30-Minute Pre-Visit Briefing Modal */}
+      {activeBriefing && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setActiveBriefing(null)}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl space-y-4 text-xs"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="border-b border-border pb-3 flex items-start justify-between">
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase text-purple-600 tracking-wider">
+                  Site Visit Pre-Briefing (30m Prior)
+                </span>
+                <h3 className="text-xl font-bold text-foreground">{activeBriefing.unitTitle}</h3>
+                <p className="text-muted-foreground text-xs">
+                  Buyer: {activeBriefing.leadName} • {activeBriefing.societyName}
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveBriefing(null)}
+                className="text-muted-foreground hover:text-foreground font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Gate Access Protocol */}
+            <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-200/60 space-y-1">
+              <span className="font-bold text-purple-900 flex items-center gap-1.5">
+                <Key className="h-4 w-4 text-purple-600" />
+                Security & Gate 2 Pass Protocol:
+              </span>
+              <p className="text-purple-950 font-medium leading-relaxed">
+                {activeBriefing.gateAccessProtocol}
+              </p>
+              {activeBriefing.parkingInstructions && (
+                <p className="text-purple-800 text-[11px] mt-1">
+                  🚗 <strong>Parking:</strong> {activeBriefing.parkingInstructions}
+                </p>
+              )}
+            </div>
+
+            {/* Owner Expectations */}
+            <div className="p-3.5 rounded-xl bg-secondary/60 border border-border space-y-1">
+              <span className="font-bold text-foreground flex items-center gap-1.5">
+                <User className="h-4 w-4 text-primary" />
+                Owner Price Non-Negotiables:
+              </span>
+              <p className="text-muted-foreground leading-relaxed">
+                {activeBriefing.ownerExpectationsSummary}
+              </p>
+            </div>
+
+            {/* Talking Points & Objections */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-emerald-50/40 border border-emerald-200/60 space-y-1.5">
+                <span className="font-bold text-emerald-800 flex items-center gap-1">
+                  <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+                  Key Talking Points:
+                </span>
+                <ul className="list-disc list-inside text-emerald-950 space-y-1">
+                  {activeBriefing.talkingPoints?.map((tp, idx) => (
+                    <li key={idx}>{tp}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-50/40 border border-amber-200/60 space-y-1.5">
+                <span className="font-bold text-amber-800 flex items-center gap-1">
+                  <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
+                  Anticipated Objections:
+                </span>
+                <ul className="list-disc list-inside text-amber-950 space-y-1">
+                  {activeBriefing.previousObjections?.map((obj, idx) => (
+                    <li key={idx}>{obj}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-border">
+              <Button
+                onClick={() => setActiveBriefing(null)}
+                className="h-8 px-4 text-xs font-semibold"
+              >
+                Close Briefing
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 
 

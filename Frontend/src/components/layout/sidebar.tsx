@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -38,35 +37,30 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
   // Role-Aware Navigation
   const isBoss = currentUser.role === "boss";
 
-  const bossNavItems = [
-    { id: "overview", label: "Overview", href: "/", icon: LayoutDashboard },
+  const salesWorkspaceItems = [
+    { id: "overview", label: isBoss ? "Executive Overview" : "Today's Priorities", href: "/", icon: isBoss ? LayoutDashboard : Home },
+    { id: "leads", label: isBoss ? "All Leads" : "My Leads", href: "/leads", icon: Users },
+    { id: "pipeline", label: "Deal Pipeline", href: "/pipeline", icon: Kanban },
+    { id: "tasks", label: "Follow-up Queue", href: "/tasks", icon: ListTodo },
+  ];
+
+  const propertyIntelItems = [
+    { id: "projects", label: "Projects & Societies", href: "/projects", icon: Building2 },
+    { id: "people", label: "People Directory", href: "/people", icon: Contact },
+    { id: "activities", label: "Touchpoint Activity", href: "/activities", icon: Activity },
+  ];
+
+  const intelligenceItems = [
     { id: "ai-agent", label: "Aria AI Agent", href: "/agent-live", icon: Bot, highlight: true },
-    { id: "leads", label: "Leads", href: "/leads", icon: Users },
-    { id: "pipeline", label: "Pipeline", href: "/pipeline", icon: Kanban },
-    { id: "people", label: "People", href: "/people", icon: Contact },
-    { id: "projects", label: "Projects", href: "/projects", icon: Building2 },
-    { id: "activities", label: "Activities", href: "/activities", icon: Activity },
-    { id: "tasks", label: "Tasks", href: "/tasks", icon: ListTodo },
-    { id: "reports", label: "Reports", href: "/reports", icon: ChartNoAxesCombined },
   ];
 
   const adminNavItems = [
-    { id: "users", label: "Users", href: "/users", icon: Users },
-    { id: "regions", label: "Regions", href: "/regions", icon: MapPin },
+    { id: "reports", label: "Executive Reports", href: "/reports", icon: ChartNoAxesCombined },
+    { id: "users", label: "Team Users", href: "/users", icon: Users },
+    { id: "regions", label: "Regional Desks", href: "/regions", icon: MapPin },
     { id: "billing", label: "Billing & Plans", href: "/billing", icon: CreditCard },
     { id: "settings", label: "Settings", href: "/settings", icon: Settings },
   ];
-
-  const salespersonNavItems = [
-    { id: "overview", label: "Home", href: "/", icon: Home },
-    { id: "ai-agent", label: "Aria AI Agent", href: "/agent-live", icon: Bot, highlight: true },
-    { id: "leads", label: "My Leads", href: "/leads", icon: Users },
-    { id: "tasks", label: "Follow-ups", href: "/tasks", icon: ListTodo },
-    { id: "projects", label: "Projects", href: "/projects", icon: Building2 },
-    { id: "activities", label: "Activities", href: "/activities", icon: Activity },
-  ];
-
-  const currentNav = isBoss ? bossNavItems : salespersonNavItems;
 
   const handleNavClick = (id: string, e: React.MouseEvent) => {
     if (onSelectTab) {
@@ -83,7 +77,7 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
       )}
     >
       {/* Top Organization Header */}
-      <div>
+      <div className="overflow-y-auto">
         <div className="h-14 px-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-subtle">
@@ -102,46 +96,108 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
           </Badge>
         </div>
 
-        {/* Primary Navigation */}
-        <div className="px-3 py-3 space-y-1">
-          <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {isBoss ? "Management" : "Sales Workspace"}
+        {/* 4-Tier Navigation Taxonomy */}
+        <div className="px-3 py-3 space-y-4">
+          {/* TIER 1: SALES WORKSPACE */}
+          <div className="space-y-1">
+            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Sales Workspace
+            </div>
+            {salesWorkspaceItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab ? activeTab === item.id : pathname === item.href;
+
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(item.id, e)}
+                  className={cn(
+                    "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                    isActive
+                      ? "bg-secondary text-foreground font-semibold shadow-subtle"
+                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                  )}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
+                    <span>{item.label}</span>
+                  </div>
+                </a>
+              );
+            })}
           </div>
 
-          {currentNav.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab ? activeTab === item.id : pathname === item.href;
+          {/* TIER 2: PROPERTY INTELLIGENCE */}
+          <div className="space-y-1">
+            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Property Intelligence
+            </div>
+            {propertyIntelItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab ? activeTab === item.id : pathname === item.href;
 
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                onClick={(e) => handleNavClick(item.id, e)}
-                className={cn(
-                  "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
-                  isActive
-                    ? "bg-secondary text-foreground font-semibold shadow-subtle"
-                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-                )}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon className={cn("h-4 w-4 shrink-0 stroke-[1.75]", item.highlight && "text-indigo-600 dark:text-indigo-400")} />
-                  <span>{item.label}</span>
-                </div>
-                {item.highlight && (
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30">
-                    LIVE
-                  </span>
-                )}
-              </a>
-            );
-          })}
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(item.id, e)}
+                  className={cn(
+                    "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                    isActive
+                      ? "bg-secondary text-foreground font-semibold shadow-subtle"
+                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                  )}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
+                    <span>{item.label}</span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
 
-          {/* Admin Section for Boss */}
+          {/* TIER 3: INTELLIGENCE & AUTOMATION */}
+          <div className="space-y-1">
+            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Intelligence &amp; AI
+            </div>
+            {intelligenceItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab ? activeTab === item.id : pathname === item.href;
+
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(item.id, e)}
+                  className={cn(
+                    "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                    isActive
+                      ? "bg-secondary text-foreground font-semibold shadow-subtle"
+                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                  )}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={cn("h-4 w-4 shrink-0 stroke-[1.75]", item.highlight && "text-verdigris")} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.highlight && (
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-verdigris-light text-verdigris border border-verdigris-border">
+                      LIVE
+                    </span>
+                  )}
+                </a>
+              );
+            })}
+          </div>
+
+          {/* TIER 4: MANAGEMENT & ADMIN (Boss only) */}
           {isBoss && (
-            <div className="pt-4 space-y-1">
-              <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Administration
+            <div className="space-y-1">
+              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Management &amp; Admin
               </div>
               {adminNavItems.map((item) => {
                 const Icon = item.icon;
@@ -169,17 +225,17 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
         </div>
       </div>
 
-      {/* Current User Identity (display only — roles come from the server profile) */}
-      <div className="p-3 border-t border-border bg-secondary/30 space-y-2">
+      {/* Current User Identity */}
+      <div className="p-3 border-t border-border bg-secondary/30 space-y-2 shrink-0">
         <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
           Signed in as
         </div>
 
         <div className="flex items-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium bg-card text-foreground border border-border">
           {isBoss ? (
-            <Shield className="h-3 w-3 shrink-0" />
+            <Shield className="h-3 w-3 shrink-0 text-brass" />
           ) : (
-            <UserCheck className="h-3 w-3 shrink-0" />
+            <UserCheck className="h-3 w-3 shrink-0 text-verdigris" />
           )}
           <span className="capitalize">{currentUser.role}</span>
         </div>

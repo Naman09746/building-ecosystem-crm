@@ -8,14 +8,14 @@ Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind C
 
 ## ⚡ Key Differentiators & Value Pillars
 
-1. **Human-Gated AI Intake & Qualification (Aria Agent)**: 24/7 conversational intake across web widgets that extracts budget, micro-market, unit config, and buyer intent, calculates lead scores — and stages every proposed deal behind an explicit **Approve/Reject** card before anything touches the pipeline. The AI never writes to the database on its own.
-2. **AI Lost-Lead Resurrection Engine**: Manager-only scan (`/api/agent/resurrect`) cross-matches dormant buyer requirements against live inventory, generating personalized WhatsApp pitches for 1-click deal revival through the standard audited mutation path.
-3. **Frictionless 10-Second Interaction Logger**: Complete structured outcome disposition and next-action follow-up scheduling in under 10 seconds without modal fatigue (<kbd>L</kbd>, <kbd>F</kbd>, <kbd>⌘K</kbd> hotkeys). Failed syncs auto-retry via the built-in retry queue.
-4. **Multi-Tenant Security by Construction**: Row-Level Security on all 16 tables, `org_id` always derived from the verified session (never request bodies), fail-closed HMAC-verified webhooks, DB-trigger-enforced plan quotas, role changes guarded against self-elevation.
-5. **Project Collateral & KYC Document Vault**: Repository for brochures, floor plans, cost sheets, and buyer KYC associated to leads and projects.
-6. **Role-Tailored Workspaces**:
-   - **Executive (Boss) Command Center**: Real computed KPIs (inflow momentum, stage aging, follow-up closure rate), regional filters that actually filter, overdue tracking, and lost-lead radar.
-   - **Salesperson Daily Cockpit**: Action-first task timeline, prioritized next best actions, hot deal alerts, and matching inventory recommendations.
+1. **Atomic Flat/Unit Asset Model & 360° Dossiers**: 6-tier real estate hierarchy (`Region` $\rightarrow$ `Area/Locality` $\rightarrow$ `Society/Project` $\rightarrow$ `Tower/Block` $\rightarrow$ `Floor` $\rightarrow$ `Flat/Unit`). The Flat/Unit is the core transactional asset holding pricing memory, cost sheets, and temporal ownership histories.
+2. **Proactive Seller Intelligence Engine**: Identifies expiring lease agreements ($<60$ days), vacant units incurring maintenance holding costs, and 3+ year investor exit windows with 1-click conversion to active resale listings.
+3. **100-Point Bi-Directional Matching Engine**: Algorithmic scoring across Location (30%), Budget (30%), Configuration (20%), Floor/Facing (10%), Mandate Exclusivity (10%). Includes reverse buyer matching when new units are onboarded.
+4. **30-Minute Pre-Site-Visit Operational Briefings**: Synthesizes Gate 2 visitor pass digital PINs, visitor parking bays, owner price non-negotiables, talking points, and anticipated objections.
+5. **Human-in-the-Loop Free-Text & Voice Meeting Structurer**: Parses raw sales rep notes into structured objections, buying signals, and sentiment. AI never mutates CRM state autonomously — all changes require explicit sales rep approval.
+6. **Temporal People & Stakeholder Graphs**: Universal relationship model (`entity_relationships`) tracking current owners, historical ownership chains, tenants, and authorized brokers with automated ownership lifecycle triggers.
+7. **Structured Institutional Sales Memory**: Property facts (`property_facts`) with 5 verification tiers (`verified`, `historical`, `user_provided`, `inferred`, `unknown`) and automated 180-day staleness flagging.
+8. **Multi-Tenant Security by Construction**: Row-Level Security on all 34 tables, `org_id` always derived from the verified session, fail-closed HMAC webhooks, and DB-enforced plan quotas.
 
 ---
 
@@ -26,10 +26,14 @@ Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind C
 
 | Agent / Engine | Purpose | Trust Model |
 | :--- | :--- | :--- |
-| **Aria Lead Qualifier** | Conversational intake & qualification proposals | Gemini 2.5 Flash · no-execute tool · human approval required |
+| **Seller Intelligence** | Tenancy expiry, vacant units & investor exit signals | Server scanner (`/api/seller-opportunities`) · 1-click mandate conversion |
+| **100-Point Bi-Directional Matcher** | Multi-factor inventory ↔ buyer matching | Algorithmic scoring · reverse matching on new units |
+| **Site Visit Pre-Briefing** | 30-min pre-visit gate passes & owner boundaries | Synthesizer (`/api/properties/site-briefings`) · instant cockpit view |
+| **Meeting Structurer** | Unstructured speech/notes → structured outcomes | Human-in-the-loop approval gate · zero autonomous DB writes |
+| **Aria 2.0 Intelligence** | Property briefings, buyer matching & intake qualification | Gemini 2.5 Flash · read-only tools · human approval required |
 | **Lost-Lead Resurrector** | Dormant-deal ↔ live-inventory matching | Server-side manager+ scan (read-only) · client applies via audited writes |
 | **WhatsApp Sales Engine** | 1-click templated outreach & instant logging | Outbound `wa.me/` · inbound webhook HMAC + replay guard |
-| **Live Sync Telemetry** | Cross-device convergence | Supabase Realtime `postgres_changes` on leads/tasks/activities |
+| **Live Sync Telemetry** | Cross-device convergence | Supabase Realtime `postgres_changes` on core tables |
 
 ---
 
@@ -37,13 +41,13 @@ Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind C
 
 ```
 Real-estate/
-├── supabase/migrations/            # Canonical DB — apply in order:
+├── supabase/migrations/            # Canonical DB — apply in order (0001 → 0019):
 │   ├── 0001_init.sql               #   multi-tenant schema, RLS, org bootstrap trigger
 │   ├── 0002_sample_seed.sql        #   first-run sample data RPC
 │   ├── 0003_rate_limiting.sql      #   durable Postgres rate limiter
-│   ├── 0004_tenant_defaults.sql    #   org_id column defaults
-│   ├── 0005_authorization_hardening.sql # role guard, task scoping, ownership
-│   └── 0006_billing_quotas.sql     #   billing columns + lead/seat quota triggers
+│   ├── ...                         #   phases 4-11 hardening, SLAs, analytics, billing
+│   ├── 0018_phase12_property_intelligence_schema.sql # Areas, Towers, Units 360, Relationships, Facts
+│   └── 0019_phase13_intelligence_automation.sql # Seller opportunities, site visit briefings, stale facts RPC
 ├── .github/workflows/ci.yml        # CI: lint → vitest → next build
 ├── DOCS/                           # Architecture blueprints & AI agent guides
 └── Frontend/
@@ -52,22 +56,17 @@ Real-estate/
     └── src/
         ├── middleware.ts           # Edge route protection (JWT revalidation)
         ├── app/                    # App Router: marketing page, auth flow,
-        │   │                       # CRM routes (thin AppShell wrappers), /api/*
-        │   └── api/                # chat · leads · activities · agent/resurrect ·
-        │                           # health · billing/* · webhooks/*  (all gated)
+        │   │                       # CRM routes (thin AppShell wrappers), /api/* (63 endpoints)
+        │   └── api/                # seller-opportunities · site-briefings · meeting-summary · properties/* · ...
         ├── components/crm/pages/   # Page bodies; routes are thin AppShell wrappers
         ├── context/                # auth-context (Supabase sessions) · crm-context
-        │                           # (hydration + optimistic write-through mutations)
         ├── lib/
         │   ├── persistence/        # crm-sync (row↔domain mappers) · retry-queue
-        │   ├── observability/      # structured [CRM_ERROR] reporter
-        │   ├── server/             # api-security · supabase-server · validations ·
-        │   │                       # rate-limit · subscription (server-only modules)
+        │   ├── server/             # seller-intelligence · site-visit-briefing · aria-tools · api-security
         │   ├── mock-data.ts        # Demo dataset (unauthenticated mode only)
         │   └── utils.ts            # ₹ Lakh/Cr currency, phone formatters
         ├── types/crm.ts            # Domain TypeScript definitions
-        └── __tests__/              # 60 tests: unit · security primitives ·
-                                    # persistence mappers · CRM state machine (jsdom)
+        └── __tests__/              # 222 tests across 23 suites: unit · security · state-machine · property & seller intelligence
 ```
 
 ---
@@ -82,9 +81,9 @@ Real-estate/
 ### 1. Database setup
 Apply migrations in numeric order (SQL Editor or Supabase CLI):
 ```
-supabase/migrations/0001_init.sql        → 0006_billing_quotas.sql
+supabase/migrations/0001_init.sql        → 0019_phase13_intelligence_automation.sql
 ```
-This provisions the multi-tenant schema, RLS policies, org auto-bootstrap on signup, first-run sample-data seeding, quota triggers, and durable rate limiting. All migrations are validated against real PostgreSQL.
+This provisions the multi-tenant schema, RLS policies, org auto-bootstrap on signup, first-run sample-data seeding, quota triggers, durable rate limiting, Property Intelligence, and Seller Opportunities Automation. All migrations are validated against real PostgreSQL.
 
 ### 2. Environment
 ```bash
@@ -106,7 +105,7 @@ Without env configuration the app runs in demo mode (mock dataset, in-memory) fo
 ### Testing & CI
 ```bash
 make ci             # everything CI runs: lint → DB validation → tests → build
-make test           # 60 tests: unit, security primitives, mappers, state machine
+make test           # 222 tests across 23 suites: unit, security primitives, mappers, state machine, seller intelligence
 make test-migrations # full migration + RLS + quota validation against real Postgres
 make test-e2e       # Playwright browser smoke suite (builds + serves the app)
 ```

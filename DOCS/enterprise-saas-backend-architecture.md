@@ -40,26 +40,32 @@ This document details the production backend architecture for **Apex Realty Call
 
 ## 2. PostgreSQL Row-Level Security Matrix
 
-Canonical schema: `supabase/migrations/0001_init.sql` (+ hardening in `0005`).
+Canonical schema: `supabase/migrations/0001_init.sql` through `0018_phase12_property_intelligence_schema.sql` (32 tables).
 
 | Table | Scope |
 | :--- | :--- |
 | `orgs` | SELECT: own org (`current_org_id()`). UPDATE: owner/admin/boss only. INSERT: none (bootstrap trigger/service-role only) |
 | `profiles` | SELECT/UPDATE within org. **Role changes guarded by trigger** — never self, owner/admin only |
 | `regions`, `pipeline_stages`, `projects` | Read: org members. Manage: manager+ |
-| `people`, `project_contacts` | Org members (all operations org-scoped) |
-| `project_units` | Read: org. Status update: org members |
+| `property_areas` | Read: org members. Manage: manager+ (tier rating, slug, pincode) |
+| `project_towers` | Read: org members. Manage: manager+ (floors, units/floor, elevator counts) |
+| `people`, `project_contacts` | Org members (all operations org-scoped, unique phone normalizer anchor) |
+| `external_organizations` | Read: org members. Manage: manager+ (developers, RWAs, brokerages) |
+| `project_units` | Read: org. Status/details update: org members (atomic reserve RPC `FOR UPDATE`) |
+| `entity_relationships` | Read: org. Manage: org members (temporal ownership transitions managed by trigger) |
+| `property_facts` | Read/Insert: org members. Delete: manager+ (institutional sales memory with 5 verification tiers) |
+| `unit_price_history` | Read: org members. Insert: automated via trigger on unit asking price changes |
 | `leads` | SELECT/UPDATE: assigned rep **or** manager+. INSERT: org (ownership trigger forces non-managers to self). DELETE: boss+ only |
 | `activities` | INSERT + SELECT within org. **Immutable** — no update/delete policies exist |
 | `tasks` | SELECT/UPDATE: own or manager+; INSERT: self or manager+; DELETE: manager+ |
-| `documents` | Org members |
+| `documents` | Org members (storage folder RLS per org) |
 | `ai_agent_executions` | INSERT + SELECT within org |
 | `audit_log` | INSERT: org. SELECT: manager+ only |
 | `webhook_events` | **Zero client policies** — service-role only |
 | `webhook_sources` | Manager+ manage; used to resolve inbound provider events to tenants |
 | `rate_limit_buckets` | **Zero client policies** — service-role only |
 
-Helper functions (`current_org_id()`, `current_user_role()`) are `security definer` with pinned `search_path`. Column defaults (`0004`) backstop `org_id` resolution.
+Helper functions (`current_org_id()`, `current_user_role()`) are `security definer` with pinned `search_path`. Column defaults backstop `org_id` resolution.
 
 ---
 
@@ -69,16 +75,23 @@ All routes live under `Frontend/src/app/api/`. Authentication = verified session
 
 | Endpoint | Auth | Rate Limit | Notes |
 | :--- | :--- | :--- | :--- |
-| `POST /api/chat` | ✅ session | 20/min per **user** (durable L2) | Plan gate (`402 PLAN_UPGRADE_REQUIRED` below Growth). Zod message bounds (≤20 msgs / ≤32KB), `system` role rejected from clients, `maxOutputTokens=1024`, 25s timeout. Tool has no execute handler |
+| `POST /api/chat` | ✅ session | 30/min per **user** (durable L2) | Plan gate (`402 PLAN_UPGRADE_REQUIRED` below Growth). Zod message bounds, `system` role rejected, `maxOutputTokens=1500`, 25s timeout. Tool has no execute handler |
+| `GET /api/properties/areas` | ✅ session | 120/min per user | Locality catalog with tier rating, slug, and pincode |
+| `GET /api/properties/towers` | ✅ session | 120/min per user | Tower block configs with floor counts & elevator stats |
+| `GET /api/properties/units` | ✅ session | 120/min per user | Filterable unit inventory engine with price & intent filters |
+| `GET /api/properties/units/[id]` | ✅ session | 120/min per user | Flat 360° Dossier aggregator (specs, owners, facts, price audit, buyer matches) |
+| `GET /api/relationships` | ✅ session | 120/min per user | Temporal people & stakeholder graph query endpoint |
+| `GET /api/properties/facts` | ✅ session | 120/min per user | Institutional property sales memory with verification tiers |
+| `GET /api/search/global` | ✅ session | 60/min per user | Server-side multi-entity search RPC |
 | `GET /api/leads` | ✅ session | 120/min per user | Pagination clamped (≤100). Reps restricted to own leads; explicit `org_id` filter alongside RLS |
 | `POST /api/leads` | ✅ session | 30/min per user | Zod `createLeadSchema`; E.164 normalization; people dedup anchor per-org; `salesperson_id` forced to caller unless manager+ |
 | `GET /api/activities` | ✅ session | 120/min per user | Limit clamped ≤200; org-scoped |
 | `POST /api/activities` | ✅ session | 60/min per user | Immutable audit insert; `user_id`/`user_name` derived from session; lead must belong to caller's org (404 otherwise) |
-| `POST /api/agent/resurrect` | ✅ manager+ role | 20/min per user | Plan gate. `daysThreshold` strict int 1–365 (kills PostgREST `.or()` injection). Read-only scan; logs executions |
+| `POST /api/agent/resurrect` | ✅ manager+ role | 30/min per user | Plan gate. `daysThreshold` strict int 1–365 (kills PostgREST `.or()` injection). Read-only scan; logs executions |
 | `GET /api/health` | public (minimal) / manager+ (verbose) | — | Public body: status + timestamp only. Verbose adds latency/memory/webhook readiness |
-| `POST /api/billing/checkout` | ✅ manager+ | 10/min per user (durable) | Simulated mode until provider keys; real sessions `501` pending SDK integration. Org always from session |
-| `POST /api/billing/webhook` | ✅ HMAC fail-closed | n/a | Insert-first idempotency in `webhook_events`; activation/cancellation event mapping; failures recorded, never raw-error responses |
-| `POST /api/webhooks/whatsapp` | ✅ HMAC fail-closed | n/a | ±5min timestamp freshness; `phone_number_id` → `webhook_sources` tenant resolution; unmapped sources logged, never written |
+| `POST /api/billing/checkout` | ✅ manager+ | 10/min per user (durable) | Stripe / Razorpay order creation + simulated mode fallback |
+| `POST /api/billing/webhook` | ✅ HMAC fail-closed | n/a | Insert-first idempotency in `webhook_events`; activation/cancellation event mapping; failures recorded |
+| `POST /api/webhooks/whatsapp` | ✅ HMAC fail-closed | n/a | ±5min timestamp freshness; `phone_number_id` → `webhook_sources` tenant resolution |
 | `POST /api/webhooks/meta-lead-ads` | ✅ HMAC fail-closed | n/a | Same pattern keyed on `page_id` |
 | `GET /api/webhooks/*` | verify-token handshake | — | Timing-safe token comparison; 503 if tokens unconfigured |
 

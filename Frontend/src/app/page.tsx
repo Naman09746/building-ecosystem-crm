@@ -2,56 +2,52 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import {
   Building2,
-  Building,
   PhoneCall,
-  Zap,
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
-  TrendingUp,
-  Users,
-  Kanban,
-  FileSpreadsheet,
-  Download,
-  Smartphone,
-  Sparkles,
-  ChevronRight,
-  Star,
   MapPin,
-  Clock,
   Check,
+  Compass,
+  FileText,
+  Smartphone,
+  ChevronDown,
+  Sparkles,
+  Kanban,
+  Clock,
+  User,
+  Users,
   Layers,
   ArrowUpRight,
-  QrCode,
   ShieldAlert,
-  Headphones,
-  Compass,
-  KeyRound,
-  Grid3X3,
-  FileText,
-  Search,
-  CheckSquare,
-  SlidersHorizontal,
-  Mail,
+  Menu,
+  X,
 } from "lucide-react";
 import {
-  IsometricCityscape,
+  HeroEditorialVisual,
+  RealEstateRelationshipDiagram,
+  PhysicalSiteVisitShowcase,
+  ExecutiveDarkCockpit,
   ArchitecturalFloorplanVector,
-  MobileCompanionDeviceFrame,
 } from "@/components/marketing/architectural-visuals";
 
 export default function LandingPage() {
   const router = useRouter();
   const { user, workflowStep } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("monthly");
-  const [activeTab, setActiveTab] = React.useState<"cockpit" | "dossier" | "pipeline" | "matcher">("cockpit");
+  const [activeTab, setActiveTab] = React.useState<"specs" | "ownership" | "gate" | "demand">("specs");
   const [openFaq, setOpenFaq] = React.useState<number | null>(0);
-  const [mobileBetaEmail, setMobileBetaEmail] = React.useState("");
-  const [mobileBetaSubmitted, setMobileBetaSubmitted] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getDashboardHref = () => {
     if (!user) return "/login?mode=signup";
@@ -61,737 +57,544 @@ export default function LandingPage() {
     return "/dashboard";
   };
 
-  const handleMobileBetaSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mobileBetaEmail.trim()) return;
-    
-    // Store in localStorage
-    try {
-      const existing = JSON.parse(localStorage.getItem("callcrm_mobile_beta_emails") || "[]");
-      existing.push({ email: mobileBetaEmail.trim(), timestamp: new Date().toISOString() });
-      localStorage.setItem("callcrm_mobile_beta_emails", JSON.stringify(existing));
-    } catch {}
-
-    setMobileBetaSubmitted(true);
-    setTimeout(() => {
-      setMobileBetaEmail("");
-    }, 2500);
-  };
-
   return (
-    <div className="min-h-screen w-full bg-paper text-ink selection:bg-brass/20 flex flex-col font-sans">
-      {/* 1. ARCHITECTURAL LEDGER TOP NAVBAR */}
-      <header className="sticky top-0 z-40 w-full border-b border-architecturalLine bg-paper/90 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-9 w-9 rounded-lg bg-ink text-paper-card flex items-center justify-center font-bold shadow-sm">
-              <Building2 className="h-5 w-5 text-brass" />
+    <div className="min-h-screen w-full max-w-full bg-[#f8f7f4] text-[#181a19] selection:bg-[#a68138]/20 flex flex-col font-sans overflow-x-hidden">
+      {/* ═══════════════════════════════════════════════════════
+          RESPONSIVE EDITORIAL NAVBAR
+          ═══════════════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-40 w-full border-b border-[#e2ded6] bg-[#f8f7f4]/95 backdrop-blur-md px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between min-w-0">
+        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
+          <Link href="/" className="flex items-center gap-2.5 font-bold text-sm tracking-tight text-[#181a19] shrink-0">
+            <div className="h-7 w-7 rounded-lg bg-[#181a19] text-[#f8f7f4] flex items-center justify-center shadow-xs shrink-0">
+              <Building2 className="h-4 w-4 text-[#a68138]" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-base tracking-tight text-ink flex items-center gap-1.5 font-display">
-                Apex CallCRM
-                <span className="text-[10px] font-mono font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-brass/10 text-brass border border-brass/20">
-                  LEDGER v2.4
-                </span>
-              </span>
-              <span className="text-[11px] text-slate-500 font-medium hidden lg:block">
-                Architectural Sales Command Center
-              </span>
-            </div>
+            <span className="font-semibold text-sm sm:text-base">Apex CallCRM</span>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
-            <a href="#features" className="hover:text-ink transition-colors">
-              Features
+          {/* Desktop/Tablet Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-[#4a4d4b]">
+            <a href="#property-intelligence" className="hover:text-[#181a19] transition-colors py-1">
+              Property Details
             </a>
-            <a href="#product-tour" className="hover:text-ink transition-colors">
-              Interface Tour
+            <a href="#matching" className="hover:text-[#181a19] transition-colors py-1">
+              Buyer Matching
             </a>
-            <a href="#how-it-works" className="hover:text-ink transition-colors">
-              How It Works
+            <a href="#site-visits" className="hover:text-[#181a19] transition-colors py-1">
+              Site Visits
             </a>
-            <a href="#pricing" className="hover:text-ink transition-colors">
+            <a href="#leadership" className="hover:text-[#181a19] transition-colors py-1">
+              For Leadership
+            </a>
+            <a href="#pricing" className="hover:text-[#181a19] transition-colors py-1">
               Pricing
-            </a>
-            <a href="#faq" className="hover:text-ink transition-colors">
-              FAQ
-            </a>
-            <a href="#mobile-app" className="hover:text-ink transition-colors flex items-center gap-1.5">
-              <span>Mobile App</span>
-              <span className="text-[9px] font-mono font-bold bg-verdigris-light text-verdigris px-1.5 py-0.2 rounded border border-verdigris-border">
-                BETA
-              </span>
             </a>
           </nav>
         </div>
 
-        {/* Right CTA / Auth state */}
-        <div className="flex items-center gap-3">
-          {user ? (
+        {/* Desktop Actions */}
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
+          {mounted && user ? (
             <Link
               href={getDashboardHref()}
-              className="flex items-center gap-2 py-2 px-4 bg-ink text-paper-card text-xs font-semibold rounded-xl hover:bg-ink-hover transition-all active:scale-[0.99] shadow-sm"
+              className="py-2 px-4 bg-[#181a19] hover:bg-[#2d302e] text-[#f8f7f4] text-xs font-semibold rounded-lg transition-all shadow-xs flex items-center gap-1.5"
             >
-              <span>Go to Sales Cockpit</span>
-              <ArrowRight className="h-3.5 w-3.5 text-brass" />
+              <span>Go to Workspace</span>
+              <ArrowRight className="h-3.5 w-3.5 text-[#a68138]" />
             </Link>
           ) : (
             <>
               <Link
-                href="/login?mode=login"
-                className="text-xs font-semibold text-slate-700 hover:text-ink px-3 py-2 transition-colors hidden sm:block"
+                href="/login"
+                className="text-xs font-semibold text-[#181a19] hover:text-[#4a4d4b] px-3 py-2 transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/login?mode=signup"
-                className="flex items-center gap-1.5 py-2 px-4 bg-ink text-paper-card text-xs font-semibold rounded-xl hover:bg-ink-hover transition-all active:scale-[0.99] shadow-sm"
+                className="py-2 px-4 bg-[#181a19] hover:bg-[#2d302e] text-[#f8f7f4] text-xs font-semibold rounded-lg transition-all shadow-xs flex items-center gap-1.5"
               >
                 <span>Start 14-Day Free Trial</span>
-                <ArrowRight className="h-3.5 w-3.5 text-brass" />
+                <ArrowRight className="h-3.5 w-3.5 text-[#a68138]" />
               </Link>
             </>
           )}
         </div>
-      </header>
 
-      {/* 2. ARCHITECTURAL HERO SECTION with 3D Isometric Background */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24 px-4 sm:px-8 border-b border-architecturalLine">
-        {/* 3D Isometric Cityscape — absolute background */}
-        <div className="absolute inset-0 pointer-events-none z-0">
-          <div className="absolute bottom-0 left-0 w-full">
-            <IsometricCityscape />
-          </div>
-          {/* Gradient overlay for text readability */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(180deg, rgba(248,250,252,0.92) 0%, rgba(248,250,252,0.75) 50%, rgba(248,250,252,0.5) 100%)",
-            }}
-          />
-        </div>
-
-        <div className="relative z-10 max-w-6xl mx-auto text-center space-y-6">
-          {/* Top Pill with Monospace Code */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-paper-card/90 backdrop-blur-sm border border-architecturalLine shadow-xs text-xs text-ink font-medium animate-in fade-in-50">
-            <span className="flex h-2 w-2 rounded-full bg-verdigris animate-ping" />
-            <span className="font-mono text-[11px] font-bold text-brass uppercase tracking-wider">
-              [SYSTEM SPEC: RESIDENTIAL SALES LEDGER]
-            </span>
-            <span className="text-slate-300">•</span>
-            <span className="text-slate-600">Engineered for High-Ticket Property Desks</span>
-          </div>
-
-          {/* Architectural Serif Headline */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-ink max-w-4xl mx-auto leading-[1.12] font-display">
-            The High-Velocity Sales Command Center for{" "}
-            <span className="bg-gradient-to-r from-brass to-amber-700 bg-clip-text text-transparent underline decoration-brass/30 decoration-wavy">
-              High-Ticket Property Closers
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-sm sm:text-base lg:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Replace passive CRM spreadsheets with an action-first architectural sales ledger. Match inventory in 10 seconds, eliminate deal slippage, and automate daily outreach across Gurgaon, Mumbai & NCR.
-          </p>
-
-          {/* Dual Action CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+        {/* Mobile Hamburger Toggle Button */}
+        <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+          {mounted && user ? (
+            <Link
+              href={getDashboardHref()}
+              className="py-1.5 px-3 bg-[#181a19] text-[#f8f7f4] text-xs font-semibold rounded-lg"
+            >
+              Workspace
+            </Link>
+          ) : (
             <Link
               href="/login?mode=signup"
-              className="w-full sm:w-auto py-3.5 px-7 bg-ink text-paper-card font-bold text-sm rounded-xl hover:bg-ink-hover transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]"
+              className="py-1.5 px-2.5 bg-[#181a19] text-[#f8f7f4] text-[11px] font-semibold rounded-lg shrink-0"
             >
-              <span>Start 14-Day Free Trial</span>
-              <ArrowRight className="h-4 w-4 text-brass" />
+              Start Free
             </Link>
+          )}
 
-            <Link
-              href="/login?mode=login"
-              className="w-full sm:w-auto py-3.5 px-6 bg-paper-card/90 backdrop-blur-sm text-ink font-semibold text-sm rounded-xl border border-architecturalLine hover:bg-paper transition-all flex items-center justify-center gap-2 shadow-xs"
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle Navigation Menu"
+            className="p-2 rounded-lg text-[#181a19] hover:bg-[#f0ede6] transition-colors focus:outline-none shrink-0"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Slide-down Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden fixed inset-x-0 top-[53px] z-30 bg-[#f8f7f4] border-b border-[#e2ded6] shadow-xl p-5 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          <nav className="flex flex-col space-y-3 font-semibold text-sm text-[#181a19]">
+            <a
+              href="#property-intelligence"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 hover:bg-[#f0ede6] rounded-lg transition-colors"
             >
-              <Sparkles className="h-4 w-4 text-brass" />
-              <span>Explore Instant Live Preview</span>
-            </Link>
-          </div>
+              Property Details
+            </a>
+            <a
+              href="#matching"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 hover:bg-[#f0ede6] rounded-lg transition-colors"
+            >
+              Buyer Matching
+            </a>
+            <a
+              href="#site-visits"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 hover:bg-[#f0ede6] rounded-lg transition-colors"
+            >
+              Site Visits
+            </a>
+            <a
+              href="#leadership"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 hover:bg-[#f0ede6] rounded-lg transition-colors"
+            >
+              For Leadership
+            </a>
+            <a
+              href="#pricing"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 hover:bg-[#f0ede6] rounded-lg transition-colors"
+            >
+              Pricing
+            </a>
+          </nav>
 
-          <div className="flex items-center justify-center gap-6 pt-2 text-xs text-slate-600">
-            <span className="flex items-center gap-1.5">
-              <Check className="h-4 w-4 text-verdigris" /> 100% Free 14-Day Trial
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Check className="h-4 w-4 text-verdigris" /> No Credit Card Required
-            </span>
-            <span className="flex items-center gap-1.5 hidden sm:flex">
-              <Check className="h-4 w-4 text-verdigris" /> 60-Second Setup
-            </span>
+          <div className="pt-3 border-t border-[#e2ded6] space-y-2">
+            {mounted && user ? (
+              <Link
+                href={getDashboardHref()}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full py-2.5 text-center text-xs font-bold text-[#f8f7f4] bg-[#181a19] rounded-xl shadow-xs"
+              >
+                Open Workspace
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full py-2.5 text-center text-xs font-bold text-[#181a19] bg-[#ffffff] border border-[#e2ded6] rounded-xl"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/login?mode=signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full py-2.5 text-center text-xs font-bold text-[#f8f7f4] bg-[#181a19] rounded-xl shadow-xs"
+                >
+                  Start 14-Day Free Trial
+                </Link>
+              </>
+            )}
           </div>
         </div>
+      )}
 
-          {/* Live Sales Stream Ledger Mockup */}
-          <div className="relative z-10 pt-2 max-w-5xl mx-auto">
-            <div className="relative rounded-2xl border border-architecturalLine bg-paper-card glow-card p-3 sm:p-5 shadow-2xl text-left overflow-hidden">
-              {/* Photo & Technical Header Strip */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-architecturalLine">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                  <span className="text-[11px] font-mono text-slate-500 ml-2 font-medium">
-                    callcrm.in/sovereign-desk/cockpit
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono font-bold text-verdigris bg-verdigris-light px-2 py-0.5 rounded border border-verdigris-border">
-                    ● ACTIVE STREAM · 12 LEADS IN QUEUE
-                  </span>
-                </div>
-              </div>
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 1: HERO (Human & Grounded)
+          ═══════════════════════════════════════════════════════ */}
+      <section className="pt-8 pb-12 sm:pt-16 sm:pb-20 md:pt-20 md:pb-24 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto w-full min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-center min-w-0">
+          {/* Left Column: Authoritative Statement (6 Cols) */}
+          <div className="lg:col-span-6 min-w-0 space-y-4 sm:space-y-6 text-left">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#181a19] leading-[1.18] break-words">
+              Built for the way luxury real estate is actually sold.
+            </h1>
 
-              {/* Mockup Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Card 1: Next Best Action */}
-                <div className="bg-paper p-3.5 rounded-xl border border-architecturalLine space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
-                      [ACTION-01 · URGENT SLA]
-                    </span>
-                    <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <p className="font-bold text-xs text-ink">Siddharth Oberoi</p>
-                    <span className="font-mono text-[10px] font-bold text-brass bg-brass-light px-1.5 py-0.2 rounded border border-brass-border">
-                      HOT · 96 SCORE
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 font-mono">
-                    Req: 4 BHK Sky Suite • Budget: <strong className="text-ink">₹14.50 CR</strong>
-                  </p>
-                  <div className="bg-amber-50 text-amber-900 border border-amber-200 text-[10px] p-2 rounded-lg font-medium">
-                    ⚠️ Shortlisted Unit 1802. Negotiation follow-up commitment due now.
-                  </div>
-                  <div className="flex gap-1.5 pt-1">
-                    <button className="flex-1 py-1.5 bg-ink text-paper-card text-[10px] font-bold rounded-lg flex items-center justify-center gap-1">
-                      <PhoneCall className="h-3 w-3 text-brass" /> Call +91 98112
-                    </button>
-                    <button className="px-2.5 py-1.5 bg-verdigris text-white text-[10px] font-bold rounded-lg">
-                      WhatsApp
-                    </button>
-                  </div>
-                </div>
+            <p className="text-xs sm:text-sm md:text-base text-[#4a4d4b] leading-relaxed max-w-xl">
+              One workspace for your buyers, properties, owners, and follow-ups — giving your sales team the context to close high-ticket deals.
+            </p>
 
-                {/* Card 2: Recommended Unit Match */}
-                <div className="bg-paper p-3.5 rounded-xl border border-architecturalLine space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
-                      [UNIT-MATCH · 4/4 CRITERIA]
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-verdigris bg-verdigris-light px-1.5 py-0.5 rounded border border-verdigris-border">
-                      EXACT FIT
-                    </span>
-                  </div>
-                  <p className="font-bold text-xs text-ink">Sovereign Grand Residences</p>
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-600">
-                    <span className="bg-paper-card px-1.5 py-0.5 rounded border border-architecturalLine text-[10px] font-bold">
-                      TOWER-C · UNIT-1401
-                    </span>
-                    <span className="font-bold text-ink text-xs">₹11.80 CR</span>
-                  </div>
-                  <div className="text-[10px] text-slate-600 space-y-1 font-mono">
-                    <p>✓ 4 BHK + Servant (5,400 sq.ft)</p>
-                    <p>✓ North-East Facing, High Floor</p>
-                  </div>
-                  <button className="w-full py-1.5 bg-paper-card hover:bg-paper text-ink text-[10px] font-semibold rounded-lg border border-architecturalLine flex items-center justify-center gap-1">
-                    <FileText className="h-3 w-3 text-brass" /> Generate Pitch Proposal PDF
-                  </button>
-                </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1">
+              <Link
+                href="/login?mode=signup"
+                className="py-3 px-5 sm:px-6 bg-[#181a19] hover:bg-[#2d302e] text-[#f8f7f4] font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 min-h-[44px]"
+              >
+                <span>Start 14-Day Free Trial</span>
+                <ArrowRight className="h-4 w-4 text-[#a68138]" />
+              </Link>
+              <a
+                href="#property-intelligence"
+                className="py-3 px-5 sm:px-6 bg-transparent hover:bg-[#f0ede6] text-[#181a19] font-semibold text-xs sm:text-sm rounded-xl border border-[#e2ded6] transition-all flex items-center justify-center min-h-[44px]"
+              >
+                See Property Details
+              </a>
+            </div>
 
-                {/* Card 3: Today's Calling SLAs */}
-                <div className="bg-paper p-3.5 rounded-xl border border-architecturalLine space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
-                      [DAILY OUTREACH SLAs]
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-ink">8 / 10 COMPLETED</span>
-                  </div>
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-verdigris h-full w-[80%]" />
-                  </div>
-                  <div className="space-y-1.5 pt-1 font-mono text-[10px]">
-                    <div className="flex items-center justify-between">
-                      <span className="text-ink font-medium">Rajiv S. (The Emerald)</span>
-                      <span className="text-verdigris font-bold">CONNECTED</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-ink font-medium">Priya K. (Sky Suites)</span>
-                      <span className="text-blue-600 font-bold">SITE VISIT 4 PM</span>
-                    </div>
-                  </div>
-                  <div className="p-1.5 bg-paper-card border border-architecturalLine rounded-lg text-center text-[10px] font-semibold text-slate-600">
-                    Execution Loop: SEE → CALL → LOG → MOVE ON
-                  </div>
-                </div>
-              </div>
+            {/* Credibility Note */}
+            <div className="pt-1 text-[11px] sm:text-xs text-[#7a7d7b] flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <span>✓ 14-day free trial</span>
+              <span>✓ No credit card required</span>
+              <span>✓ Built for Gurgaon, Mumbai &amp; Bangalore desks</span>
             </div>
           </div>
-      </section>
 
-      {/* 3. ARCHITECTURAL VALUE HIGHLIGHTS BAR */}
-      <section className="w-full bg-paper-card border-b border-architecturalLine py-8 px-4 sm:px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center font-mono">
-          <div className="space-y-1">
-            <p className="text-xl sm:text-2xl font-extrabold text-ink tracking-tight">14-Day Free Access</p>
-            <p className="text-xs text-slate-500 font-sans">₹0 to start • No credit card</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xl sm:text-2xl font-extrabold text-brass tracking-tight">&lt; 10s Rapid Log</p>
-            <p className="text-xs text-slate-500 font-sans">1-Click Call & WhatsApp logging</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xl sm:text-2xl font-extrabold text-verdigris tracking-tight">Zero Stalling Deals</p>
-            <p className="text-xs text-slate-500 font-sans">Automated SLA alerts & tasks</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xl sm:text-2xl font-extrabold text-ink tracking-tight">Strict Data Privacy</p>
-            <p className="text-xs text-slate-500 font-sans">Role & Regional team walls</p>
+          {/* Right Column: Facade Visual + Live Context (6 Cols) */}
+          <div className="lg:col-span-6 min-w-0">
+            <HeroEditorialVisual />
           </div>
         </div>
       </section>
 
-      {/* 4. DEEP INTERFACE TOUR (Dense, realistic preview tabs) */}
-      <section id="product-tour" className="py-16 sm:py-24 px-4 sm:px-8 max-w-6xl mx-auto w-full space-y-10">
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brass bg-brass-light px-3 py-1 rounded-full border border-brass-border">
-            [SOFTWARE ARCHITECTURE TOUR]
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight font-display">
-            Inspect the Real Sales Cockpit
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 2: RELATIONSHIP OVERVIEW
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 border-y border-[#e2ded6] bg-[#f0ede6]/60 min-w-0">
+        <div className="max-w-6xl mx-auto min-w-0">
+          <RealEstateRelationshipDiagram />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 3: PROPERTY DETAILS (Flat 360°)
+          ═══════════════════════════════════════════════════════ */}
+      <section id="property-intelligence" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto w-full space-y-6 sm:space-y-10 min-w-0">
+        <div className="text-left max-w-2xl space-y-2 min-w-0">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-[#181a19] tracking-tight">
+            Know the property before you call.
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
-            Real data density: explore how CallCRM turns passive database clutter into a high-speed execution engine.
+          <p className="text-xs sm:text-sm text-[#4a4d4b] leading-relaxed">
+            Floor plans, owner history, gate rules, and matching buyers in one place.
           </p>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="flex items-center justify-center">
-          <div className="bg-paper p-1 rounded-xl border border-architecturalLine flex flex-wrap items-center justify-center gap-1 shadow-inner max-w-full">
-            {[
-              { id: "cockpit", label: "1. Next Best Actions" },
-              { id: "dossier", label: "2. 360° Buyer Dossier" },
-              { id: "pipeline", label: "3. Kanban Pipeline" },
-              { id: "matcher", label: "4. Unit Matcher" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  activeTab === tab.id
-                    ? "bg-paper-card text-ink shadow-xs border border-architecturalLine font-bold"
-                    : "text-slate-500 hover:text-ink"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* Cinematic Property Frame with Penthouse Interior Photo */}
+        <div className="rounded-2xl border border-[#e2ded6] bg-[#ffffff] shadow-sm overflow-hidden text-left min-w-0">
+          {/* Top Real Estate Photography Hero Banner */}
+          <div className="relative w-full h-[200px] sm:h-[280px] md:h-[340px] bg-[#181a19]">
+            <Image
+              src="/images/penthouse-interior.jpg"
+              alt="DLF The Camellias Living Pavilion"
+              fill
+              sizes="(max-width: 1024px) 100vw, 1200px"
+              className="object-cover object-center brightness-[0.97]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#181a19]/90 via-[#181a19]/30 to-transparent" />
+
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex flex-col sm:flex-row sm:items-end justify-between gap-2 text-[#f8f7f4]">
+              <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                <h3 className="text-base sm:text-xl md:text-2xl font-bold text-white truncate">
+                  DLF The Camellias · Tower A · Unit A-1402
+                </h3>
+                <p className="text-[11px] sm:text-xs text-white/80">
+                  Sector 42, Golf Course Road · 14th Floor · North-East Facing
+                </p>
+              </div>
+
+              <div className="text-left sm:text-right font-mono shrink-0">
+                <span className="text-lg sm:text-2xl font-bold text-white">₹16.50 Cr</span>
+                <span className="text-[10px] sm:text-xs text-white/70 block">₹39,285 / sq.ft</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* High Density Display Card */}
-        <div className="bg-paper-card border border-architecturalLine rounded-2xl p-6 sm:p-8 shadow-sm">
-          {/* TAB 1: COCKPIT */}
-          {activeTab === "cockpit" && (
-            <div className="space-y-4 animate-in fade-in-50">
-              <div className="flex items-center justify-between pb-3 border-b border-architecturalLine">
-                <div>
-                  <h3 className="text-lg font-bold text-ink font-display">Action-First Sales Cockpit</h3>
-                  <p className="text-xs text-slate-600">
-                    Prioritized calling queue ranking deals by intent score, budget, and follow-up deadlines.
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold text-brass bg-brass-light px-2.5 py-1 rounded-md border border-brass-border">
-                  SPEED-TO-LEAD QUEUE
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  {
-                    code: "LEAD-9081",
-                    name: "Aditya Varma",
-                    score: 95,
-                    budget: "₹6.50 CR",
-                    req: "3 BHK + Servant (High Floor)",
-                    note: "Site visit completed on Sunday. Requested floor comparison between Tower B & C.",
-                    phone: "+91 98112 45890",
-                  },
-                  {
-                    code: "LEAD-8842",
-                    name: "Dr. Meenakshi Sundaram",
-                    score: 88,
-                    budget: "₹9.80 CR",
-                    req: "4 BHK Duplex (Park Facing)",
-                    note: "Family approved layout. Token advance discussion scheduled for 3:30 PM.",
-                    phone: "+91 98701 33412",
-                  },
-                  {
-                    code: "LEAD-7920",
-                    name: "Rohit & Ananya Khanna",
-                    score: 82,
-                    budget: "₹12.00 CR",
-                    req: "Penthouse with Terrace",
-                    note: "CA reviewing payment plan milestones. Send revised installment schedule.",
-                    phone: "+91 99100 88231",
-                  },
-                ].map((lead, idx) => (
-                  <div
-                    key={idx}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 bg-paper rounded-xl border border-architecturalLine"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] font-bold text-slate-500 bg-paper-card px-1.5 py-0.2 rounded border border-architecturalLine">
-                          {lead.code}
-                        </span>
-                        <span className="font-bold text-xs text-ink">{lead.name}</span>
-                        <span className="font-mono text-[10px] font-bold text-verdigris bg-verdigris-light px-1.5 py-0.2 rounded border border-verdigris-border">
-                          {lead.score} SCORE
-                        </span>
-                        <span className="font-mono text-xs font-bold text-ink">{lead.budget}</span>
-                      </div>
-                      <p className="text-[11px] text-slate-600">
-                        <strong>Req:</strong> {lead.req} • <span className="text-slate-500">{lead.note}</span>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                      <button className="flex-1 sm:flex-none py-1.5 px-3 bg-ink text-paper-card text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5">
-                        <PhoneCall className="h-3 w-3 text-brass" /> <span>Call</span>
-                      </button>
-                      <button className="py-1.5 px-3 bg-verdigris text-white text-xs font-semibold rounded-lg">
-                        WhatsApp
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* Dossier Navigation Tabs */}
+          <div className="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 border-b border-[#e2ded6] pb-3">
+              {[
+                { id: "specs", label: "Floor Plan & Specs" },
+                { id: "ownership", label: "Owner & Lease" },
+                { id: "gate", label: "Gate & Parking" },
+                { id: "demand", label: "Matching Buyers" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[38px] ${
+                    activeTab === tab.id
+                      ? "bg-[#181a19] text-[#f8f7f4] shadow-xs"
+                      : "bg-[#f8f7f4] text-[#4a4d4b] hover:text-[#181a19] border border-[#e2ded6]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-          )}
 
-          {/* TAB 2: 360° DOSSIER */}
-          {activeTab === "dossier" && (
-            <div className="space-y-4 animate-in fade-in-50">
-              <div className="flex items-center justify-between pb-3 border-b border-architecturalLine">
-                <div>
-                  <h3 className="text-lg font-bold text-ink font-display">360° Buyer Intelligence Dossier</h3>
-                  <p className="text-xs text-slate-600">
-                    Deep structural context: verified preferences, confirmed buying signals, objections, and decision-makers.
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold text-verdigris bg-verdigris-light px-2.5 py-1 rounded-md border border-verdigris-border">
-                  BUYER MASTER RECORD
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-3.5 bg-paper rounded-xl border border-architecturalLine space-y-1.5">
-                  <span className="font-mono text-[10px] font-bold text-slate-500 uppercase">
-                    [ARCHITECTURAL REQ]
-                  </span>
-                  <p className="text-xs font-bold text-ink">4 BHK + Servant Suite</p>
-                  <p className="text-[11px] text-slate-500 font-mono">Floor: 14 to 22 • North-East Facing</p>
-                </div>
-
-                <div className="p-3.5 bg-paper rounded-xl border border-architecturalLine space-y-1.5">
-                  <span className="font-mono text-[10px] font-bold text-slate-500 uppercase">
-                    [FINANCIAL PROFILE]
-                  </span>
-                  <p className="text-xs font-bold text-ink font-mono">₹14.50 CR BUDGET</p>
-                  <p className="text-[11px] text-verdigris font-mono font-medium">✓ Pre-Approved Mortgage</p>
-                </div>
-
-                <div className="p-3.5 bg-paper rounded-xl border border-architecturalLine space-y-1.5">
-                  <span className="font-mono text-[10px] font-bold text-slate-500 uppercase">
-                    [DECISION STAKEHOLDERS]
-                  </span>
-                  <p className="text-xs font-bold text-ink">Buyer, Spouse & Tax Advisor</p>
-                  <p className="text-[11px] text-slate-500">Primary residence upgrade</p>
-                </div>
-
-                <div className="p-3.5 bg-paper rounded-xl border border-architecturalLine space-y-1.5">
-                  <span className="font-mono text-[10px] font-bold text-slate-500 uppercase">
-                    [ACTIVE OBJECTION]
-                  </span>
-                  <p className="text-xs font-bold text-amber-800">Floor Rise Comparison</p>
-                  <p className="text-[11px] text-slate-500">Comparing Tower C vs D rates</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: PIPELINE */}
-          {activeTab === "pipeline" && (
-            <div className="space-y-4 animate-in fade-in-50">
-              <div className="flex items-center justify-between pb-3 border-b border-architecturalLine">
-                <div>
-                  <h3 className="text-lg font-bold text-ink font-display">Visual Kanban Stage Progression</h3>
-                  <p className="text-xs text-slate-600">
-                    Real-time aggregated deal values across pipeline milestones with drag-and-drop mechanics.
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold text-ink bg-paper px-2.5 py-1 rounded-md border border-architecturalLine">
-                  TOTAL: ₹111.0 CR IN PIPELINE
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs">
-                {[
-                  { stage: "QUALIFIED", val: "₹48.5 CR", count: "6 Leads", leads: ["Siddharth O. (₹14.5 Cr)", "Meenakshi S. (₹9.8 Cr)"] },
-                  { stage: "SITE VISIT", val: "₹32.0 CR", count: "4 Leads", leads: ["Aditya Varma (₹6.5 Cr)", "Rajiv Singhania (₹8.2 Cr)"] },
-                  { stage: "NEGOTIATION", val: "₹18.5 CR", count: "2 Leads", leads: ["Rohit Khanna (₹12.0 Cr)", "Anita Sen (₹6.5 Cr)"] },
-                  { stage: "BOOKING WON", val: "₹12.0 CR", count: "1 Deal", leads: ["Vikramaditya (₹12.0 Cr - Closed)"] },
-                ].map((col, idx) => (
-                  <div key={idx} className="p-3 bg-paper rounded-xl border border-architecturalLine space-y-2">
-                    <div className="flex items-center justify-between pb-2 border-b border-architecturalLine">
-                      <span className="font-bold text-ink text-[11px]">{col.stage}</span>
-                      <span className="text-brass font-bold">{col.val}</span>
-                    </div>
-                    <div className="space-y-1.5">
-                      {col.leads.map((ld, i) => (
-                        <div key={i} className="p-2 bg-paper-card rounded-lg border border-architecturalLine text-[10px] text-slate-700">
-                          {ld}
-                        </div>
-                      ))}
-                    </div>
+            {/* Tab 1: Specs & Floorplan */}
+            {activeTab === "specs" && (
+              <div className="space-y-4 animate-in fade-in-50 min-w-0">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 text-xs min-w-0">
+                  <div className="p-3 bg-[#f8f7f4] rounded-xl border border-[#e2ded6] min-w-0">
+                    <span className="text-[11px] text-[#7a7d7b] block">Super Area</span>
+                    <p className="font-bold text-[#181a19] text-xs sm:text-sm mt-0.5">4,200 sq.ft</p>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: MATCHER */}
-          {activeTab === "matcher" && (
-            <div className="space-y-4 animate-in fade-in-50">
-              <div className="flex items-center justify-between pb-3 border-b border-architecturalLine">
-                <div>
-                  <h3 className="text-lg font-bold text-ink font-display">Buyer-to-Unit Matcher Matrix</h3>
-                  <p className="text-xs text-slate-600">
-                    Live inventory matrix cross-referencing buyer preferences to recommend the exact tower and unit.
-                  </p>
-                </div>
-                <span className="text-xs font-mono font-bold text-verdigris bg-verdigris-light px-2.5 py-1 rounded-md border border-verdigris-border">
-                  INVENTORY MATCHER ACTIVE
-                </span>
-              </div>
-
-              <div className="space-y-3 font-mono">
-                {[
-                  {
-                    unit: "TOWER-C · UNIT-1401",
-                    project: "Sovereign Grand Residences",
-                    specs: "4 BHK + Servant (5,400 sq.ft) • Floor 14 • North-East Facing",
-                    price: "₹11.80 CR",
-                    match: "4/4 EXACT MATCH",
-                    badge: "bg-verdigris-light text-verdigris border-verdigris-border",
-                  },
-                  {
-                    unit: "TOWER-A · UNIT-1802",
-                    project: "Imperial Crest Green",
-                    specs: "4 BHK Sky Suite (5,800 sq.ft) • Floor 18 • Park Facing",
-                    price: "₹14.20 CR",
-                    match: "3/4 STRONG MATCH",
-                    badge: "bg-brass-light text-brass border-brass-border",
-                  },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 bg-paper rounded-xl border border-architecturalLine flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-ink bg-paper-card px-2 py-0.5 rounded border border-architecturalLine">
-                          {item.unit}
-                        </span>
-                        <span className="font-bold text-xs text-ink font-sans">{item.project}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${item.badge}`}>
-                          {item.match}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 font-sans">{item.specs}</p>
-                    </div>
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                      <span className="text-sm font-extrabold text-ink">{item.price}</span>
-                      <button className="py-1.5 px-3 bg-ink text-paper-card text-xs font-semibold rounded-lg hover:bg-ink-hover font-sans flex items-center gap-1">
-                        <FileText className="h-3 w-3 text-brass" /> <span>Generate Pitch</span>
-                      </button>
-                    </div>
+                  <div className="p-3 bg-[#f8f7f4] rounded-xl border border-[#e2ded6] min-w-0">
+                    <span className="text-[11px] text-[#7a7d7b] block">Carpet Area</span>
+                    <p className="font-bold text-[#181a19] text-xs sm:text-sm mt-0.5">3,450 sq.ft</p>
                   </div>
-                ))}
-              </div>
+                  <div className="p-3 bg-[#f8f7f4] rounded-xl border border-[#e2ded6] min-w-0">
+                    <span className="text-[11px] text-[#7a7d7b] block">Configuration</span>
+                    <p className="font-bold text-[#181a19] text-xs sm:text-sm mt-0.5">4 BHK + Staff Room</p>
+                  </div>
+                  <div className="p-3 bg-[#f8f7f4] rounded-xl border border-[#e2ded6] min-w-0">
+                    <span className="text-[11px] text-[#7a7d7b] block">Parking</span>
+                    <p className="font-bold text-[#181a19] text-xs sm:text-sm mt-0.5">3 Bays (Bay B2-14)</p>
+                  </div>
+                </div>
 
-              {/* Interactive Vector CAD Floor Plan Render */}
-              <div className="pt-2">
                 <ArchitecturalFloorplanVector />
               </div>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
 
-      {/* 5. SIX CORE REAL ESTATE SUPERPOWERS */}
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-8 max-w-6xl mx-auto w-full space-y-12 border-t border-architecturalLine">
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brass bg-brass-light px-3 py-1 rounded-full border border-brass-border">
-            [ARCHITECTURAL CAPABILITIES]
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight font-display">
-            Built Specifically for High-Ticket Real Estate
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
-            Engineered with precise real estate logic: floor-rise calculations, Vastu facings, and 10-second touchpoints.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            {
-              icon: Zap,
-              title: "Next Best Action Engine",
-              desc: "Algorithms prioritize buyers by score, intent, and SLA deadlines so closers always know who to call next.",
-              badge: "SPEED-TO-LEAD",
-            },
-            {
-              icon: PhoneCall,
-              title: "10-Second Rapid Touchpoints",
-              desc: "1-click calling & WhatsApp logging. Automatically cascades stages and queues the next follow-up.",
-              badge: "TWO-CLICK LOG",
-            },
-            {
-              icon: Compass,
-              title: "Buyer-to-Unit Matcher",
-              desc: "Match configuration, Vastu facing, and budget preferences with active inventory matrices in 10 seconds.",
-              badge: "INVENTORY FIT",
-            },
-            {
-              icon: Kanban,
-              title: "Kanban Stage Progression",
-              desc: "Structured pipeline progression: New Inbound → Qualified → Site Visit → Negotiation → Won Booking.",
-              badge: "DEAL PIPELINE",
-            },
-            {
-              icon: MapPin,
-              title: "Multi-City Hub Partitioning",
-              desc: "Role-based tenant isolation between Gurgaon, South Delhi, Noida, Mumbai, and Bangalore sales desks.",
-              badge: "DATA PRIVACY",
-            },
-            {
-              icon: TrendingUp,
-              title: "Executive vs Closer Cockpits",
-              desc: "Command center tracking overdue SLAs, conversion velocity, and team pipeline forecasts in real-time.",
-              badge: "KPI COMMAND",
-            },
-          ].map((feat, idx) => {
-            const Icon = feat.icon;
-            return (
-              <div
-                key={idx}
-                className="bg-paper-card border border-architecturalLine rounded-2xl p-6 hover:shadow-md transition-all hover:border-brass/50 flex flex-col justify-between group"
-              >
-                <div className="space-y-3">
+            {/* Tab 2: Ownership */}
+            {activeTab === "ownership" && (
+              <div className="space-y-4 animate-in fade-in-50 text-xs min-w-0">
+                <div className="p-4 rounded-xl bg-[#f8f7f4] border border-[#e2ded6] space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="h-10 w-10 rounded-xl bg-paper text-ink flex items-center justify-center group-hover:bg-ink group-hover:text-paper-card transition-colors">
-                      <Icon className="h-5 w-5 text-brass" />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold text-slate-500 bg-paper px-2 py-0.5 rounded border border-architecturalLine">
-                      {feat.badge}
-                    </span>
+                    <span className="text-xs font-bold text-[#181a19]">Owner Details</span>
+                    <span className="text-xs text-[#7a7d7b]">Purchased March 2022</span>
                   </div>
-                  <h3 className="text-base font-bold text-ink font-display">{feat.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{feat.desc}</p>
+                  <p className="text-sm font-bold text-[#181a19]">Rajesh Sharma</p>
+                  <p className="text-xs text-[#4a4d4b] leading-relaxed">
+                    Purchased directly from developer. Tenancy agreement currently active through 14 October 2026.
+                  </p>
                 </div>
               </div>
-            );
-          })}
+            )}
+
+            {/* Tab 3: Gate Rules */}
+            {activeTab === "gate" && (
+              <div className="p-4 sm:p-5 rounded-xl bg-[#edf4f1] border border-[#b8d6cb] space-y-2 text-xs text-[#224a3e] animate-in fade-in-50 min-w-0">
+                <p className="font-bold text-xs sm:text-sm">Gate 2 Access &amp; Parking</p>
+                <p className="text-xs text-[#224a3e] leading-relaxed">
+                  Gate 2 Visitor PIN: <strong>#8492</strong> · Escort client through Tower A private lift lobby · Reserved Visitor Parking: <strong>Bay B2-14</strong>.
+                </p>
+              </div>
+            )}
+
+            {/* Tab 4: Buyer Demand */}
+            {activeTab === "demand" && (
+              <div className="space-y-3 text-xs animate-in fade-in-50 min-w-0">
+                {[
+                  { name: "Siddharth Verma", budget: "₹17.00 Cr", score: "96 / 100", req: "4 BHK · North-East facing · High Floor" },
+                  { name: "Vikramaditya Oberoi", budget: "₹16.50 Cr", score: "92 / 100", req: "4 BHK + Staff · Token Ready" },
+                ].map((buyer, i) => (
+                  <div key={i} className="p-3.5 bg-[#f8f7f4] rounded-xl border border-[#e2ded6] flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-sm text-[#181a19]">{buyer.name}</span>
+                        <span className="font-bold text-[#181a19] font-mono">{buyer.budget}</span>
+                        <span className="text-[11px] font-semibold text-[#224a3e] bg-[#edf4f1] px-2 py-0.5 rounded border border-[#b8d6cb]">
+                          {buyer.score} Match
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#7a7d7b] mt-0.5">{buyer.req}</p>
+                    </div>
+                    <button className="py-2 px-3 bg-[#181a19] text-[#f8f7f4] text-xs font-semibold rounded-lg flex items-center justify-center gap-1 shrink-0 min-h-[38px]">
+                      <span>Send property</span>
+                      <ArrowRight className="h-3 w-3 text-[#a68138]" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* 6. HOW IT WORKS (4 STRUCTURED STEPS) */}
-      <section id="how-it-works" className="py-16 sm:py-20 px-4 sm:px-8 bg-paper-subtle border-y border-architecturalLine">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-verdigris bg-verdigris-light px-3 py-1 rounded-full border border-verdigris-border">
-              [EXECUTION BLUEPRINT]
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight font-display">
-              From Inquiry to Booking in 4 Steps
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 4: BUYER MATCHING
+          ═══════════════════════════════════════════════════════ */}
+      <section id="matching" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 border-t border-[#e2ded6] bg-[#f8f7f4] min-w-0">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-center min-w-0">
+          {/* Left Column: Explanation */}
+          <div className="lg:col-span-5 min-w-0 space-y-3 sm:space-y-4 text-left">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#181a19] tracking-tight">
+              Find the right buyer for every property.
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
-              Standardize your sales rhythm from the first minute of adoption.
+            <p className="text-xs sm:text-sm text-[#4a4d4b] leading-relaxed">
+              When a new luxury mandate arrives, CallCRM checks your active buyers across five criteria:
             </p>
+
+            <ul className="space-y-2 text-xs text-[#4a4d4b] pt-1">
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> <span><strong>Location:</strong> Exact society or micro-market</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> <span><strong>Budget:</strong> Within buyer&apos;s price band</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> <span><strong>Configuration:</strong> BHK and staff room</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> <span><strong>Floor &amp; Facing:</strong> High-floor, park-facing, Vastu</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> <span><strong>Direct Owner:</strong> Verified resale mandate</span>
+              </li>
+            </ul>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                step: "01",
-                title: "Sign Up & Create Org",
-                desc: "Set up your brokerage workspace and assign regional hub channels in under 60 seconds.",
-              },
-              {
-                step: "02",
-                title: "Import Projects & Leads",
-                desc: "Upload CSV spreadsheets from property portals into structured priority queues.",
-              },
-              {
-                step: "03",
-                title: "Execute 10s Outreach",
-                desc: "Closers dial with 1-click, log outcomes, and schedule site visits without manual typing.",
-              },
-              {
-                step: "04",
-                title: "Close Luxury Deals",
-                desc: "Match shortlisted inventory units, track token advances, and celebrate revenue milestones.",
-              },
-            ].map((step, idx) => (
-              <div
-                key={idx}
-                className="bg-paper-card border border-architecturalLine rounded-2xl p-6 relative shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <span className="text-3xl font-black text-brass/30 block mb-2 font-mono">
-                    {step.step}
-                  </span>
-                  <h3 className="text-base font-bold text-ink mb-2 font-display">{step.title}</h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">{step.desc}</p>
+          {/* Right Column: Live Match Demonstration Card */}
+          <div className="lg:col-span-7 min-w-0">
+            <div className="p-4 sm:p-6 rounded-2xl bg-[#ffffff] border border-[#e2ded6] shadow-sm space-y-4 text-left min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#e2ded6]">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-[#181a19]">Siddharth Verma ↔ Unit A-1402</p>
+                  <p className="text-[11px] text-[#7a7d7b]">DLF The Camellias</p>
+                </div>
+                <span className="text-xs sm:text-sm font-bold text-[#224a3e] bg-[#edf4f1] px-2.5 py-1 rounded-md border border-[#b8d6cb] shrink-0">
+                  96 / 100 Match
+                </span>
+              </div>
+
+              <div className="space-y-1.5 sm:space-y-2 text-xs min-w-0">
+                <div className="p-2 sm:p-2.5 bg-[#f8f7f4] rounded-lg border border-[#e2ded6] flex justify-between gap-2">
+                  <span className="truncate">Location (DLF The Camellias)</span>
+                  <span className="text-[#224a3e] font-semibold shrink-0">Match</span>
+                </div>
+                <div className="p-2 sm:p-2.5 bg-[#f8f7f4] rounded-lg border border-[#e2ded6] flex justify-between gap-2">
+                  <span className="truncate">Budget (₹17.0 Cr vs ₹16.5 Cr Asking)</span>
+                  <span className="text-[#224a3e] font-semibold shrink-0">Match</span>
+                </div>
+                <div className="p-2 sm:p-2.5 bg-[#f8f7f4] rounded-lg border border-[#e2ded6] flex justify-between gap-2">
+                  <span className="truncate">Configuration (4 BHK + Staff Room)</span>
+                  <span className="text-[#224a3e] font-semibold shrink-0">Match</span>
+                </div>
+                <div className="p-2 sm:p-2.5 bg-[#f8f7f4] rounded-lg border border-[#e2ded6] flex justify-between gap-2">
+                  <span className="truncate">Floor &amp; Facing (Floor 14, Park Facing)</span>
+                  <span className="text-[#224a3e] font-semibold shrink-0">Match</span>
                 </div>
               </div>
-            ))}
+
+              <button className="w-full py-3 bg-[#181a19] hover:bg-[#2d302e] text-[#f8f7f4] font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]">
+                <span>Send property on WhatsApp</span>
+                <ArrowRight className="h-3.5 w-3.5 text-[#a68138]" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 7. BALANCED PRICING WITH ACTIVE ANNUAL TOGGLE CALCULATION */}
-      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-8 max-w-6xl mx-auto w-full space-y-12">
-        <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brass bg-brass-light px-3 py-1 rounded-full border border-brass-border">
-            [TRANSPARENT SUBSCRIPTION TIERS]
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight font-display">
-            Built for Small-to-Mid Brokerage Realities
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 5: SITE VISITS
+          ═══════════════════════════════════════════════════════ */}
+      <section id="site-visits" className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 border-t border-[#e2ded6] bg-[#f0ede6]/50 min-w-0">
+        <div className="max-w-6xl mx-auto space-y-6 min-w-0">
+          <PhysicalSiteVisitShowcase />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 6: HUMAN + AI (Simple & Restrained)
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto w-full space-y-6 sm:space-y-8 text-left min-w-0">
+        <div className="max-w-2xl space-y-2 min-w-0">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-[#181a19] tracking-tight">
+            Suggestions backed by evidence. Never automated without you.
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
-            No massive seat jumps. Start with a 14-day free trial with full feature access.
+          <p className="text-xs sm:text-sm text-[#4a4d4b]">
+            CallCRM highlights potential seller opportunities and follow-up gaps, but your salespeople decide what action to take.
+          </p>
+        </div>
+
+        {/* The Triad Card */}
+        <div className="p-4 sm:p-6 md:p-8 rounded-2xl bg-[#ffffff] border border-[#e2ded6] shadow-sm space-y-4 min-w-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-xs min-w-0">
+            {/* Fact */}
+            <div className="p-4 rounded-xl bg-[#f8f7f4] border border-[#e2ded6] space-y-1 min-w-0">
+              <span className="text-[11px] font-bold text-[#181a19] block">
+                Fact
+              </span>
+              <p className="font-semibold text-[#181a19]">Lease on Unit A-1402 ends in 48 days</p>
+              <p className="text-[#7a7d7b] leading-relaxed">
+                Registered lease agreement on file.
+              </p>
+            </div>
+
+            {/* Inference */}
+            <div className="p-4 rounded-xl bg-[#faf5ec] border border-[#e8d5b0] space-y-1 min-w-0">
+              <span className="text-[11px] font-bold text-[#a68138] block">
+                Inference
+              </span>
+              <p className="font-semibold text-[#181a19]">Potential resale opportunity</p>
+              <p className="text-[#4a4d4b] leading-relaxed">
+                Owner has held the property for 4.4 years with no renewal filed.
+              </p>
+            </div>
+
+            {/* Recommendation */}
+            <div className="p-4 rounded-xl bg-[#edf4f1] border border-[#b8d6cb] space-y-1 min-w-0">
+              <span className="text-[11px] font-bold text-[#224a3e] block">
+                Recommendation
+              </span>
+              <p className="font-semibold text-[#181a19]">Call owner to verify plans</p>
+              <p className="text-[#4a4d4b] leading-relaxed">
+                Check whether Rajesh Sharma plans to renew lease or sell.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3.5 bg-[#f8f7f4] rounded-xl border border-[#e2ded6] text-xs text-[#4a4d4b]">
+            <strong>Your team stays in control:</strong> Resale mandates are only created after a salesperson verifies the owner&apos;s intent.
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 7: LEADERSHIP & PIPELINE
+          ═══════════════════════════════════════════════════════ */}
+      <section id="leadership" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 bg-[#181a19] text-[#f8f7f4] border-y border-black min-w-0">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 min-w-0">
+          <ExecutiveDarkCockpit />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 8: PRICING
+          ═══════════════════════════════════════════════════════ */}
+      <section id="pricing" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto w-full space-y-8 sm:space-y-12 text-center min-w-0">
+        <div className="space-y-2.5 max-w-2xl mx-auto min-w-0">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-[#181a19] tracking-tight">
+            Simple, transparent pricing.
+          </h2>
+          <p className="text-xs sm:text-sm text-[#4a4d4b]">
+            14-day free trial with full feature access. No credit card required.
           </p>
 
-          {/* Billing Switcher with Dynamic Live Calculation */}
-          <div className="pt-4 flex items-center justify-center">
-            <div className="bg-paper p-1 rounded-xl border border-architecturalLine flex items-center gap-1 shadow-inner">
+          {/* Billing Switcher */}
+          <div className="pt-2 sm:pt-3 flex items-center justify-center">
+            <div className="bg-[#f0ede6] p-1 rounded-xl border border-[#e2ded6] flex items-center gap-1 shadow-inner">
               <button
                 type="button"
                 onClick={() => setBillingCycle("monthly")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[38px] ${
                   billingCycle === "monthly"
-                    ? "bg-paper-card text-ink shadow-xs border border-architecturalLine font-bold"
-                    : "text-slate-500 hover:text-ink"
+                    ? "bg-[#ffffff] text-[#181a19] shadow-xs border border-[#e2ded6] font-bold"
+                    : "text-[#7a7d7b] hover:text-[#181a19]"
                 }`}
               >
                 Monthly Billing
@@ -799,15 +602,15 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={() => setBillingCycle("yearly")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 min-h-[38px] ${
                   billingCycle === "yearly"
-                    ? "bg-paper-card text-ink shadow-xs border border-architecturalLine font-bold"
-                    : "text-slate-500 hover:text-ink"
+                    ? "bg-[#ffffff] text-[#181a19] shadow-xs border border-[#e2ded6] font-bold"
+                    : "text-[#7a7d7b] hover:text-[#181a19]"
                 }`}
               >
                 <span>Annual Billing</span>
-                <span className="text-[10px] font-mono font-bold text-verdigris bg-verdigris-light px-1.5 py-0.2 rounded border border-verdigris-border">
-                  SAVE 20%
+                <span className="text-[10px] font-semibold text-[#224a3e] bg-[#edf4f1] px-1.5 py-0.2 rounded border border-[#b8d6cb]">
+                  Save 20%
                 </span>
               </button>
             </div>
@@ -815,348 +618,192 @@ export default function LandingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          {/* Plan 1: Solo Closer */}
-          <div className="bg-paper-card border border-architecturalLine rounded-2xl p-6 shadow-xs flex flex-col justify-between hover:border-brass/40 transition-all">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch text-left min-w-0">
+          {/* Solo Closer */}
+          <div className="bg-[#ffffff] border border-[#e2ded6] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between hover:border-[#a68138]/40 transition-all min-w-0">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-ink font-display">Solo Closer</h3>
-                <span className="text-[10px] font-mono font-semibold bg-paper text-slate-600 px-2 py-0.5 rounded border border-architecturalLine">
-                  1 SEAT
+                <h3 className="text-base sm:text-lg font-bold text-[#181a19]">Solo Closer</h3>
+                <span className="text-[11px] text-[#4a4d4b] bg-[#f8f7f4] px-2 py-0.5 rounded border border-[#e2ded6]">
+                  1 Seat
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mb-4">
-                For independent luxury property advisors and boutique solo desks.
+              <p className="text-xs text-[#4a4d4b] mb-4">
+                For independent luxury property advisors and solo desks.
               </p>
-              <div className="mb-6 pb-4 border-b border-architecturalLine">
+              <div className="mb-6 pb-4 border-b border-[#e2ded6]">
                 <div className="flex items-baseline gap-1 font-mono">
-                  <span className="text-3xl font-extrabold text-ink">
+                  <span className="text-2xl sm:text-3xl font-bold text-[#181a19]">
                     ₹{billingCycle === "monthly" ? "1,999" : "1,599"}
                   </span>
-                  <span className="text-xs text-slate-500">/ month</span>
+                  <span className="text-xs text-[#7a7d7b]">/ month</span>
                 </div>
-                {billingCycle === "yearly" ? (
-                  <p className="text-[11px] text-verdigris font-mono font-medium mt-1">
+                {billingCycle === "yearly" && (
+                  <p className="text-[11px] text-[#224a3e] font-medium mt-1">
                     Billed ₹19,188/year (Save ₹4,800/yr)
                   </p>
-                ) : (
-                  <p className="text-[11px] text-slate-500 font-mono mt-1">Billed monthly</p>
                 )}
               </div>
 
-              <ul className="space-y-2.5 mb-6 text-xs text-slate-700">
+              <ul className="space-y-2.5 mb-6 text-xs text-[#4a4d4b]">
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> 1 Dedicated Sales Closer Seat
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> 1 dedicated closer seat
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Up to 300 Active Leads & Pipeline
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Up to 300 active leads
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> 1 Master Project Catalog
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> 1-Click Calling & WhatsApp Logging
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Standard Email Support
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> 1 master project catalog
                 </li>
               </ul>
             </div>
 
             <Link
               href="/login?mode=signup"
-              className="w-full py-2.5 px-4 bg-paper hover:bg-paper-subtle text-ink font-semibold text-xs rounded-xl border border-architecturalLine transition-all text-center"
+              className="w-full py-3 px-4 bg-[#f8f7f4] hover:bg-[#f0ede6] text-[#181a19] font-semibold text-xs rounded-xl border border-[#e2ded6] transition-all text-center min-h-[44px] flex items-center justify-center"
             >
               Start 14-Day Free Trial
             </Link>
           </div>
 
-          {/* Plan 2: Boutique Team (Most Popular) */}
-          <div className="bg-paper-card border-2 border-ink rounded-2xl p-6 shadow-xl relative flex flex-col justify-between scale-[1.02] bg-gradient-to-b from-paper-card to-brass/5">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-ink text-paper-card text-[10px] font-mono font-bold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-sm flex items-center gap-1">
-              <span className="text-brass">★</span> MOST POPULAR FOR SMALL AGENCIES
+          {/* Boutique Team */}
+          <div className="bg-[#ffffff] border-2 border-[#181a19] rounded-2xl p-5 sm:p-6 shadow-lg relative flex flex-col justify-between min-w-0">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#181a19] text-[#f8f7f4] text-[10px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-sm whitespace-nowrap">
+              Most Popular
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2 mt-1">
-                <h3 className="text-lg font-bold text-ink font-display">Boutique Team</h3>
-                <span className="text-[10px] font-mono font-bold bg-ink text-paper-card px-2 py-0.5 rounded">
-                  2–4 CLOSERS
+                <h3 className="text-base sm:text-lg font-bold text-[#181a19]">Boutique Team</h3>
+                <span className="text-[11px] bg-[#181a19] text-[#f8f7f4] px-2 py-0.5 rounded">
+                  2–4 Closers
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mb-4">
-                The sweet spot for small-to-mid agencies and regional sales desks.
+              <p className="text-xs text-[#4a4d4b] mb-4">
+                For small-to-mid real estate agencies and advisory desks.
               </p>
-              <div className="mb-6 pb-4 border-b border-architecturalLine">
+              <div className="mb-6 pb-4 border-b border-[#e2ded6]">
                 <div className="flex items-baseline gap-1 font-mono">
-                  <span className="text-3xl font-extrabold text-ink">
+                  <span className="text-2xl sm:text-3xl font-bold text-[#181a19]">
                     ₹{billingCycle === "monthly" ? "4,999" : "3,999"}
                   </span>
-                  <span className="text-xs text-slate-500">/ month</span>
+                  <span className="text-xs text-[#7a7d7b]">/ month</span>
                 </div>
-                {billingCycle === "yearly" ? (
-                  <p className="text-[11px] text-verdigris font-mono font-medium mt-1">
+                {billingCycle === "yearly" && (
+                  <p className="text-[11px] text-[#224a3e] font-medium mt-1">
                     Billed ₹47,988/year (Save ₹12,000/yr)
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-slate-500 font-mono mt-1">
-                    Includes 3 Closers + 1 Manager Cockpit
                   </p>
                 )}
               </div>
 
-              <ul className="space-y-2.5 mb-6 text-xs text-slate-700">
+              <ul className="space-y-2.5 mb-6 text-xs text-[#4a4d4b]">
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> 3 Closer Seats + 1 Executive Cockpit
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> 3 closer seats + 1 manager view
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Up to 2,500 Leads with 360° Dossiers
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Up to 2,500 leads &amp; property records
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> 5 Project Catalogs & Inventory Matrices
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> 5 project catalogs &amp; inventory matrices
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> AI Buyer-to-Unit Matcher Engine
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Automated SLA Calling Queue
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Priority Phone & WhatsApp Support
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Buyer matching &amp; site visit details
                 </li>
               </ul>
             </div>
 
             <Link
               href="/login?mode=signup"
-              className="w-full py-3 px-4 bg-ink text-paper-card font-bold text-xs rounded-xl hover:bg-ink-hover transition-all text-center shadow-md flex items-center justify-center gap-1.5"
+              className="w-full py-3 px-4 bg-[#181a19] text-[#f8f7f4] font-bold text-xs rounded-xl hover:bg-[#2d302e] transition-all text-center shadow-md flex items-center justify-center gap-1.5 min-h-[44px]"
             >
               <span>Start 14-Day Free Trial</span>
-              <ArrowRight className="h-3.5 w-3.5 text-brass" />
+              <ArrowRight className="h-3.5 w-3.5 text-[#a68138]" />
             </Link>
           </div>
 
-          {/* Plan 3: Scale Desk */}
-          <div className="bg-paper-card border border-architecturalLine rounded-2xl p-6 shadow-xs flex flex-col justify-between hover:border-brass/40 transition-all">
+          {/* Scale Desk */}
+          <div className="bg-[#ffffff] border border-[#e2ded6] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between hover:border-[#a68138]/40 transition-all min-w-0">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-ink font-display">Scale Desk</h3>
-                <span className="text-[10px] font-mono font-semibold bg-paper text-slate-600 px-2 py-0.5 rounded border border-architecturalLine">
-                  5–10 CLOSERS
+                <h3 className="text-base sm:text-lg font-bold text-[#181a19]">Scale Desk</h3>
+                <span className="text-[11px] text-[#4a4d4b] bg-[#f8f7f4] px-2 py-0.5 rounded border border-[#e2ded6]">
+                  5–10 Closers
                 </span>
               </div>
-              <p className="text-xs text-slate-600 mb-4">
+              <p className="text-xs text-[#4a4d4b] mb-4">
                 For established brokerages managing multiple luxury mandates.
               </p>
-              <div className="mb-6 pb-4 border-b border-architecturalLine">
+              <div className="mb-6 pb-4 border-b border-[#e2ded6]">
                 <div className="flex items-baseline gap-1 font-mono">
-                  <span className="text-3xl font-extrabold text-ink">
+                  <span className="text-2xl sm:text-3xl font-bold text-[#181a19]">
                     ₹{billingCycle === "monthly" ? "9,999" : "7,999"}
                   </span>
-                  <span className="text-xs text-slate-500">/ month</span>
+                  <span className="text-xs text-[#7a7d7b]">/ month</span>
                 </div>
-                {billingCycle === "yearly" ? (
-                  <p className="text-[11px] text-verdigris font-mono font-medium mt-1">
+                {billingCycle === "yearly" && (
+                  <p className="text-[11px] text-[#224a3e] font-medium mt-1">
                     Billed ₹95,988/year (Save ₹24,000/yr)
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-slate-500 font-mono mt-1">
-                    Includes 10 Closers + Full Analytics
                   </p>
                 )}
               </div>
 
-              <ul className="space-y-2.5 mb-6 text-xs text-slate-700">
+              <ul className="space-y-2.5 mb-6 text-xs text-[#4a4d4b]">
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Up to 10 Closer Seats & Managers
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Up to 10 closer seats &amp; managers
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Up to 10,000 Active Leads
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Up to 10,000 active leads
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Unlimited Projects & Inventory Units
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Unlimited projects &amp; inventory
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Multi-City Regional Tenant Partitioning
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-verdigris" /> Dedicated Account Manager & Onboarding
+                  <Check className="h-4 w-4 text-[#224a3e] shrink-0" /> Multi-city branch partitioning
                 </li>
               </ul>
             </div>
 
             <Link
               href="/login?mode=signup"
-              className="w-full py-2.5 px-4 bg-paper hover:bg-paper-subtle text-ink font-semibold text-xs rounded-xl border border-architecturalLine transition-all text-center"
+              className="w-full py-3 px-4 bg-[#f8f7f4] hover:bg-[#f0ede6] text-[#181a19] font-semibold text-xs rounded-xl border border-[#e2ded6] transition-all text-center min-h-[44px] flex items-center justify-center"
             >
               Start 14-Day Free Trial
             </Link>
           </div>
         </div>
-
-        {/* Clear Trial Policy Notice */}
-        <div className="max-w-2xl mx-auto p-4 bg-paper rounded-xl border border-architecturalLine text-center text-xs text-slate-600 space-y-1">
-          <p className="font-semibold text-ink">💡 Transparent Trial & Billing Policy</p>
-          <p>
-            You get 100% full feature access for 14 days without entering credit card details. At the end of 14 days, you can choose to activate your plan via UPI/Card, or your workspace gracefully pauses with zero surprise charges.
-          </p>
-        </div>
       </section>
 
-      {/* 8. EARLY ACCESS PILOT FEEDBACK */}
-      <section className="py-16 sm:py-20 px-4 sm:px-8 bg-paper-subtle border-y border-architecturalLine">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brass bg-brass-light px-3 py-1 rounded-full border border-brass-border">
-              [BETA PILOT REVIEWS]
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight font-display">
-              Feedback from Beta Sales Desks
-            </h2>
-            <p className="text-xs text-slate-500">
-              Early feedback gathered from luxury advisory teams during our closed beta testing.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                quote:
-                  "The 10-second touchpoint modal eliminated the friction of updating our CRM. Closers actually log their calls now because it takes 2 clicks instead of 2 minutes.",
-                role: "Managing Director",
-                company: "High-Ticket Advisory Desk (Gurgaon Pilot)",
-              },
-              {
-                quote:
-                  "Matching buyer requirements with active floor plans in 10 seconds during the call gives our reps massive confidence. Our site-visit scheduling speed noticeably increased.",
-                role: "Sales Director",
-                company: "Premium Residential Agency (NCR Beta)",
-              },
-              {
-                quote:
-                  "Having strict separation between our regional team leads while giving leadership an executive overview is exactly what we needed to scale past 10 closers.",
-                role: "Principal Broker",
-                company: "Prime Residential Advisory (South Mumbai Pilot)",
-              },
-            ].map((t, idx) => (
-              <div
-                key={idx}
-                className="bg-paper-card border border-architecturalLine rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4"
-              >
-                <div className="space-y-3">
-                  <div className="flex text-brass gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-brass text-brass" />
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-700 leading-relaxed italic">&ldquo;{t.quote}&rdquo;</p>
-                </div>
-                <div className="border-t border-architecturalLine pt-3">
-                  <p className="font-bold text-xs text-ink">{t.role}</p>
-                  <p className="text-[11px] text-brass font-medium">{t.company}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 9. MOBILE COMPANION APP (HONEST BETA WAITING LIST) */}
-      <section id="mobile-app" className="py-16 sm:py-24 px-4 sm:px-8 max-w-6xl mx-auto w-full">
-        <div className="bg-ink text-paper-card rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
-          <div className="space-y-5 max-w-xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs font-mono font-semibold text-brass border border-brass/30">
-              <Smartphone className="h-3.5 w-3.5" />
-              <span>[MOBILE COMPANION · ANDROID & iOS IN BUILD]</span>
-            </div>
-
-            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white font-display">
-              Sales Closers Never Sit at Desks. Take CallCRM On Site.
-            </h2>
-
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              We are currently engineering native mobile apps for site offices: 1-click calling, WhatsApp quick-replies, offline buyer dossiers, and live unit availability.
-            </p>
-
-            <ul className="space-y-2 text-xs text-slate-200">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-brass" /> Instant Push Notifications for Hot Inbound Buyer Inquiries
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-brass" /> 1-Click WhatsApp Proposal & Floor-Plan Dispatch
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-brass" /> Offline Site Visit Check-ins & GPS Verification
-              </li>
-            </ul>
-
-            {/* Verified Beta Signup Form with Local Storage */}
-            <div className="pt-2">
-              {mobileBetaSubmitted ? (
-                <div className="p-3 bg-verdigris/40 border border-verdigris rounded-xl text-xs text-verdigris-light flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Verified! You&apos;ve been added to our Mobile Beta Early Access list.</span>
-                </div>
-              ) : (
-                <form onSubmit={handleMobileBetaSubmit} className="flex flex-col sm:flex-row items-stretch gap-2 max-w-md">
-                  <input
-                    type="email"
-                    required
-                    value={mobileBetaEmail}
-                    onChange={(e) => setMobileBetaEmail(e.target.value)}
-                    placeholder="Enter work email for early APK access"
-                    className="px-3.5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/60 text-xs focus:outline-none focus:ring-2 focus:ring-brass flex-1 font-mono"
-                  />
-                  <button
-                    type="submit"
-                    className="py-2.5 px-4 bg-brass text-ink font-bold text-xs rounded-xl hover:bg-brass-hover transition-all shrink-0 font-sans"
-                  >
-                    Join Mobile Beta
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-
-          {/* High-Resolution Code-Rendered Smartphone UI Frame */}
-          <div className="shrink-0 flex items-center justify-center">
-            <MobileCompanionDeviceFrame />
-          </div>
-        </div>
-      </section>
-
-      {/* 10. COMPREHENSIVE ACCORDION FAQ SECTION (All 5 questions answered) */}
-      <section id="faq" className="py-16 px-4 sm:px-8 max-w-4xl mx-auto w-full space-y-8">
-        <div className="text-center space-y-2">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-brass bg-brass-light px-3 py-1 rounded-full border border-brass-border">
-            [KNOWLEDGE BASE]
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink font-display">
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 9: FAQ
+          ═══════════════════════════════════════════════════════ */}
+      <section id="faq" className="py-12 sm:py-16 px-4 sm:px-6 md:px-8 max-w-4xl mx-auto w-full space-y-6 sm:space-y-8 text-left min-w-0">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#181a19]">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs text-slate-500">Everything you need to know about CallCRM and the 14-day trial.</p>
+          <p className="text-xs text-[#7a7d7b]">Everything you need to know about CallCRM and the 14-day trial.</p>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {[
             {
-              q: "Can I import leads from property portals and Facebook Ads?",
-              a: "Yes. CallCRM provides 1-click CSV and Excel import templates that automatically map buyer name, phone, budget, and configuration preferences directly into your priority calling queue in under 30 seconds.",
+              q: "Can I import leads from property portals and spreadsheets?",
+              a: "Yes. CallCRM provides standard CSV and Excel import templates that automatically map buyer name, phone, budget, and configuration preferences directly into your priority calling queue in under 30 seconds.",
             },
             {
-              q: "How does the Buyer-to-Unit Matcher work?",
-              a: "When you record a lead's requirements (e.g. 4 BHK, high floor, park facing, budget ₹12 Cr), CallCRM automatically scans your inventory matrices and highlights units with 4/4 exact matches, allowing reps to pitch suitable units instantly on the phone.",
+              q: "How does the buyer-to-unit matching work?",
+              a: "When you record a lead's requirements (e.g. 4 BHK, high floor, park facing, budget ₹16 Cr), CallCRM automatically evaluates your inventory matrices across location, budget, configuration, floor band, and mandate exclusivity, allowing reps to pitch suitable units instantly on the phone.",
             },
             {
-              q: "Can our sales closers see each other's leads?",
-              a: "No. CallCRM is architected with strict role-based data partitioning. Salespersons only see their own assigned leads, while Sales Managers and Founders have full organizational visibility across regional desks.",
+              q: "Can sales closers see each other's leads?",
+              a: "No. CallCRM is built with strict role-based data partitioning. Salespersons only see their own assigned leads, while Sales Managers and Founders have full organizational visibility across regional desks.",
             },
             {
               q: "What happens after the 14-day free trial?",
-              a: "You get 100% full feature access during the trial. No credit card is required to sign up. At the end of 14 days, you can choose to activate your plan via UPI/Card, or your workspace gracefully pauses with zero unexpected charges.",
+              a: "You get 100% full feature access during the trial. No credit card is required to sign up. At the end of 14 days, you can choose to activate your plan via UPI/Card, or your workspace gracefully pauses with zero surprise charges.",
             },
             {
-              q: "Can I add more seats as my sales team grows?",
+              q: "Can I add more closer seats as my brokerage grows?",
               a: "Yes. You can start on the Solo or Boutique plan and add additional sales closer seats or upgrade anytime with prorated billing.",
             },
           ].map((faq, idx) => {
@@ -1164,20 +811,20 @@ export default function LandingPage() {
             return (
               <div
                 key={idx}
-                className="bg-paper-card border border-architecturalLine rounded-xl p-4 transition-all"
+                className="bg-[#ffffff] border border-[#e2ded6] rounded-xl p-4 transition-all min-w-0"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  className="w-full flex items-center justify-between text-left font-bold text-xs sm:text-sm text-ink focus:outline-none"
+                  className="w-full flex items-center justify-between text-left font-bold text-xs sm:text-sm text-[#181a19] focus:outline-none min-h-[36px]"
                 >
-                  <span className="font-display">{faq.q}</span>
-                  <span className="text-brass text-xs font-mono font-bold shrink-0 ml-2">
+                  <span className="pr-2">{faq.q}</span>
+                  <span className="text-[#a68138] text-xs font-mono font-bold shrink-0 ml-2">
                     {isOpen ? "−" : "+"}
                   </span>
                 </button>
                 {isOpen && (
-                  <p className="text-xs text-slate-600 mt-3 pt-3 border-t border-architecturalLine leading-relaxed animate-in fade-in-50">
+                  <p className="text-xs text-[#4a4d4b] mt-3 pt-3 border-t border-[#e2ded6] leading-relaxed animate-in fade-in-50">
                     {faq.a}
                   </p>
                 )}
@@ -1187,74 +834,74 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 11. FINAL BOTTOM CTA BANNER */}
-      <section className="py-16 sm:py-20 px-4 sm:px-8 bg-paper-subtle border-t border-architecturalLine text-center">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight font-display">
-            Ready to Supercharge Your Real Estate Sales Team?
+      {/* FINAL BOTTOM CTA BANNER */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-[#f0ede6]/60 border-t border-[#e2ded6] text-center min-w-0">
+        <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 min-w-0">
+          <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-[#181a19] tracking-tight">
+            Built for the way real estate is actually sold.
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
-            Experience the architectural sales command center designed for high-ticket property closers. Set up your workspace in 60 seconds.
+          <p className="text-xs sm:text-sm text-[#4a4d4b] max-w-xl mx-auto">
+            Give your sales team the property context, follow-up discipline, and speed to close high-ticket deals. Set up your workspace in 2 minutes.
           </p>
-          <div className="flex items-center justify-center gap-3 pt-2">
+          <div className="flex items-center justify-center gap-3 pt-1">
             <Link
               href="/login?mode=signup"
-              className="py-3.5 px-8 bg-ink text-paper-card font-bold text-sm rounded-xl hover:bg-ink-hover transition-all flex items-center gap-2 shadow-md active:scale-[0.99]"
+              className="py-3.5 px-6 sm:px-8 bg-[#181a19] text-[#f8f7f4] font-bold text-xs sm:text-sm rounded-xl hover:bg-[#2d302e] transition-all flex items-center gap-2 shadow-md min-h-[44px]"
             >
               <span>Start 14-Day Free Trial</span>
-              <ArrowRight className="h-4 w-4 text-brass" />
+              <ArrowRight className="h-4 w-4 text-[#a68138]" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 12. ARCHITECTURAL LEDGER FOOTER */}
-      <footer className="w-full bg-paper-card border-t border-architecturalLine py-12 px-4 sm:px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 text-xs">
-          <div className="space-y-3 col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-2 font-bold text-sm text-ink font-display">
-              <Building2 className="h-4 w-4 text-brass" />
+      {/* ARCHITECTURAL FOOTER */}
+      <footer className="w-full bg-[#ffffff] border-t border-[#e2ded6] py-8 sm:py-12 px-4 sm:px-6 md:px-8 min-w-0">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8 text-xs text-left min-w-0">
+          <div className="space-y-2 sm:space-y-3 col-span-2 sm:col-span-1 min-w-0">
+            <div className="flex items-center gap-2 font-bold text-sm text-[#181a19]">
+              <Building2 className="h-4 w-4 text-[#a68138]" />
               <span>Apex CallCRM</span>
             </div>
-            <p className="text-slate-500 text-[11px] leading-relaxed">
-              The high-velocity sales command center engineered for Indian luxury real estate developers and advisory desks.
+            <p className="text-[#7a7d7b] text-[11px] leading-relaxed">
+              Sales operating system engineered for Indian luxury real estate brokerages and advisory desks.
             </p>
           </div>
 
-          <div className="space-y-2">
-            <h5 className="font-bold text-ink">Product</h5>
-            <ul className="space-y-1.5 text-slate-500 text-[11px]">
-              <li><a href="#features" className="hover:text-ink">Next Best Moves</a></li>
-              <li><a href="#features" className="hover:text-ink">Buyer-to-Unit Matcher</a></li>
-              <li><a href="#features" className="hover:text-ink">Rapid 10s Logger</a></li>
-              <li><a href="#pricing" className="hover:text-ink">Subscription Pricing</a></li>
+          <div className="space-y-2 min-w-0">
+            <h5 className="font-bold text-[#181a19]">Product</h5>
+            <ul className="space-y-1.5 text-[#7a7d7b] text-[11px]">
+              <li><a href="#property-intelligence" className="hover:text-[#181a19]">Property Details</a></li>
+              <li><a href="#matching" className="hover:text-[#181a19]">Buyer Matching</a></li>
+              <li><a href="#site-visits" className="hover:text-[#181a19]">Site Visits</a></li>
+              <li><a href="#pricing" className="hover:text-[#181a19]">Pricing Plans</a></li>
             </ul>
           </div>
 
-          <div className="space-y-2">
-            <h5 className="font-bold text-ink">Supported Regions</h5>
-            <ul className="space-y-1.5 text-slate-500 text-[11px]">
-              <li>Gurgaon & Golf Course Ext.</li>
-              <li>South Delhi & Lutyens</li>
-              <li>Mumbai MMR & Worli</li>
-              <li>Bangalore North & East</li>
+          <div className="space-y-2 min-w-0">
+            <h5 className="font-bold text-[#181a19]">Supported Markets</h5>
+            <ul className="space-y-1.5 text-[#7a7d7b] text-[11px]">
+              <li>Gurgaon &amp; Golf Course Ext.</li>
+              <li>South Delhi &amp; Lutyens</li>
+              <li>Mumbai MMR &amp; Worli</li>
+              <li>Bangalore North &amp; East</li>
             </ul>
           </div>
 
-          <div className="space-y-2">
-            <h5 className="font-bold text-ink">Security & Standards</h5>
-            <ul className="space-y-1.5 text-slate-500 text-[11px]">
-              <li>Lead Privacy Architecture</li>
-              <li>Role-Based Access Control</li>
-              <li>Client Confidentiality Guardrails</li>
+          <div className="space-y-2 min-w-0">
+            <h5 className="font-bold text-[#181a19]">Privacy &amp; Security</h5>
+            <ul className="space-y-1.5 text-[#7a7d7b] text-[11px]">
+              <li>Role-Based Lead Privacy</li>
               <li>Encrypted Session Tokens</li>
+              <li>Client Confidentiality Walls</li>
+              <li>Dedicated Tenant DB Rules</li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto pt-6 border-t border-architecturalLine flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 font-mono">
+        <div className="max-w-6xl mx-auto pt-5 sm:pt-6 border-t border-[#e2ded6] flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 text-[10px] sm:text-[11px] text-[#7a7d7b] font-mono text-center sm:text-left min-w-0">
           <p>© 2026 Apex Realty Technologies. All rights reserved.</p>
-          <p>ENGINEERED FOR HIGH-TICKET REAL ESTATE CLOSERS</p>
+          <p>ENGINEERED FOR REAL ESTATE SALES TEAMS</p>
         </div>
       </footer>
     </div>

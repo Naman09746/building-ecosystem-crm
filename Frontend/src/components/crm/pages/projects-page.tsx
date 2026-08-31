@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { UnitStatusBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 import { ProjectUnit, UnitStatus, Project } from "@/types/crm";
+import { UnitDetailModal } from "@/components/crm/unit-detail-modal";
 import { toast } from "sonner";
 
 export function ProjectsPage() {
@@ -59,6 +60,8 @@ export function ProjectsPage() {
   const [editingUnit, setEditingUnit] = React.useState<ProjectUnit | null>(null);
   const [isBulkImportOpen, setIsBulkImportOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [selectedDossierUnit, setSelectedDossierUnit] = React.useState<ProjectUnit | null>(null);
+  const [isDossierOpen, setIsDossierOpen] = React.useState(false);
 
   // Form State - Project
   const [projName, setProjName] = React.useState("");
@@ -572,12 +575,16 @@ export function ProjectsPage() {
             return (
               <Card
                 key={unit.id}
-                className={`p-4 space-y-3 transition-all hover:shadow-card border ${
+                onClick={() => {
+                  setSelectedDossierUnit(unit);
+                  setIsDossierOpen(true);
+                }}
+                className={`p-4 space-y-3 transition-all hover:shadow-card border cursor-pointer ${
                   unit.status === "available"
-                    ? "border-emerald-200 bg-emerald-50/20"
+                    ? "border-emerald-200 bg-emerald-50/20 hover:border-emerald-400"
                     : unit.status === "booked" || unit.status === "sold"
-                    ? "border-blue-200 bg-blue-50/20"
-                    : "border-border bg-card"
+                    ? "border-blue-200 bg-blue-50/20 hover:border-blue-400"
+                    : "border-border bg-card hover:border-primary/40"
                 }`}
               >
                 {/* Top Row: Tower & Unit # + Status */}
@@ -593,13 +600,14 @@ export function ProjectsPage() {
                       Floor {unit.floor} • {unit.superAreaSqFt || unit.sizeSqFt} sq.ft
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <UnitStatusBadge status={unit.status} />
                     {isManager && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setEditingUnit(unit);
                           setUnitTower(unit.tower);
                           setUnitNumber(unit.unitNumber);
@@ -626,8 +634,8 @@ export function ProjectsPage() {
                     <span className="font-semibold text-foreground">{unit.configuration}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">List Price</span>
-                    <span className="font-bold text-foreground font-mono">{formatCurrencyINR(unit.price)}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">Asking Price</span>
+                    <span className="font-bold text-foreground font-mono">{formatCurrencyINR(unit.askingPrice || unit.price)}</span>
                   </div>
                 </div>
 
@@ -643,13 +651,14 @@ export function ProjectsPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-[11px] text-muted-foreground italic py-1 text-center">
-                    Unit unassigned — Ready for allocation
+                  <div className="text-[11px] text-muted-foreground italic py-1 text-center flex items-center justify-center gap-1">
+                    <Sparkles className="h-3 w-3 text-primary/60" />
+                    <span>Click for Flat 360° Dossier & History</span>
                   </div>
                 )}
 
                 {/* Status Dropdown Controller */}
-                <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs">
+                <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs" onClick={(e) => e.stopPropagation()}>
                   <span className="text-[10px] text-muted-foreground font-medium">Update Status:</span>
                   <select
                     value={unit.status}
@@ -1009,6 +1018,16 @@ export function ProjectsPage() {
           </Card>
         </div>
       )}
+
+      {/* Flat 360° Dossier Dialog */}
+      <UnitDetailModal
+        unit={selectedDossierUnit}
+        isOpen={isDossierOpen}
+        onClose={() => {
+          setIsDossierOpen(false);
+          setSelectedDossierUnit(null);
+        }}
+      />
     </div>
   );
 }

@@ -11,8 +11,12 @@ export const phoneSchema = z
   .max(16, "Phone number cannot exceed 16 characters")
   .regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/, "Invalid telephone format");
 
-// UUID reference (project / lead / user IDs)
-export const idSchema = z.string().uuid("Must be a valid identifier");
+// Safe identifier reference (UUID or alphanumeric slug/ID without injection chars)
+export const idSchema = z
+  .string()
+  .min(1, "Identifier required")
+  .max(100)
+  .regex(/^[a-zA-Z0-9_.-]+$/, "Invalid identifier format");
 
 // 1. Create Lead Payload Schema
 export const createLeadSchema = z.object({
@@ -20,10 +24,12 @@ export const createLeadSchema = z.object({
   phone: phoneSchema,
   email: z.string().email("Invalid email format").optional().or(z.literal("")),
   projectId: idSchema,
+  unitId: idSchema.optional().nullable(),
   budget: z.number().positive("Budget must be a positive number").max(10_000_000_000),
   stage: z.enum(["new", "contacted", "qualified", "site_visit", "negotiation", "won", "lost"]).default("new"),
   source: z.string().max(100).default("Website Inbound"),
   propertyType: z.string().max(100).default("Luxury Apartment"),
+  dealType: z.enum(["primary_sale", "resale", "rental", "investor_exit"]).default("primary_sale"),
   configurationPreference: z.string().max(100).optional(),
   preferredFloor: z.string().max(50).optional(),
   facingPreference: z.string().max(50).optional(),
@@ -46,8 +52,8 @@ export const updateLeadSchema = createLeadSchema.partial().extend({
 export const createActivitySchema = z.object({
   leadId: idSchema.optional(),
   projectId: idSchema.optional(),
+  unitId: idSchema.optional().nullable(),
   personId: idSchema.optional(),
-  // Only used when no lead is attached; server prefers the lead's person record.
   personName: z.string().max(200).optional(),
   type: z.enum(["call", "whatsapp", "meeting", "site_visit", "note", "stage_change", "ai_agent"]),
   outcome: z.string().max(100).optional(),
@@ -174,31 +180,101 @@ export const aiAgentQualifySchema = z.object({
   recommendedAction: z.string(),
 });
 
-// 8. Projects Schemas
+// 8. Projects / Societies Schemas
 export const createProjectSchema = z.object({
   name: z.string().min(2, "Project name must be at least 2 characters").max(150),
   developer: z.string().min(2, "Developer name is required").max(150),
   location: z.string().min(2, "Location is required").max(200),
   regionId: idSchema.optional().nullable(),
+  areaId: idSchema.optional().nullable(),
+  societyType: z.enum(["gated_community", "high_rise", "luxury_township", "builder_floors", "commercial_hub", "mixed_use"]).default("gated_community"),
+  totalTowers: z.number().int().min(1).max(100).default(1),
+  totalUnitsCount: z.number().int().min(0).default(0),
+  possessionYear: z.number().int().min(1980).max(2050).optional().nullable(),
+  gatedSecurityType: z.enum(["24x7_guards", "3_tier", "biometric_smart", "unrestricted"]).default("3_tier"),
+  reraRegistrationNumber: z.string().max(100).optional().nullable(),
+  masterAmenities: z.array(z.string()).optional(),
+  maintenanceContactPhone: phoneSchema.optional().nullable(),
+  societyOfficeAddress: z.string().max(300).optional().nullable(),
   priceRange: z.string().max(100).optional(),
   status: z.enum(["active", "launching_soon", "completed"]).default("active"),
 });
 
 export const updateProjectSchema = createProjectSchema.partial();
 
+// 8b. Property Areas / Localities Schemas
+export const createPropertyAreaSchema = z.object({
+  regionId: idSchema.optional().nullable(),
+  name: z.string().min(2, "Area name must be at least 2 characters").max(150),
+  slug: z.string().min(2).max(150),
+  city: z.string().min(2).max(100).default("Gurugram"),
+  state: z.string().min(2).max(100).default("Haryana"),
+  pincode: z.string().max(20).optional().nullable(),
+  tier: z.enum(["luxury", "ultra_luxury", "premium", "affordable"]).default("luxury"),
+  description: z.string().max(1000).optional().nullable(),
+});
+
+export const updatePropertyAreaSchema = createPropertyAreaSchema.partial();
+
+// 8c. Project Towers / Blocks Schemas
+export const createProjectTowerSchema = z.object({
+  projectId: idSchema,
+  name: z.string().min(1, "Tower name required").max(100),
+  towerCode: z.string().max(20).optional().nullable(),
+  totalFloors: z.number().int().min(1).max(200).default(1),
+  unitsPerFloor: z.number().int().min(1).max(50).default(4),
+  elevatorsCount: z.number().int().min(0).max(20).default(2),
+  possessionDate: z.string().max(50).optional().nullable(),
+  constructionStatus: z.enum(["under_construction", "ready", "launching"]).default("ready"),
+  facingDirection: z.string().max(100).optional().nullable(),
+  notes: z.string().max(1000).optional().nullable(),
+});
+
+export const updateProjectTowerSchema = createProjectTowerSchema.partial().omit({ projectId: true });
+
 // 9. Project Units Schemas
 export const createProjectUnitSchema = z.object({
   projectId: idSchema,
+  towerId: idSchema.optional().nullable(),
   tower: z.string().min(1, "Tower identifier required").max(50),
   unitNumber: z.string().min(1, "Unit number required").max(50),
   floor: z.number().int().min(-5).max(200),
   configuration: z.string().min(2).max(100),
+  unitType: z.enum(["apartment", "penthouse", "villa", "builder_floor", "duplex", "plot", "commercial"]).default("apartment"),
   superAreaSqFt: z.number().positive().max(100_000),
+  carpetAreaSqFt: z.number().positive().max(100_000).optional().nullable(),
+  builtUpAreaSqFt: z.number().positive().max(100_000).optional().nullable(),
+  balconiesCount: z.number().int().min(0).max(20).default(1),
+  bathroomsCount: z.number().int().min(1).max(20).default(2),
+  parkingSlots: z.number().int().min(0).max(10).default(1),
+  parkingType: z.enum(["covered", "open", "basement_stack", "none"]).default("covered"),
+  isCornerUnit: z.boolean().default(false),
+  furnishingStatus: z.enum(["unfurnished", "semi_furnished", "fully_furnished", "bare_shell"]).default("semi_furnished"),
+  physicalCondition: z.enum(["brand_new", "excellent", "good", "needs_renovation"]).default("good"),
+  viewType: z.string().max(100).optional().nullable(),
   price: z.number().positive().max(10_000_000_000),
+  askingPrice: z.number().positive().max(10_000_000_000).optional().nullable(),
+  estimatedMarketPrice: z.number().positive().max(10_000_000_000).optional().nullable(),
+  lastTransactedPrice: z.number().positive().max(10_000_000_000).optional().nullable(),
+  lastTransactedDate: z.string().max(50).optional().nullable(),
+  maintenanceMonthly: z.number().min(0).max(1_000_000).optional().nullable(),
+  expectedMonthlyRent: z.number().min(0).max(10_000_000).optional().nullable(),
+  rentalYieldPct: z.number().min(0).max(100).optional().nullable(),
   status: z.enum(["available", "hold", "site_visit", "negotiation", "booked", "sold"]).default("available"),
+  occupancyStatus: z.enum(["owner_occupied", "rented", "vacant", "under_fitout", "unknown"]).default("unknown"),
+  sellerIntent: z.enum([
+    "actively_selling", "soft_testing_market", "willing_to_sell_at_price", "not_selling",
+    "distress_sale", "urgent_liquidation", "evaluating_market", "unknown"
+  ]).default("unknown"),
+  sellerTargetTimeline: z.string().max(100).optional().nullable(),
+  listingStatus: z.enum(["unlisted", "exclusive_mandate", "open_market", "private_pocket", "off_market"]).default("unlisted"),
+  verificationStatus: z.enum(["verified", "unverified", "stale", "disputed", "historical", "user_reported", "inferred"]).default("unverified"),
   facing: z.string().max(50).optional().nullable(),
   assignedLeadId: idSchema.optional().nullable(),
   assignedBuyerName: z.string().max(150).optional().nullable(),
+  keyLocation: z.string().max(200).optional().nullable(),
+  unitAmenities: z.array(z.string()).optional(),
+  notes: z.string().max(2000).optional().nullable(),
 });
 
 export const updateProjectUnitSchema = createProjectUnitSchema.partial();
@@ -206,6 +282,83 @@ export const updateProjectUnitSchema = createProjectUnitSchema.partial();
 export const bulkImportUnitsSchema = z.object({
   projectId: idSchema,
   units: z.array(createProjectUnitSchema.omit({ projectId: true })).min(1).max(500),
+});
+
+// 9b. External Organizations Schemas
+export const createExternalOrgSchema = z.object({
+  name: z.string().min(2, "Organization name required").max(150),
+  orgType: z.enum(["developer", "rwa", "property_management", "brokerage", "architect", "contractor", "law_firm", "channel_partner", "vendor", "other"]),
+  phone: phoneSchema.optional().nullable(),
+  email: z.string().email().optional().or(z.literal("")),
+  website: z.string().url().optional().or(z.literal("")),
+  officeAddress: z.string().max(300).optional().nullable(),
+  city: z.string().max(100).optional().nullable(),
+  gstin: z.string().max(50).optional().nullable(),
+  reraId: z.string().max(100).optional().nullable(),
+  notes: z.string().max(1000).optional().nullable(),
+});
+
+export const updateExternalOrgSchema = createExternalOrgSchema.partial();
+
+// 9c. Universal Entity Relationships Schemas
+export const createEntityRelationshipSchema = z.object({
+  subjectType: z.enum(["person", "organization", "user", "lead"]),
+  subjectId: idSchema,
+  subjectName: z.string().max(150).optional().nullable(),
+  subjectPhone: z.string().max(50).optional().nullable(),
+  relationshipType: z.enum([
+    "owns", "current_owner", "co_owns", "previous_owner", "previously_owned",
+    "rents", "current_tenant", "previously_rented", "investor_in", "power_of_attorney", "caretaker",
+    "rwa_president", "rwa_secretary", "rwa_treasurer", "rwa_member", "facility_manager", "society_guard", "estate_manager",
+    "exclusive_broker", "channel_partner_for", "representing_seller", "representing_buyer", "works_for", "contractor_for",
+    "developed_by", "architect_of", "constructed_by", "managed_by",
+    "family_member_of", "referred_by", "primary_contact_for", "other"
+  ]),
+  targetType: z.enum(["unit", "project", "person", "organization"]),
+  targetId: idSchema,
+  targetName: z.string().max(150).optional().nullable(),
+  validFrom: z.string().max(50).optional().nullable(),
+  validUntil: z.string().max(50).optional().nullable(),
+  isCurrent: z.boolean().default(true),
+  confidenceScore: z.number().int().min(0).max(100).default(100),
+  verificationStatus: z.enum(["verified", "historical", "user_reported", "inferred", "disputed"]).default("verified"),
+  provenanceSource: z.enum([
+    "salesperson_entry", "registry_document", "society_directory", "owner_direct",
+    "builder_data", "broker_network", "inbound_lead", "ai_inferred"
+  ]).default("salesperson_entry"),
+  commercialTerms: z.record(z.string(), z.any()).optional(),
+  notes: z.string().max(1000).optional().nullable(),
+});
+
+export const updateEntityRelationshipSchema = createEntityRelationshipSchema.partial();
+
+// 9d. Property Facts / Sales Memory Schemas
+export const createPropertyFactSchema = z.object({
+  entityType: z.enum(["project", "tower", "unit", "area"]),
+  entityId: idSchema,
+  category: z.enum([
+    "visitor_access_rules", "society_regulations", "owner_preferences", "pricing_intelligence",
+    "neighbourhood_context", "construction_quality", "amenity_status", "legal_rera_status", "structural_features", "legal_title", "general"
+  ]),
+  title: z.string().min(2).max(150),
+  factStatement: z.string().min(3).max(2000),
+  verificationTier: z.enum(["verified", "historical", "user_provided", "inferred", "unknown"]).default("verified"),
+  confidencePct: z.number().int().min(0).max(100).default(100),
+  sourceReference: z.string().max(200).optional().nullable(),
+  expiresAt: z.string().max(50).optional().nullable(),
+});
+
+export const updatePropertyFactSchema = createPropertyFactSchema.partial();
+
+// 9e. Global Search Schema
+export const globalSearchSchema = z.object({
+  q: z.string().min(1, "Search query required").max(100),
+  limit: z.number().int().min(1).max(50).default(15).optional(),
+});
+
+export const globalSearchQuerySchema = z.object({
+  q: z.string().min(2, "Search query must be at least 2 characters").max(100),
+  limit: z.number().int().min(1).max(50).default(15).optional(),
 });
 
 // 10. Regions Schemas
@@ -306,3 +459,68 @@ export const updateBillingProfileSchema = z.object({
     })
     .optional(),
 });
+
+// ====================================================================
+// 16. PHASE 13 — INTELLIGENCE & AUTOMATION SCHEMAS
+// ====================================================================
+
+export const createSellerOpportunitySchema = z.object({
+  unitId: idSchema,
+  ownerId: idSchema.optional().nullable(),
+  signalType: z.enum([
+    "tenancy_expiring",
+    "vacant_unit",
+    "investor_exit_window",
+    "valuation_request",
+    "repeated_price_enquiry",
+    "market_comp_transacted",
+    "distress_indicator",
+    "manual_prospect",
+  ]),
+  signalStrength: z.number().int().min(0).max(100).default(75),
+  estimatedValuation: z.number().positive().max(10_000_000_000).optional(),
+  suggestedPitch: z.string().max(1000).optional(),
+  urgency: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
+  status: z.enum(["detected", "assigned", "contacted", "valuation_presented", "mandate_secured", "dismissed", "listed"]).default("detected"),
+  assignedToUserId: idSchema.optional().nullable(),
+  aiRationale: z.string().max(1000).optional(),
+  metadata: z.record(z.string().max(100), z.any()).optional(),
+});
+
+export const updateSellerOpportunitySchema = createSellerOpportunitySchema.partial().extend({
+  status: z.enum(["detected", "assigned", "contacted", "valuation_presented", "mandate_secured", "dismissed", "listed"]).optional(),
+  lastContactedAt: z.string().optional(),
+});
+
+export const siteVisitBriefingInputSchema = z.object({
+  leadId: idSchema,
+  unitId: idSchema,
+  activityId: idSchema.optional().nullable(),
+  scheduledAt: z.string().optional(),
+});
+
+export const freeTextMeetingSummarySchema = z.object({
+  leadId: idSchema.optional(),
+  unitId: idSchema.optional().nullable(),
+  personName: z.string().max(200).optional(),
+  rawNotes: z.string().min(5, "Notes must contain at least 5 characters").max(5000),
+  spokenLanguage: z.string().max(50).default("en-IN").optional(),
+});
+
+export const confirmMeetingDispositionSchema = z.object({
+  leadId: idSchema,
+  unitId: idSchema.optional().nullable(),
+  activityType: z.enum(["call", "meeting", "site_visit", "whatsapp", "note", "stage_change", "booking", "ai_agent"]),
+  outcome: z.string().max(100),
+  outcomeLabel: z.string().max(100),
+  suggestedStage: z.enum(["new", "contacted", "qualified", "site_visit", "negotiation", "won", "lost"]).optional(),
+  sentiment: z.enum(["bullish", "cautious", "hesitant", "negative"]).default("cautious"),
+  budgetConfirmed: z.number().positive().max(10_000_000_000).optional().nullable(),
+  extractedObjections: z.array(z.string().max(100)).default([]),
+  buyingSignals: z.array(z.string().max(100)).default([]),
+  conversationSummary: z.string().max(2000),
+  suggestedNextMove: z.string().max(1000),
+  scheduledFollowUpAt: z.string().optional().nullable(),
+  notes: z.string().max(2000).optional(),
+});
+
