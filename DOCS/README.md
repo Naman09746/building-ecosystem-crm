@@ -54,8 +54,8 @@ In-depth technical guides for specialized domain engines and infrastructure:
 | 08 | [08-server-side-analytics.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/08-server-side-analytics.md) | PostgreSQL aggregation stored procedures and executive analytics. |
 | 09 | [09-setup-and-apis.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/09-setup-and-apis.md) | API keys setup, external integrations, and local development minimal config. |
 | 10 | [10-production-readiness-and-deployment.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/10-production-readiness-and-deployment.md) | Production readiness checklist and verification summary. |
-| 11 | [11-graphify-knowledge-graph.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/11-graphify-knowledge-graph.md) | Graphify AST knowledge graph CLI commands and query helpers. |
 | 12 | [12-executive-cockpit-and-dashboard-architecture.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/12-executive-cockpit-and-dashboard-architecture.md) | Technical & investor deep dive for Executive Cockpit, hero metrics, and 4 tabs. |
+| 13 | [13-sales-workspace-and-inventory-matrix-deep-dive.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/13-sales-workspace-and-inventory-matrix-deep-dive.md) | Technical & investor deep dive for All Leads, Deal Pipeline, Follow-up Queue, and Inventory. |
 
 ---
 
