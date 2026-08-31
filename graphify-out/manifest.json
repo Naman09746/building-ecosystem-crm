@@ -32,8 +32,8 @@
     "hash": "cfcb0339b06a9d9b3c1c977ea5d7ebc6"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/middleware.ts": {
-    "mtime": 1787336875.399728,
-    "hash": "ff374caf44efa3dd4cdb8f1054f4c413"
+    "mtime": 1788192195.1341426,
+    "hash": "ad1ccc807de24e106aae7c9ef0bc026b"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/types/resurrection.ts": {
     "mtime": 1787390486.210847,
@@ -60,8 +60,8 @@
     "hash": "7596126c9ccb266045b447c6a357231d"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/context/auth-context.tsx": {
-    "mtime": 1787383845.8385158,
-    "hash": "04380719b6a1b01f8c35b7cdabd65922"
+    "mtime": 1788192081.1114824,
+    "hash": "e4084f90ae28f5b8c7bfab6d6a3620b2"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/layout.tsx": {
     "mtime": 1788174438.2958002,
@@ -428,8 +428,8 @@
     "hash": "b6a0977af302ab4c76b826d870b9bd86"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/(auth)/login/page.tsx": {
-    "mtime": 1787376455.0931702,
-    "hash": "d177f26249c06921882186f66641d1ec"
+    "mtime": 1788192202.070712,
+    "hash": "2606c3f507a308f7d8d19ebad554a550"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/(auth)/onboarding/page.tsx": {
     "mtime": 1787285144.8917751,
@@ -556,8 +556,8 @@
     "hash": "0288669f54978badf8ceeb7a9bdeeaee"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/layout/app-shell.tsx": {
-    "mtime": 1788169063.7863867,
-    "hash": "0e3b5ff2ec23af38f6bd807f2f8a3cce"
+    "mtime": 1788192087.446517,
+    "hash": "d467165766195ad1b3c4510db9d6a1cd"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/cost-sheet-modal.tsx": {
     "mtime": 1788173697.133533,
@@ -644,12 +644,12 @@
     "hash": "920c613682430e3c36c31cab34eba376"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/boss-overview.tsx": {
-    "mtime": 1787389866.8714702,
-    "hash": "5b3a259390d739005071d605f51a9ec8"
+    "mtime": 1788192533.2618566,
+    "hash": "c9f75f6451e93125eb8542df4e78a1e3"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/salesperson-home.tsx": {
-    "mtime": 1788180583.444605,
-    "hash": "edc96d5f043826f8c9e2d0b1f7ad31ca"
+    "mtime": 1788192550.9518209,
+    "hash": "bba46440c308a3d9773012267f953481"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/lead-detail-modal.tsx": {
     "mtime": 1788169898.8291526,
@@ -1036,8 +1036,8 @@
     "hash": "ec19c0013c70876f55d99fb562c2acc4"
   },
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/README.md": {
-    "mtime": 1788189906.5889633,
-    "hash": "c0b2c71285b3d46f0de874921b89a5c4"
+    "mtime": 1788194115.8504028,
+    "hash": "1798d553071e57e713e7671cc6f63ca0"
   },
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/10-environment-configuration-reference.md": {
     "mtime": 1788182962.183529,
@@ -1183,6 +1183,10 @@
     "mtime": 1788183015.7931492,
     "hash": "0257a937fce15846d7a1f45522d4b072"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/12-executive-cockpit-and-dashboard-architecture.md": {
+    "mtime": 1788194098.8414707,
+    "hash": "e00dcad9fd79f1708af07972739b9393"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/11-graphify-knowledge-graph.md": {
     "mtime": 1787369612.7887459,
     "hash": "79448e8b6f321b63daecec4765f28084"
@@ -1215,6 +1219,18 @@
     "mtime": 1788182993.6557446,
     "hash": "d6bd03db44237224c727c4f00791adce"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/apple-touch-icon.png": {
+    "mtime": 1788191774.110327,
+    "hash": "0dcefaa8c5503657cc05a06a10f2c05f"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/icon.svg": {
+    "mtime": 1788191774.11007,
+    "hash": "fe546166c7601ff2b669c0e952e2add7"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/apple-touch-icon-precomposed.png": {
+    "mtime": 1788191774.110396,
+    "hash": "0dcefaa8c5503657cc05a06a10f2c05f"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/images/hero-facade.jpg": {
     "mtime": 1787779201.5540004,
     "hash": "afa62b37dcd09968e34cb6ce00db22a9"
@@ -1223,8 +1239,16 @@
     "mtime": 1787779201.5590706,
     "hash": "f765c70bcb3a88553722b0efd9d51c7e"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/images/logo.png": {
+    "mtime": 1788191774.110256,
+    "hash": "0dcefaa8c5503657cc05a06a10f2c05f"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/images/arrival-gate.jpg": {
     "mtime": 1787779201.5637069,
     "hash": "9a36d7491c82e4067a27bd7f7f6ffbb7"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/images/logo.svg": {
+    "mtime": 1788191774.1101596,
+    "hash": "fe546166c7601ff2b669c0e952e2add7"
   }
 }
