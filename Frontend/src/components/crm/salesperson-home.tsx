@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   FileText,
   Workflow,
+  Search,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ import { NegotiationModal } from "@/components/crm/negotiation-modal";
 import { SiteVisitDispatchModal } from "@/components/crm/site-visit-dispatch-modal";
 import { CommissionModal } from "@/components/crm/commission-modal";
 import { N8nIntegrationDrawer } from "@/components/crm/n8n-integration-drawer";
+import { actionCardProps } from "@/components/ui/action-card";
 
 interface SalespersonHomeProps {
   onOpenQuickLog: (leadId?: string) => void;
@@ -61,8 +63,10 @@ export function SalespersonHome({
     sellerOpportunities,
     siteVisitBriefings,
     getSiteVisitBriefing,
-    scanStaleFacts,
   } = useCRM();
+
+  const [activeTab, setActiveTab] = React.useState<"queue" | "buyers" | "tools">("queue");
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   const [isMeetingModalOpen, setIsMeetingModalOpen] = React.useState(false);
   const [isSellerModalOpen, setIsSellerModalOpen] = React.useState(false);
@@ -74,28 +78,16 @@ export function SalespersonHome({
   const [selectedActionUnit, setSelectedActionUnit] = React.useState<ProjectUnit | null>(null);
   const [activeBriefing, setActiveBriefing] = React.useState<SiteVisitBriefing | null>(null);
 
-  // Active tasks for this salesperson
+  // Active tasks
   const overdueTasks = filteredTasks.filter((t) => t.status === "overdue");
   const dueTodayTasks = filteredTasks.filter((t) => t.status === "due_today");
   const upcomingTasks = filteredTasks.filter((t) => t.status === "upcoming");
   const completedTasks = filteredTasks.filter((t) => t.status === "completed");
 
-  // Real follow-up closure rate: completed vs all closed-or-breached commitments.
-  const slaRate = React.useMemo(() => {
-    const denominator = completedTasks.length + overdueTasks.length;
-    if (denominator === 0) return null;
-    return Math.round((completedTasks.length / denominator) * 100);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredTasks]);
-
-  // Scheduled site visits
   const siteVisitLeads = filteredLeads.filter((l) => l.stage === "site_visit");
-
-  // Hot pipeline value (Lead Score >= 75 and active)
   const hotLeads = filteredLeads.filter((l) => (l.leadScore || 0) >= 75 && l.stage !== "won" && l.stage !== "lost");
   const hotPipelineValue = hotLeads.reduce((acc, l) => acc + l.budget, 0);
 
-  // Calls logged today by this rep
   const todayCallsCount = activities.filter((a) => a.userId === currentUser.id && a.type === "call").length;
   const callsTarget = 10;
 
@@ -108,581 +100,475 @@ export function SalespersonHome({
     }
   };
 
-  // Intelligent Next Best Actions prioritization:
-  // 1. Overdue high-value leads
-  // 2. Confirmed site visits
-  // 3. Hot qualified leads
-  // 4. Negotiation / closing opportunities
-  // 5. Other due follow-ups
+  // Prioritized Next Actions
   const prioritizedNextActions = React.useMemo(() => {
     return [...filteredLeads]
       .filter((l) => l.stage !== "won" && l.stage !== "lost")
       .sort((a, b) => {
-        const getPriorityScore = (lead: Lead) => {
-          let score = 0;
-          if (lead.followUpStatus === "overdue") score += 500;
-          if (lead.stage === "site_visit") score += 400;
-          if (lead.dealHealth === "at_risk") {
-            score += 350 + (100 - (lead.dealHealthScore ?? 50));
-          } else if (lead.dealHealth === "strong") {
-            score += (lead.dealHealthScore ?? 80);
-          }
-          if (lead.stage === "negotiation") score += 250;
-          if (lead.leadScore >= 90) score += 200;
-          if (lead.followUpStatus === "due_today") score += 150;
-          score += (lead.budget / 10000000); // Deal value factor
-          return score;
-        };
-        return getPriorityScore(b) - getPriorityScore(a);
+        let scoreA = 0;
+        let scoreB = 0;
+        if (a.followUpStatus === "overdue") scoreA += 500;
+        if (b.followUpStatus === "overdue") scoreB += 500;
+        if (a.stage === "site_visit") scoreA += 400;
+        if (b.stage === "site_visit") scoreB += 400;
+        if (a.dealHealth === "at_risk") scoreA += 300;
+        if (b.dealHealth === "at_risk") scoreB += 300;
+        return scoreB - scoreA;
       });
   }, [filteredLeads]);
 
-  // Today's Sales Timeline Queue items dynamically derived from tasks & leads
-  const timelineQueue = React.useMemo(() => {
-    const activeTasks = filteredTasks.filter((t) => t.status !== "completed");
-    if (activeTasks.length === 0) return [];
-
-    return activeTasks.slice(0, 5).map((task) => {
-      const lead = filteredLeads.find((l) => l.id === task.leadId);
-      return {
-        time: task.dueTime || (task.status === "overdue" ? "09:30 AM" : "11:30 AM"),
-        leadName: task.personName,
-        phone: task.phone,
-        type: task.status === "overdue" ? "Call · Overdue" : task.title.toLowerCase().includes("site") ? "Site Visit" : "Call · Due",
-        projectName: task.projectName,
-        unit: lead?.assignedUnitNumber ? `Unit ${lead.assignedUnitNumber}` : undefined,
-        status: task.status as "overdue" | "due_today" | "upcoming",
-        leadId: task.leadId,
-        notes: lead?.dealHealthReason || task.title,
-      };
-    });
-  }, [filteredTasks, filteredLeads]);
+  const filteredBuyerList = filteredLeads.filter((l) =>
+    searchQuery === "" ||
+    l.personName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    l.projectName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-10">
-      {/* 1. TOP HEADER WITH 'WHAT SHOULD I DO NEXT?' IMMEDIATE BANNER */}
-      <div className="p-4 sm:p-5 rounded-2xl border border-border bg-card shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12 px-1 sm:px-2">
+      {/* 1. Header & Pulse Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-subtle">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Sales Command • {currentUser.name}
+              Sales Cockpit · {currentUser.name}
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
             What should I do next?
           </h1>
           <p className="text-xs text-muted-foreground">
             {overdueTasks.length > 0
-              ? `You have ${overdueTasks.length} overdue high-value lead requiring immediate rescue touchpoint.`
-              : `All daily follow-up commitments on schedule. ${dueTodayTasks.length} calls queued for today.`}
+              ? `⚡ ${overdueTasks.length} overdue follow-up requiring immediate touchpoint.`
+              : `All tasks on schedule. ${dueTodayTasks.length} calls queued for today.`}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+        {/* Quick Log Action */}
+        <div className="flex items-center gap-2">
           <Button
             size="sm"
-            variant="outline"
-            onClick={() => {
-              setSelectedActionLead(filteredLeads[0] || null);
-              setIsDispatchOpen(true);
-            }}
-            className="h-10 px-3 text-xs font-semibold border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-1.5 rounded-xl"
-          >
-            <Compass className="h-4 w-4" />
-            <span>Site Visit Pass</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setSelectedActionLead(filteredLeads[0] || null);
-              setIsNegotiationOpen(true);
-            }}
-            className="h-10 px-3 text-xs font-semibold border-purple-500/40 text-purple-400 hover:bg-purple-500/10 flex items-center gap-1.5 rounded-xl"
-          >
-            <ShieldCheck className="h-4 w-4" />
-            <span>Negotiation Room</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setSelectedActionLead(filteredLeads[0] || null);
-              setIsCommissionOpen(true);
-            }}
-            className="h-10 px-3 text-xs font-semibold border-amber-500/40 text-amber-400 hover:bg-amber-500/10 flex items-center gap-1.5 rounded-xl"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span>Commission Ledger</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsN8nDrawerOpen(true)}
-            className="h-10 px-3 text-xs font-semibold border-blue-500/40 text-blue-400 hover:bg-blue-500/10 flex items-center gap-1.5 rounded-xl"
-          >
-            <Workflow className="h-4 w-4" />
-            <span>n8n Automations</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsSellerModalOpen(true)}
-            className="h-10 px-3 text-xs font-semibold border-amber-500/40 text-amber-600 hover:bg-amber-500/10 flex items-center gap-1.5 rounded-xl"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span>Seller Signals ({sellerOpportunities.length})</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsMeetingModalOpen(true)}
-            className="h-10 px-3 text-xs font-semibold border-primary/40 text-primary hover:bg-primary/10 flex items-center gap-1.5 rounded-xl"
-          >
-            <FileText className="h-4 w-4" />
-            <span>AI Meeting Structurer</span>
-          </Button>
-
-          <Button
-            size="lg"
             onClick={() => onOpenQuickLog()}
-            className="h-10 px-4 text-xs font-semibold shadow-subtle bg-primary text-primary-foreground hover:bg-primary-hover flex items-center gap-2 rounded-xl"
+            className="h-9 px-4 text-xs font-bold bg-primary text-primary-foreground shadow-subtle rounded-xl gap-1.5"
           >
             <Plus className="h-4 w-4" />
-            <span>+ Log Activity</span>
+            <span>Log Quick Touchpoint</span>
           </Button>
         </div>
       </div>
 
-      {/* 2. COMPACT 'TODAY' OPERATIONAL SUMMARY METRIC BAR */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        {/* Overdue Actions */}
-        <div className={`p-3.5 rounded-xl border flex flex-col justify-between transition-all ${
-          overdueTasks.length > 0 ? "border-rose-300 bg-rose-50/50" : "border-border bg-card shadow-subtle"
-        }`}>
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              Overdue
+      {/* 2. Hero Pulse Metrics (3 Key Numbers) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="p-4 sm:p-5 border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>Pending Calls Today</span>
+            <Phone className="h-4 w-4 text-primary/70" />
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+              {dueTodayTasks.length + overdueTasks.length}
             </span>
-            <span className="h-2 w-2 rounded-full bg-rose-500" />
+            <span className="text-xs text-muted-foreground">calls in queue</span>
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-bold text-foreground font-mono">{overdueTasks.length}</span>
-            <span className="text-[10px] text-muted-foreground block">Requires instant call</span>
+          <div className="mt-2 flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Logged today: {todayCallsCount}/{callsTarget}</span>
+            {overdueTasks.length > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                {overdueTasks.length} Overdue
+              </Badge>
+            )}
           </div>
-        </div>
+        </Card>
 
-        {/* Due Today */}
-        <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              Due Today
-            </span>
-            <span className="h-2 w-2 rounded-full bg-amber-500" />
+        <Card className="p-4 sm:p-5 border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>Site Visits Booked</span>
+            <Building2 className="h-4 w-4 text-amber-500/80" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-bold text-foreground font-mono">{dueTodayTasks.length}</span>
-            <span className="text-[10px] text-muted-foreground block">{todayCallsCount} / {callsTarget} completed</span>
+          <div className="mt-3 text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+            {siteVisitLeads.length}
           </div>
-        </div>
+          <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span>Physical walkthroughs</span>
+            <span className="font-semibold text-amber-600">High Intent</span>
+          </div>
+        </Card>
 
-        {/* Upcoming Site Visits */}
-        <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 flex items-center gap-1">
-              <Compass className="h-3.5 w-3.5" />
-              Site Visits
-            </span>
-            <span className="h-2 w-2 rounded-full bg-purple-500" />
+        <Card className="p-4 sm:p-5 border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>Hot Pipeline Value</span>
+            <Flame className="h-4 w-4 text-orange-500/80" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-bold text-foreground font-mono">{siteVisitLeads.length}</span>
-            <span className="text-[10px] text-muted-foreground block">Tours booked this wk</span>
+          <div className="mt-3 text-xl sm:text-2xl font-black text-foreground tracking-tight font-mono truncate">
+            {formatCurrencyINR(hotPipelineValue)}
           </div>
-        </div>
-
-        {/* Hot Pipeline Value */}
-        <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
-              <Flame className="h-3.5 w-3.5 text-rose-500" />
-              Hot Pipeline
-            </span>
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-bold text-foreground">{hotLeads.length}</span> VIP buyers with score &ge; 75
           </div>
-          <div className="mt-2">
-            <span className="text-xl font-bold text-foreground font-mono">{formatCurrencyINR(hotPipelineValue)}</span>
-            <span className="text-[10px] text-muted-foreground block">{hotLeads.length} active buyers</span>
-          </div>
-        </div>
-
-        {/* SLA Adherence */}
-        <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-col justify-between col-span-2 sm:col-span-1">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              SLA Adherence
-            </span>
-          </div>
-          <div className="mt-2">
-            <span className={`text-2xl font-bold font-mono ${slaRate === null ? "text-muted-foreground" : slaRate >= 90 ? "text-emerald-600" : slaRate >= 70 ? "text-amber-600" : "text-rose-600"}`}>
-              {slaRate === null ? "—" : `${slaRate}%`}
-            </span>
-            <span className="text-[10px] text-muted-foreground block">Follow-ups closed</span>
-          </div>
-        </div>
+        </Card>
       </div>
 
-      {/* 3. TWO-COLUMN OPERATIONAL COCKPIT: NEXT BEST ACTIONS & TODAY SALES TIMELINE */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left 7 Columns: NEXT BEST ACTIONS (Most Important Operational Section) */}
-        <div className="lg:col-span-7 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-bold text-foreground">Next Best Actions (Prioritized)</h2>
-            </div>
-            <span className="text-xs text-muted-foreground font-mono">{prioritizedNextActions.length} Actions Ready</span>
-          </div>
+      {/* 3. Segmented Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-border/70 pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("queue")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "queue"
+              ? "bg-primary text-primary-foreground shadow-subtle"
+              : "bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <Zap className="h-3.5 w-3.5" />
+          <span>Action Queue</span>
+          {(overdueTasks.length + dueTodayTasks.length) > 0 && (
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${activeTab === "queue" ? "bg-white/20 text-white" : "bg-primary/20 text-primary"}`}>
+              {overdueTasks.length + dueTodayTasks.length}
+            </span>
+          )}
+        </button>
 
-          <div className="space-y-3">
-            {prioritizedNextActions.slice(0, 4).map((lead, idx) => {
-              const isOverdue = lead.followUpStatus === "overdue";
-              const isSiteVisit = lead.stage === "site_visit";
+        <button
+          type="button"
+          onClick={() => setActiveTab("buyers")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "buyers"
+              ? "bg-primary text-primary-foreground shadow-subtle"
+              : "bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <User className="h-3.5 w-3.5" />
+          <span>My Active Buyers</span>
+          <span className="text-[10px] opacity-70">({filteredLeads.length})</span>
+        </button>
 
-              return (
-                <div
-                  key={lead.id}
-                  className={`p-4 rounded-xl border transition-all space-y-3 ${
-                    isOverdue
-                      ? "border-rose-300 bg-rose-50/30"
-                      : isSiteVisit
-                      ? "border-purple-300 bg-purple-50/20"
-                      : "border-border bg-card shadow-subtle hover:border-border/90"
-                  }`}
-                >
-                  {/* Lead Header */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-base text-foreground">{lead.personName}</span>
-                        <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
-                        <DealHealthBadge health={lead.dealHealth} score={lead.dealHealthScore} reason={lead.dealHealthReason} showScore />
-                        <PipelineBadge stage={lead.stage} />
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 font-mono">
-                        <span>{lead.projectName}</span>
-                        {lead.assignedUnitNumber && (
-                          <span className="bg-secondary px-1.5 py-0.2 rounded text-[10px] font-bold text-foreground">
-                            Unit {lead.assignedUnitNumber}
-                          </span>
-                        )}
-                        <span>•</span>
-                        <span className="font-bold text-foreground">{formatCurrencyINR(lead.budget)}</span>
-                      </div>
-                    </div>
+        <button
+          type="button"
+          onClick={() => setActiveTab("tools")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "tools"
+              ? "bg-primary text-primary-foreground shadow-subtle"
+              : "bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <Compass className="h-3.5 w-3.5" />
+          <span>Closing Tools & Automations</span>
+        </button>
+      </div>
 
-                    <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-secondary text-muted-foreground shrink-0">
-                      #{idx + 1} Priority
-                    </span>
-                  </div>
+      {/* 4. Tab Contents */}
 
-                  {/* 2. Key Sales Context: Pitch Unit & Timing */}
-                  <div className="flex items-center justify-between text-xs py-1 px-2.5 rounded-lg bg-primary/5 border border-primary/10">
-                    <span className="font-semibold text-primary">
-                      🎯 Pitch: <strong>{lead.projectName}</strong>
-                      {lead.assignedUnitNumber ? ` · Unit ${lead.assignedUnitNumber}` : ""}
-                      {lead.configurationPreference ? ` (${lead.configurationPreference})` : ""}
-                    </span>
-                    <span className="text-[11px] font-mono font-bold text-muted-foreground">
-                      Follow-up: {lead.nextFollowUpAt || "Today"}
-                    </span>
-                  </div>
+      {/* TAB 1: TODAY'S ACTION QUEUE */}
+      {activeTab === "queue" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Priority Call Queue (7-cols) */}
+          <div className="lg:col-span-7 space-y-4">
+            <Card className="p-5 space-y-3 shadow-subtle border-border/80">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  <h3 className="text-sm font-bold text-foreground">Priority Next Actions</h3>
+                </div>
+                <span className="text-xs font-mono text-muted-foreground">AI Prioritized</span>
+              </div>
 
-                  {/* 3. Operational Intel: Why it matters, Last Interaction & Suggested Move */}
-                  <div className="p-2.5 rounded-lg bg-secondary/40 border border-border/40 text-xs space-y-1.5">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                        Why this matters:
-                      </span>
-                      <p className="text-foreground/90 font-medium leading-relaxed">
-                        {lead.dealHealthReason || "High priority customer engagement target."}
-                      </p>
-                    </div>
-
-                    {lead.lastConversationSummary && (
+              <div className="space-y-3">
+                {prioritizedNextActions.slice(0, 5).map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="p-3.5 rounded-xl border border-border bg-card hover:bg-secondary/20 transition-all space-y-2 text-xs"
+                  >
+                    <div className="flex items-start justify-between">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-                          Last interaction:
-                        </span>
-                        <p className="text-muted-foreground text-[11px] leading-relaxed italic">
-                          &ldquo;{lead.lastConversationSummary}&rdquo;
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-foreground">{lead.personName}</span>
+                          <PipelineBadge stage={lead.stage} />
+                          <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {lead.projectName} • Budget: <strong className="font-mono text-foreground">{formatCurrencyINR(lead.budget)}</strong>
                         </p>
                       </div>
-                    )}
-
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-primary block">
-                        Suggested Next Action:
-                      </span>
-                      <p className="text-foreground font-semibold leading-relaxed">
-                        {lead.suggestedNextMove || lead.recommendedAction || "Call customer to align next milestone."}
-                      </p>
+                      <DealHealthBadge health={lead.dealHealth} reason={lead.dealHealthReason} />
                     </div>
-                  </div>
 
-                  {/* 4. 1-Click Operational Action Bar */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1.5 border-t border-border/40 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => onSelectLead(lead)}
-                      className="text-primary font-semibold hover:underline flex items-center gap-1 text-[11px] self-start sm:self-auto"
-                    >
-                      <span>Open 360° Dossier</span>
-                      <ChevronRight className="h-3 w-3" />
-                    </button>
+                    <div className="text-[11px] text-muted-foreground bg-secondary/30 p-2 rounded-lg leading-relaxed">
+                      <strong>Next Action:</strong> {lead.recommendedAction || "Call buyer to confirm requirements."}
+                    </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {isSiteVisit && (
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        Due: {lead.nextFollowUpAt || "Today"}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`tel:${lead.phone}`}
+                          className="inline-flex items-center h-7 px-2.5 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border border-blue-500/20 transition-colors"
+                        >
+                          <Phone className="h-3 w-3 mr-1" />
+                          Call
+                        </a>
+                        <a
+                          href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center h-7 px-2.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors"
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          WhatsApp
+                        </a>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-9 sm:h-7 px-3 sm:px-2.5 text-xs sm:text-[11px] font-bold border-purple-500/40 text-purple-600 hover:bg-purple-500/10 flex items-center gap-1"
-                          onClick={() => handleOpenBriefing(lead)}
+                          onClick={() => onOpenQuickLog(lead.id)}
+                          className="h-7 text-xs px-2.5"
                         >
-                          <Compass className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
-                          <span>Pre-Visit Briefing</span>
+                          Log
                         </Button>
-                      )}
-                      <a
-                        href={`tel:${lead.phone}`}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-9 sm:h-7 px-3 sm:px-2.5 rounded-lg text-xs sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                      >
-                        <Phone className="h-3.5 w-3.5 sm:h-3 sm:w-3 mr-1" />
-                        Call
-                      </a>
-                      <a
-                        href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-9 sm:h-7 px-3 sm:px-2.5 rounded-lg text-xs sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                      >
-                        <MessageSquare className="h-3.5 w-3.5 sm:h-3 sm:w-3 mr-1" />
-                        WhatsApp
-                      </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Right Column: Due Tasks Checklist & Daily Pulse (5-cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <Card className="p-5 space-y-3 shadow-subtle border-border/80">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold text-foreground">Follow-up Checklist</h3>
+                </div>
+                <span className="text-xs text-muted-foreground font-mono">
+                  {completedTasks.length}/{filteredTasks.length} Done
+                </span>
+              </div>
+
+              <div className="space-y-2.5 max-h-[440px] overflow-y-auto pr-1">
+                {filteredTasks.slice(0, 6).map((task) => (
+                  <div
+                    key={task.id}
+                    className={`p-3 rounded-xl border text-xs transition-all flex items-start justify-between gap-3 ${
+                      task.status === "completed"
+                        ? "bg-secondary/20 border-border/50 opacity-60 line-through"
+                        : task.status === "overdue"
+                        ? "bg-rose-50/20 border-rose-200"
+                        : "bg-card border-border"
+                    }`}
+                  >
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="font-bold text-foreground truncate">{task.title}</div>
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                        <span>{task.personName}</span>
+                        <span>•</span>
+                        <span className="font-mono">{task.dueDate}</span>
+                      </div>
+                    </div>
+
+                    {task.status !== "completed" && (
                       <Button
                         size="sm"
-                        variant="secondary"
-                        className="h-9 sm:h-7 px-3 sm:px-2 text-xs sm:text-[11px] font-medium shrink-0"
-                        onClick={() => onOpenQuickLog(lead.id)}
+                        variant="outline"
+                        onClick={() => completeTask(task.id)}
+                        className="h-6 text-[10px] px-2 shrink-0 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
                       >
-                        Log
+                        <Check className="h-3 w-3 mr-1" />
+                        Done
                       </Button>
-                    </div>
+                    )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right 5 Columns: TODAY SALES ACTIVITY TIMELINE */}
-        <div className="lg:col-span-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600" />
-              <h2 className="text-sm font-bold text-foreground">Today&apos;s Sales Timeline</h2>
-            </div>
-            <span className="text-xs text-muted-foreground font-mono">{timelineQueue.length} Scheduled</span>
-          </div>
-
-          <div className="p-4 rounded-xl border border-border bg-card shadow-subtle space-y-3">
-            <p className="text-[11px] text-muted-foreground pb-2 border-b border-border">
-              Structured queue of today&apos;s customer touchpoints. Complete each item with 1-click.
-            </p>
-
-            <div className="relative pl-4 space-y-4 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-              {timelineQueue.map((item, i) => {
-                const isOverdue = item.status === "overdue";
-                const isDue = item.status === "due_today";
-
-                return (
-                  <div key={i} className="relative space-y-1 text-xs">
-                    {/* Timeline Node Dot */}
-                    <div className={`absolute -left-[19px] top-1 h-3 w-3 rounded-full border-2 border-card ${
-                      isOverdue ? "bg-rose-500" : isDue ? "bg-amber-500" : "bg-emerald-500"
-                    }`} />
-
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-foreground text-xs">{item.time}</span>
-                      <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                        isOverdue
-                          ? "bg-rose-100 text-rose-800"
-                          : "bg-amber-100 text-amber-800"
-                      }`}>
-                        {item.type}
-                      </span>
-                    </div>
-
-                    <div className="font-bold text-foreground text-sm flex items-center justify-between">
-                      <span>{item.leadName}</span>
-                      <span className="text-[11px] text-muted-foreground font-normal">{item.projectName}</span>
-                    </div>
-
-                    <div className="text-[11px] text-muted-foreground">
-                      {item.notes} {item.unit && `(${item.unit})`}
-                    </div>
-
-                    {/* Fast Quick-Action Row */}
-                    <div className="flex items-center justify-end gap-1.5 pt-1">
-                      <a
-                        href={`tel:${item.phone}`}
-                        className="inline-flex items-center justify-center h-6 px-2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                      >
-                        <Phone className="h-2.5 w-2.5 mr-1" />
-                        Call
-                      </a>
-                      <a
-                        href={`https://wa.me/${item.phone.replace(/\D/g, "")}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center h-6 px-2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                      >
-                        <MessageSquare className="h-2.5 w-2.5 mr-1" />
-                        WhatsApp
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => onOpenQuickLog(item.leadId)}
-                        className="h-6 px-2 rounded text-[10px] font-semibold bg-secondary text-foreground hover:bg-secondary/80 border border-border"
-                      >
-                        Log
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Intelligence Modals */}
-      <SellerOpportunitiesModal
-        isOpen={isSellerModalOpen}
-        onClose={() => setIsSellerModalOpen(false)}
-      />
-
-      <MeetingSummaryModal
-        isOpen={isMeetingModalOpen}
-        onClose={() => setIsMeetingModalOpen(false)}
-      />
-
-      {/* 30-Minute Pre-Visit Briefing Modal */}
-      {activeBriefing && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
-          onClick={() => setActiveBriefing(null)}
-        >
-          <div
-            className="bg-card border border-border rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl space-y-4 text-xs"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="border-b border-border pb-3 flex items-start justify-between">
-              <div>
-                <span className="text-[10px] font-mono font-bold uppercase text-purple-600 tracking-wider">
-                  Site Visit Pre-Briefing (30m Prior)
-                </span>
-                <h3 className="text-xl font-bold text-foreground">{activeBriefing.unitTitle}</h3>
-                <p className="text-muted-foreground text-xs">
-                  Buyer: {activeBriefing.leadName} • {activeBriefing.societyName}
-                </p>
+                ))}
               </div>
-              <button
-                onClick={() => setActiveBriefing(null)}
-                className="text-muted-foreground hover:text-foreground font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Gate Access Protocol */}
-            <div className="p-3.5 rounded-xl bg-purple-50/50 border border-purple-200/60 space-y-1">
-              <span className="font-bold text-purple-900 flex items-center gap-1.5">
-                <Key className="h-4 w-4 text-purple-600" />
-                Security & Gate 2 Pass Protocol:
-              </span>
-              <p className="text-purple-950 font-medium leading-relaxed">
-                {activeBriefing.gateAccessProtocol}
-              </p>
-              {activeBriefing.parkingInstructions && (
-                <p className="text-purple-800 text-[11px] mt-1">
-                  🚗 <strong>Parking:</strong> {activeBriefing.parkingInstructions}
-                </p>
-              )}
-            </div>
-
-            {/* Owner Expectations */}
-            <div className="p-3.5 rounded-xl bg-secondary/60 border border-border space-y-1">
-              <span className="font-bold text-foreground flex items-center gap-1.5">
-                <User className="h-4 w-4 text-primary" />
-                Owner Price Non-Negotiables:
-              </span>
-              <p className="text-muted-foreground leading-relaxed">
-                {activeBriefing.ownerExpectationsSummary}
-              </p>
-            </div>
-
-            {/* Talking Points & Objections */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-emerald-50/40 border border-emerald-200/60 space-y-1.5">
-                <span className="font-bold text-emerald-800 flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-                  Key Talking Points:
-                </span>
-                <ul className="list-disc list-inside text-emerald-950 space-y-1">
-                  {activeBriefing.talkingPoints?.map((tp, idx) => (
-                    <li key={idx}>{tp}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="p-3 rounded-xl bg-amber-50/40 border border-amber-200/60 space-y-1.5">
-                <span className="font-bold text-amber-800 flex items-center gap-1">
-                  <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
-                  Anticipated Objections:
-                </span>
-                <ul className="list-disc list-inside text-amber-950 space-y-1">
-                  {activeBriefing.previousObjections?.map((obj, idx) => (
-                    <li key={idx}>{obj}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-border">
-              <Button
-                onClick={() => setActiveBriefing(null)}
-                className="h-8 px-4 text-xs font-semibold"
-              >
-                Close Briefing
-              </Button>
-            </div>
+            </Card>
           </div>
         </div>
       )}
 
-      {/* Negotiation Room Modal */}
+      {/* TAB 2: MY ACTIVE BUYERS */}
+      {activeTab === "buyers" && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search buyer name, project..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-8 pl-8 pr-3 rounded-lg border border-border bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <span className="text-xs text-muted-foreground font-mono">
+              {filteredBuyerList.length} Active Leads Assigned
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filteredBuyerList.map((lead) => (
+              <div
+                key={lead.id}
+                {...actionCardProps(() => onSelectLead(lead), `Open lead ${lead.personName}`)}
+                className="p-4 rounded-xl border border-border bg-card hover:border-primary/50 cursor-pointer shadow-subtle transition-all space-y-2.5 text-xs"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="font-bold text-sm text-foreground">{lead.personName}</div>
+                    <div className="text-[11px] text-muted-foreground">{lead.projectName}</div>
+                  </div>
+                  <span className="font-bold font-mono text-xs text-foreground bg-secondary px-2 py-0.5 rounded">
+                    {formatCurrencyINR(lead.budget)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px]">
+                  <PipelineBadge stage={lead.stage} />
+                  <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
+                </div>
+
+                <div className="text-[11px] text-muted-foreground bg-secondary/30 p-2 rounded line-clamp-2">
+                  {lead.lastActivityText || "No touchpoints logged yet"}
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/40">
+                  <span>Due: {lead.nextFollowUpAt || "Today"}</span>
+                  <DealHealthBadge health={lead.dealHealth} reason={lead.dealHealthReason} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: TOOLS & CLOSING ROOM */}
+      {activeTab === "tools" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Tool 1: Site Visit Pass */}
+          <Card
+            onClick={() => {
+              setSelectedActionLead(filteredLeads[0] || null);
+              setIsDispatchOpen(true);
+            }}
+            className="p-5 border-border hover:border-emerald-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
+          >
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+              <Compass className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Gate 2 Pass & Dispatch</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Generate instant digital security gate passes and 30-min buyer dossier for site visits.
+              </p>
+            </div>
+          </Card>
+
+          {/* Tool 2: Negotiation Room */}
+          <Card
+            onClick={() => {
+              setSelectedActionLead(filteredLeads[0] || null);
+              setIsNegotiationOpen(true);
+            }}
+            className="p-5 border-border hover:border-purple-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
+          >
+            <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Negotiation & Counter-Offers</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Multi-party bidding tracker, developer discount ceilings, and real-time payment schedule planner.
+              </p>
+            </div>
+          </Card>
+
+          {/* Tool 3: Commission Ledger */}
+          <Card
+            onClick={() => {
+              setSelectedActionLead(filteredLeads[0] || null);
+              setIsCommissionOpen(true);
+            }}
+            className="p-5 border-border hover:border-amber-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
+          >
+            <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+              <FileSpreadsheet className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Commission & Payout Ledger</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Calculate developer slab payouts, CP splits, and GST TDS deductions on closed deals.
+              </p>
+            </div>
+          </Card>
+
+          {/* Tool 4: AI Meeting Structurer */}
+          <Card
+            onClick={() => setIsMeetingModalOpen(true)}
+            className="p-5 border-border hover:border-primary/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
+          >
+            <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">AI Meeting Notes Structurer</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Convert voice notes and rough call audio into clean structured action items and stage updates.
+              </p>
+            </div>
+          </Card>
+
+          {/* Tool 5: Seller Signals */}
+          <Card
+            onClick={() => setIsSellerModalOpen(true)}
+            className="p-5 border-border hover:border-amber-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
+          >
+            <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Seller Match Radar ({sellerOpportunities.length})</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Proactive seller triggers: expiring leases, high ROI investors, and off-market listings.
+              </p>
+            </div>
+          </Card>
+
+          {/* Tool 6: n8n Automations */}
+          <Card
+            onClick={() => setIsN8nDrawerOpen(true)}
+            className="p-5 border-border hover:border-blue-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
+          >
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+              <Workflow className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">n8n Event Bus & Webhooks</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Inspect 9 real estate webhooks: 99acres, MagicBricks, Meta Lead Ads, and WhatsApp Cloud.
+              </p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Modals */}
+      <SellerOpportunitiesModal
+        open={isSellerModalOpen}
+        onOpenChange={setIsSellerModalOpen}
+        onMatchLead={(lead, opp) => {
+          onSelectLead(lead);
+          setIsSellerModalOpen(false);
+        }}
+      />
+
+      <MeetingSummaryModal
+        open={isMeetingModalOpen}
+        onOpenChange={setIsMeetingModalOpen}
+        onApplySummary={(summary) => {
+          setIsMeetingModalOpen(false);
+        }}
+      />
+
       <NegotiationModal
         open={isNegotiationOpen}
         onOpenChange={setIsNegotiationOpen}
@@ -690,23 +576,19 @@ export function SalespersonHome({
         unit={selectedActionUnit}
       />
 
-      {/* Operational Site Visit Dispatch & Digital Gate Pass Modal */}
       <SiteVisitDispatchModal
         open={isDispatchOpen}
         onOpenChange={setIsDispatchOpen}
         lead={selectedActionLead}
-        unit={selectedActionUnit}
+        briefing={activeBriefing}
       />
 
-      {/* Indian Real Estate Brokerage & Commission Ledger Modal */}
       <CommissionModal
         open={isCommissionOpen}
         onOpenChange={setIsCommissionOpen}
         lead={selectedActionLead}
-        unit={selectedActionUnit}
       />
 
-      {/* n8n Automation & Integration Orchestrator Drawer */}
       <N8nIntegrationDrawer
         open={isN8nDrawerOpen}
         onOpenChange={setIsN8nDrawerOpen}
@@ -714,6 +596,3 @@ export function SalespersonHome({
     </div>
   );
 }
-
-
-

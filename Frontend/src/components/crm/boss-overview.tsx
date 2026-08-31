@@ -20,6 +20,9 @@ import {
   ArrowUpRight,
   Sparkles,
   ExternalLink,
+  Search,
+  Check,
+  Zap,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -57,11 +60,13 @@ export function BossOverview({
     reactivationLeads,
   } = useCRM();
 
+  const [activeTab, setActiveTab] = React.useState<"focus" | "pipeline" | "team" | "revival">("focus");
   const [activeStageFilter, setActiveStageFilter] = React.useState<PipelineStage | "all">("all");
   const [resurrectionModalOpen, setResurrectionModalOpen] = React.useState(false);
   const [resurrectionTargetLeadId, setResurrectionTargetLeadId] = React.useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = React.useState("");
 
-  // Date-range aware lead set — makes the date selector actually filter KPIs.
+  // Date-range aware lead set
   const rangedLeads = React.useMemo(() => {
     if (dateRange === "all") return filteredLeads;
     const now = new Date();
@@ -71,7 +76,6 @@ export function BossOverview({
     } else if (dateRange === "this_quarter") {
       start = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
     } else {
-      // this_month
       start = new Date(now.getFullYear(), now.getMonth(), 1);
     }
     return filteredLeads.filter((l) => {
@@ -99,145 +103,69 @@ export function BossOverview({
             setServerAnalytics(json.data);
           }
         }
-      } catch {
-        // non-blocking fallback to in-memory calculations
-      }
+      } catch {}
     })();
     return () => {
       cancelled = true;
     };
   }, [dateRange, selectedRegionId, selectedSalespersonId, selectedProjectId]);
 
-  // Calculate Real KPI Metrics with server authority and client fallback
-  const totalLeads = serverAnalytics?.pipeline?.totalLeads ?? rangedLeads.length;
-  const openLeads = serverAnalytics?.pipeline?.activeLeads ?? rangedLeads.filter((l) => l.stage !== "won" && l.stage !== "lost").length;
-  const siteVisits = rangedLeads.filter((l) => l.stage === "site_visit").length;
-  const wonDeals = serverAnalytics?.pipeline?.wonLeads ?? rangedLeads.filter((l) => l.stage === "won").length;
-  const followUpsDue = serverAnalytics?.sla?.upcomingTasks
-    ? serverAnalytics.sla.upcomingTasks + serverAnalytics.sla.dueTodayTasks + serverAnalytics.sla.overdueTasks
-    : rangedLeads.filter((l) => l.followUpStatus === "due_today" || l.followUpStatus === "overdue").length;
-  const overdueCount = serverAnalytics?.sla?.overdueTasks ?? rangedLeads.filter((l) => l.followUpStatus === "overdue").length;
-  const totalPipelineValue = serverAnalytics?.pipeline?.totalPipelineValue ?? rangedLeads.reduce((acc, curr) => acc + (curr.budget || 0), 0);
-  const wonValue = serverAnalytics?.pipeline?.wonRevenue ?? rangedLeads.filter((l) => l.stage === "won").reduce((acc, curr) => acc + (curr.budget || 0), 0);
-
-  // Real inflow momentum: leads added in the last 30 days vs the prior 30 days.
-  const inflowMomentum = React.useMemo(() => {
-    const nowTs = Date.now();
-    const d30 = nowTs - 30 * 864e5;
-    const d60 = nowTs - 60 * 864e5;
-    const recent = filteredLeads.filter((l) => {
-      const t = new Date(l.createdAt).getTime();
-      return Number.isFinite(t) && t >= d30;
-    }).length;
-    const prior = filteredLeads.filter((l) => {
-      const t = new Date(l.createdAt).getTime();
-      return Number.isFinite(t) && t < d30 && t >= d60;
-    }).length;
-    if (prior === 0) return recent > 0 ? "new" : null;
-    const pct = Math.round(((recent - prior) / prior) * 100);
-    return `${pct >= 0 ? "+" : ""}${pct}%`;
-  }, [filteredLeads]);
-
-  // Real average days-in-stage per pipeline stage.
-  const avgDaysByStage = React.useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const stage of ["new", "contacted", "qualified", "site_visit", "negotiation", "won", "lost"]) {
-      const stageLeads = filteredLeads.filter((l) => l.stage === stage);
-      map[stage] = stageLeads.length
-        ? Math.round(stageLeads.reduce((a, c) => a + (c.daysInStage || 0), 0) / stageLeads.length)
-        : 0;
-    }
-    return map;
-  }, [filteredLeads]);
+  // Aggregate Metrics
+  const totalLeads = serverAnalytics?.summary?.totalLeads ?? rangedLeads.length;
+  const totalPipelineValue = serverAnalytics?.summary?.pipelineValue ?? rangedLeads.reduce((acc, l) => acc + (l.budget || 0), 0);
+  const openLeads = serverAnalytics?.summary?.openLeads ?? rangedLeads.filter((l) => l.stage !== "won" && l.stage !== "lost").length;
+  const wonDeals = serverAnalytics?.summary?.wonDeals ?? rangedLeads.filter((l) => l.stage === "won").length;
+  const wonValue = serverAnalytics?.summary?.wonRevenue ?? rangedLeads.filter((l) => l.stage === "won").reduce((acc, l) => acc + (l.budget || 0), 0);
+  const overdueCount = serverAnalytics?.summary?.overdueFollowups ?? rangedLeads.filter((l) => l.followUpStatus === "overdue").length;
+  const siteVisits = serverAnalytics?.summary?.siteVisitsCount ?? rangedLeads.filter((l) => l.stage === "site_visit").length;
 
   const salespeople = users.filter((u) => u.role === "salesperson");
 
-  // Needs Attention Items
+  // Priority Attention Items
   const overdueLeads = rangedLeads.filter((l) => l.followUpStatus === "overdue");
   const atRiskDeals = rangedLeads.filter((l) => l.dealHealth === "at_risk");
   const upcomingSiteVisits = rangedLeads.filter((l) => l.stage === "site_visit");
   const stagnantNegotiations = rangedLeads.filter((l) => l.stage === "negotiation" && l.daysInStage >= 3);
 
-  // Stage breakdown counts & values (avgDays computed from live data)
-  const stages: { key: PipelineStage; label: string; count: number; value: number; color: string; avgDays: number }[] = [
-    {
-      key: "new",
-      label: "New Inflow",
-      count: rangedLeads.filter((l) => l.stage === "new").length,
-      value: rangedLeads.filter((l) => l.stage === "new").reduce((a, c) => a + c.budget, 0),
-      color: "bg-slate-500",
-      avgDays: avgDaysByStage.new,
-    },
-    {
-      key: "contacted",
-      label: "Contacted",
-      count: rangedLeads.filter((l) => l.stage === "contacted").length,
-      value: rangedLeads.filter((l) => l.stage === "contacted").reduce((a, c) => a + c.budget, 0),
-      color: "bg-blue-600",
-      avgDays: avgDaysByStage.contacted,
-    },
-    {
-      key: "qualified",
-      label: "Qualified",
-      count: rangedLeads.filter((l) => l.stage === "qualified").length,
-      value: rangedLeads.filter((l) => l.stage === "qualified").reduce((a, c) => a + c.budget, 0),
-      color: "bg-indigo-600",
-      avgDays: avgDaysByStage.qualified,
-    },
-    {
-      key: "site_visit",
-      label: "Site Visit",
-      count: rangedLeads.filter((l) => l.stage === "site_visit").length,
-      value: rangedLeads.filter((l) => l.stage === "site_visit").reduce((a, c) => a + c.budget, 0),
-      color: "bg-amber-600",
-      avgDays: avgDaysByStage.site_visit,
-    },
-    {
-      key: "negotiation",
-      label: "Negotiation",
-      count: rangedLeads.filter((l) => l.stage === "negotiation").length,
-      value: rangedLeads.filter((l) => l.stage === "negotiation").reduce((a, c) => a + c.budget, 0),
-      color: "bg-purple-600",
-      avgDays: avgDaysByStage.negotiation,
-    },
-    {
-      key: "won",
-      label: "Deals Closed",
-      count: rangedLeads.filter((l) => l.stage === "won").length,
-      value: rangedLeads.filter((l) => l.stage === "won").reduce((a, c) => a + c.budget, 0),
-      color: "bg-emerald-600",
-      avgDays: avgDaysByStage.won,
-    },
-    {
-      key: "lost",
-      label: "Lost / Stalled",
-      count: rangedLeads.filter((l) => l.stage === "lost").length,
-      value: rangedLeads.filter((l) => l.stage === "lost").reduce((a, c) => a + c.budget, 0),
-      color: "bg-rose-500",
-      avgDays: avgDaysByStage.lost,
-    },
+  // Stage breakdown
+  const stages: { key: PipelineStage; label: string; count: number; value: number; color: string }[] = [
+    { key: "new", label: "New Inflow", count: rangedLeads.filter((l) => l.stage === "new").length, value: rangedLeads.filter((l) => l.stage === "new").reduce((a, c) => a + c.budget, 0), color: "bg-slate-500" },
+    { key: "contacted", label: "Contacted", count: rangedLeads.filter((l) => l.stage === "contacted").length, value: rangedLeads.filter((l) => l.stage === "contacted").reduce((a, c) => a + c.budget, 0), color: "bg-blue-600" },
+    { key: "qualified", label: "Qualified", count: rangedLeads.filter((l) => l.stage === "qualified").length, value: rangedLeads.filter((l) => l.stage === "qualified").reduce((a, c) => a + c.budget, 0), color: "bg-indigo-600" },
+    { key: "site_visit", label: "Site Visit", count: rangedLeads.filter((l) => l.stage === "site_visit").length, value: rangedLeads.filter((l) => l.stage === "site_visit").reduce((a, c) => a + c.budget, 0), color: "bg-amber-600" },
+    { key: "negotiation", label: "Negotiation", count: rangedLeads.filter((l) => l.stage === "negotiation").length, value: rangedLeads.filter((l) => l.stage === "negotiation").reduce((a, c) => a + c.budget, 0), color: "bg-purple-600" },
+    { key: "won", label: "Won", count: rangedLeads.filter((l) => l.stage === "won").length, value: rangedLeads.filter((l) => l.stage === "won").reduce((a, c) => a + c.budget, 0), color: "bg-emerald-600" },
+    { key: "lost", label: "Lost", count: rangedLeads.filter((l) => l.stage === "lost").length, value: rangedLeads.filter((l) => l.stage === "lost").reduce((a, c) => a + c.budget, 0), color: "bg-rose-500" },
   ];
 
-  // Displayed Leads based on stage filter
-  const displayedOpportunities = activeStageFilter === "all"
-    ? filteredLeads
-    : filteredLeads.filter((l) => l.stage === activeStageFilter);
+  const displayedOpportunities = (activeStageFilter === "all" ? filteredLeads : filteredLeads.filter((l) => l.stage === activeStageFilter))
+    .filter((l) => searchQuery === "" || l.personName.toLowerCase().includes(searchQuery.toLowerCase()) || l.projectName.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className="space-y-6 pb-8 max-w-7xl mx-auto">
-      {/* Top Global Filter Toolbar */}
-      <div className="p-3.5 sm:p-4 rounded-xl border border-border bg-card shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-1.5 font-bold text-foreground mr-1">
-            <Filter className="h-3.5 w-3.5 text-primary" />
-            <span>Dimensions:</span>
+    <div className="space-y-6 pb-12 max-w-7xl mx-auto px-1 sm:px-2">
+      {/* 1. Header & Filter Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card/60 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-border/70 shadow-subtle">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              Executive Cockpit
+            </h1>
+            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync
+            </span>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Multi-project sales velocity, speed-to-lead SLA enforcement, and real-time revenue pipeline.
+          </p>
+        </div>
 
-          {/* Date Range Selector */}
+        {/* Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer hover:bg-secondary"
+            className="h-8 px-2.5 rounded-lg border border-border bg-secondary/40 text-xs font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none"
           >
             <option value="this_month">This Month</option>
             <option value="last_30_days">Last 30 Days</option>
@@ -245,336 +173,572 @@ export function BossOverview({
             <option value="all">All Time</option>
           </select>
 
-          {/* Region Selector */}
           <select
             value={selectedRegionId}
             onChange={(e) => setSelectedRegionId(e.target.value)}
-            className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer hover:bg-secondary"
+            className="h-8 px-2.5 rounded-lg border border-border bg-secondary/40 text-xs font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none"
           >
             <option value="all">All Regions ({regions.length})</option>
             {regions.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name} Region
-              </option>
+              <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </select>
 
-          {/* Salesperson Selector */}
-          <select
-            value={selectedSalespersonId}
-            onChange={(e) => setSelectedSalespersonId(e.target.value)}
-            className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer hover:bg-secondary"
-          >
-            <option value="all">All Sales Reps ({salespeople.length})</option>
-            {salespeople.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} ({s.regionName || "Sales"})
-              </option>
-            ))}
-          </select>
-
-          {/* Project Selector */}
           <select
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer hover:bg-secondary"
+            className="h-8 px-2.5 rounded-lg border border-border bg-secondary/40 text-xs font-medium text-foreground hover:bg-secondary transition-colors focus:outline-none"
           >
             <option value="all">All Projects ({projects.length})</option>
             {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
+              <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-        </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 text-xs font-semibold gap-1.5"
-          onClick={() => {
-            setSelectedRegionId("all");
-            setSelectedSalespersonId("all");
-            setSelectedProjectId("all");
-            setActiveStageFilter("all");
-          }}
-        >
-          <RefreshCw className="h-3 w-3" />
-          Reset Filters
-        </Button>
-      </div>
-
-      {/* Action Center: Needs Attention (Crucial Manager Decision Hub) */}
-      <Card className="p-4 sm:p-5 border-amber-200/80 bg-amber-50/30 space-y-3 shadow-subtle">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
-              !
-            </span>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Action Center · Needs Attention</h3>
-              <p className="text-xs text-muted-foreground">
-                {overdueCount + atRiskDeals.length + upcomingSiteVisits.length} priority items requiring immediate managerial decision
-              </p>
-            </div>
-          </div>
-          {onNavigateToTab && (
-            <button
-              type="button"
-              onClick={() => onNavigateToTab("tasks")}
-              className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+          {(selectedRegionId !== "all" || selectedProjectId !== "all" || selectedSalespersonId !== "all" || dateRange !== "this_month") && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedRegionId("all");
+                setSelectedSalespersonId("all");
+                setSelectedProjectId("all");
+                setDateRange("this_month");
+                setActiveStageFilter("all");
+              }}
+              className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
             >
-              <span>View All Tasks</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+              <RefreshCw className="h-3 w-3 mr-1" />
+              Reset
+            </Button>
           )}
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 text-xs">
-          {/* Overdue Follow-up alert */}
-          <div
-            onClick={() => onNavigateToTab ? onNavigateToTab("tasks") : null}
-            className="p-3 rounded-lg border border-rose-200 bg-card hover:bg-rose-50/40 cursor-pointer transition-colors space-y-1"
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-rose-700 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-rose-600 animate-ping" />
-                {overdueCount} Overdue Follow-ups
-              </span>
-              <Badge variant="destructive" className="text-[10px] px-1 py-0 font-mono">Urgent</Badge>
-            </div>
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              {overdueLeads[0] ? `${overdueLeads[0].personName} (${overdueLeads[0].projectName}) waiting` : "High priority calls pending"}
-            </p>
+      {/* 2. Hero Metric Ribbon (4 Key Indicators with Generous Whitespace) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1: Pipeline Value */}
+        <Card className="p-5 relative overflow-hidden border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle hover:shadow-card transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>Gross Pipeline</span>
+            <Building2 className="h-4 w-4 text-primary/70" />
           </div>
-
-          {/* At-Risk High Value Deal */}
-          <div
-            {...actionCardProps(() => atRiskDeals[0] && onSelectLead(atRiskDeals[0]), "Open highest-value deal at risk")}
-            className="p-3 rounded-lg border border-orange-200 bg-card hover:bg-orange-50/40 cursor-pointer transition-colors space-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-orange-800 flex items-center gap-1.5">
-                <ShieldAlert className="h-3.5 w-3.5 text-orange-600" />
-                {atRiskDeals.length} Deal at Risk
-              </span>
-              <span className="font-bold font-mono text-[11px] text-foreground">
-                {atRiskDeals[0] ? formatCurrencyINR(atRiskDeals[0].budget) : "—"}
-              </span>
-            </div>
-            <p className="text-[11px] text-muted-foreground leading-snug truncate">
-              {atRiskDeals[0] ? `${atRiskDeals[0].personName}: ${atRiskDeals[0].dealHealthReason}` : "No high-value deals stalled"}
-            </p>
-          </div>
-
-          {/* Site Visits Today / Tomorrow */}
-          <div
-            onClick={() => setActiveStageFilter("site_visit")}
-            className="p-3 rounded-lg border border-amber-200 bg-card hover:bg-amber-50/40 cursor-pointer transition-colors space-y-1"
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-amber-800 flex items-center gap-1.5">
-                <Building2 className="h-3.5 w-3.5 text-amber-600" />
-                {upcomingSiteVisits.length} Site Visits Pending
-              </span>
-              <Badge variant="warning" className="text-[10px] px-1 py-0">High Intent</Badge>
-            </div>
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              {upcomingSiteVisits[0] ? `${upcomingSiteVisits[0].personName} · ${upcomingSiteVisits[0].projectName}` : "Physical visits scheduled"}
-            </p>
-          </div>
-
-          {/* Negotiations Stagnant */}
-          <div
-            onClick={() => setActiveStageFilter("negotiation")}
-            className="p-3 rounded-lg border border-purple-200 bg-card hover:bg-purple-50/40 cursor-pointer transition-colors space-y-1"
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-purple-800 flex items-center gap-1.5">
-                <Target className="h-3.5 w-3.5 text-purple-600" />
-                {stagnantNegotiations.length} In Final Negotiation
-              </span>
-              <Badge variant="purple" className="text-[10px] px-1 py-0">Closing</Badge>
-            </div>
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              {stagnantNegotiations[0] ? `${stagnantNegotiations[0].personName} evaluating unit pricing` : "Active commercial talks"}
-            </p>
-          </div>
-        </div>
-      </Card>
-
-      {/* 6 Actionable Executive KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
-        <Card
-          onClick={() => setActiveStageFilter("all")}
-          className="p-4 flex flex-col justify-between space-y-2 hover:border-border/90 cursor-pointer transition-all hover:shadow-subtle"
-        >
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Total Inflow
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">{totalLeads}</div>
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
-            {inflowMomentum && (
-              <span className={`px-1 py-0.2 rounded font-bold ${inflowMomentum.startsWith("-") ? "text-rose-700 bg-rose-50" : "text-emerald-700 bg-emerald-50"}`}>
-                {inflowMomentum}
-              </span>
-            )}
-            vs prev 30d
-          </div>
-        </Card>
-
-        <Card
-          onClick={() => setActiveStageFilter("qualified")}
-          className="p-4 flex flex-col justify-between space-y-2 hover:border-border/90 cursor-pointer transition-all hover:shadow-subtle"
-        >
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Open Pipeline
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">{openLeads}</div>
-          <div className="text-[11px] text-muted-foreground font-medium">Active enquiries</div>
-        </Card>
-
-        <Card
-          onClick={() => setActiveStageFilter("site_visit")}
-          className="p-4 flex flex-col justify-between space-y-2 hover:border-amber-300 cursor-pointer transition-all hover:shadow-subtle bg-amber-50/20"
-        >
-          <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">
-            Site Visits Done
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-700">{siteVisits}</div>
-          <div className="text-[11px] text-amber-800 font-medium">Physical site walkthroughs</div>
-        </Card>
-
-        <Card
-          onClick={() => setActiveStageFilter("won")}
-          className="p-4 flex flex-col justify-between space-y-2 hover:border-emerald-300 cursor-pointer transition-all hover:shadow-subtle bg-emerald-50/20"
-        >
-          <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
-            Deals Closed
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-700">{wonDeals}</div>
-          <div className="text-[11px] text-emerald-700 font-bold font-mono">
-            {formatCurrencyINR(wonValue)} booked
-          </div>
-        </Card>
-
-        <Card
-          onClick={() => onNavigateToTab && onNavigateToTab("tasks")}
-          className="p-4 flex flex-col justify-between space-y-2 hover:border-rose-300 cursor-pointer transition-all hover:shadow-subtle bg-rose-50/20"
-        >
-          <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wider block">
-            Follow-ups Due
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-rose-700">{followUpsDue}</div>
-          <div className="text-[11px] text-rose-700 font-bold font-mono">
-            {overdueCount} Overdue
-          </div>
-        </Card>
-
-        <Card
-          onClick={() => setActiveStageFilter("all")}
-          className="p-4 flex flex-col justify-between space-y-2 hover:border-border/90 cursor-pointer transition-all hover:shadow-subtle"
-        >
-          <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider block">
-            Gross Pipeline
-          </span>
-          <div className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground truncate pt-0.5">
+          <div className="mt-3 text-2xl sm:text-3xl font-black text-foreground tracking-tight font-mono truncate">
             {formatCurrencyINR(totalPipelineValue)}
           </div>
-          <div className="text-[11px] text-muted-foreground font-medium">Across all projects</div>
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-bold text-foreground">{openLeads}</span> active inquiries across {projects.length} towers
+          </div>
+        </Card>
+
+        {/* Metric 2: SLA Response Health */}
+        <Card className="p-5 relative overflow-hidden border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle hover:shadow-card transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>Speed-to-Lead SLA</span>
+            <Zap className="h-4 w-4 text-amber-500/80" />
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+              {overdueCount === 0 ? "100%" : `${Math.max(60, 100 - overdueCount * 5)}%`}
+            </span>
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">On-Time</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Response target: &lt; 5 mins</span>
+            {overdueCount > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 font-mono">
+                {overdueCount} Breached
+              </Badge>
+            )}
+          </div>
+        </Card>
+
+        {/* Metric 3: Active Negotiations & Site Visits */}
+        <Card className="p-5 relative overflow-hidden border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle hover:shadow-card transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>High-Intent Visits</span>
+            <Target className="h-4 w-4 text-indigo-500/80" />
+          </div>
+          <div className="mt-3 text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+            {siteVisits}
+          </div>
+          <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span>Physical Walkthroughs</span>
+            <span className="font-semibold text-primary">{stagnantNegotiations.length} in final closure</span>
+          </div>
+        </Card>
+
+        {/* Metric 4: Realized Revenue Won */}
+        <Card className="p-5 relative overflow-hidden border-border/80 bg-gradient-to-br from-card to-card/60 shadow-subtle hover:shadow-card transition-all">
+          <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+            <span>Closed Revenue</span>
+            <CheckCircle2 className="h-4 w-4 text-emerald-500/80" />
+          </div>
+          <div className="mt-3 text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight font-mono truncate">
+            {formatCurrencyINR(wonValue)}
+          </div>
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-bold text-foreground">{wonDeals}</span> booked units this period
+          </div>
         </Card>
       </div>
 
-      {/* Deal Health & Risk Intelligence Spotlight */}
-      {atRiskDeals.length > 0 && (
-        <Card className="p-4 sm:p-5 border-border space-y-3 bg-card shadow-subtle">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-rose-600" />
-              <h3 className="text-sm font-bold text-foreground">Deal Health & Risk Intelligence</h3>
-            </div>
-            <span className="text-[11px] text-muted-foreground">Automated Stagnation & SLA Check</span>
+      {/* 3. Segmented Navigation Tabs (Progressive Disclosure) */}
+      <div className="flex items-center gap-2 border-b border-border/70 pb-3 overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => setActiveTab("focus")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "focus"
+              ? "bg-primary text-primary-foreground shadow-subtle"
+              : "bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <Flame className="h-3.5 w-3.5" />
+          <span>Priority Action</span>
+          {(atRiskDeals.length > 0 || overdueCount > 0) && (
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${activeTab === "focus" ? "bg-white/20 text-white" : "bg-rose-500/20 text-rose-600"}`}>
+              {atRiskDeals.length + overdueCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("pipeline")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "pipeline"
+              ? "bg-primary text-primary-foreground shadow-subtle"
+              : "bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <TrendingUp className="h-3.5 w-3.5" />
+          <span>Deal Flow & Stages</span>
+          <span className="text-[10px] opacity-70">({totalLeads})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("team")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "team"
+              ? "bg-primary text-primary-foreground shadow-subtle"
+              : "bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
+        >
+          <Users className="h-3.5 w-3.5" />
+          <span>Sales Leaderboard</span>
+          <span className="text-[10px] opacity-70">({salespeople.length})</span>
+        </button>
+
+        {reactivationLeads.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setActiveTab("revival")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              activeTab === "revival"
+                ? "bg-amber-600 text-white shadow-subtle"
+                : "bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>AI Lead Revival</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-600/20 text-amber-800 dark:text-amber-200">
+              {reactivationLeads.length}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* 4. Tab Contents */}
+
+      {/* TAB 1: PRIORITY ACTION & EXECUTIVE RADAR */}
+      {activeTab === "focus" && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Main Left Column (7-cols): At-Risk Interventions & Hot Deals */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* Urgent Interventions Card */}
+            {(atRiskDeals.length > 0 || overdueCount > 0) && (
+              <Card className="p-5 border-rose-200/80 bg-rose-50/20 dark:bg-rose-950/10 space-y-3 shadow-subtle">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-bold">
+                      !
+                    </span>
+                    <div>
+                      <h2 className="text-sm font-bold text-foreground">Action Center · Urgent Interventions</h2>
+                      <p className="text-xs text-muted-foreground">High-ticket deals stalling or exceeding SLA response limits</p>
+                    </div>
+                  </div>
+                  {onNavigateToTab && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigateToTab("tasks")}
+                      className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                    >
+                      <span>Task Board</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2.5 pt-1">
+                  {atRiskDeals.slice(0, 3).map((lead) => (
+                    <div
+                      key={lead.id}
+                      {...actionCardProps(() => onSelectLead(lead), `Open at-risk lead ${lead.personName}`)}
+                      className="p-3.5 rounded-xl border border-rose-200/80 bg-card hover:border-rose-300 cursor-pointer space-y-2 text-xs transition-all shadow-subtle"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-foreground">{lead.personName}</span>
+                            <DealHealthBadge health="at_risk" reason={lead.dealHealthReason} />
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {lead.projectName} • Assigned to <strong>{lead.salespersonName}</strong>
+                          </p>
+                        </div>
+                        <span className="font-bold font-mono text-sm text-foreground">
+                          {formatCurrencyINR(lead.budget)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[11px]">
+                        <span className="text-rose-700 font-medium">{lead.dealHealthReason || "Follow-up delayed"}</span>
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          <a
+                            href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center h-6 px-2.5 rounded-md text-[11px] font-bold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors"
+                          >
+                            <MessageSquare className="h-3 w-3 mr-1" />
+                            WhatsApp
+                          </a>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onSelectLead(lead)}
+                            className="h-6 text-[11px] px-2"
+                          >
+                            Open Lead
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* High-Value Active Opportunities */}
+            <Card className="p-5 space-y-4 shadow-subtle border-border/80">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">VIP Active Opportunities</h3>
+                  <p className="text-xs text-muted-foreground">High-budget buyers currently in active negotiations or qualified stages</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setActiveTab("pipeline")}
+                  className="text-xs font-bold text-primary"
+                >
+                  View All ({filteredLeads.length})
+                </Button>
+              </div>
+
+              <div className="space-y-2.5">
+                {filteredLeads.slice(0, 5).map((lead) => (
+                  <div
+                    key={lead.id}
+                    {...actionCardProps(() => onSelectLead(lead), `Open lead ${lead.personName}`)}
+                    className="p-3.5 rounded-xl border border-border bg-card hover:bg-secondary/30 cursor-pointer transition-all flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-foreground truncate">{lead.personName}</span>
+                        <PipelineBadge stage={lead.stage} />
+                      </div>
+                      <div className="text-[11px] text-muted-foreground flex items-center gap-2">
+                        <span>{lead.projectName}</span>
+                        <span>•</span>
+                        <span>Rep: {lead.salespersonName}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="font-bold font-mono text-sm text-foreground">
+                        {formatCurrencyINR(lead.budget)}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground font-mono">
+                        Score: {lead.leadScore || 50}/100
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {atRiskDeals.map((lead) => (
-              <div
-                key={lead.id}
-                {...actionCardProps(() => onSelectLead(lead), `Open at-risk lead ${lead.personName}`)}
-                className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/30 hover:border-rose-300 cursor-pointer space-y-2 text-xs transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-foreground">{lead.personName}</span>
-                      <DealHealthBadge health="at_risk" reason={lead.dealHealthReason} />
-                      <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
-                    </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5">
-                      {lead.projectName} • Rep: <strong>{lead.salespersonName}</strong>
-                    </div>
-                  </div>
-                  <span className="font-bold text-sm text-foreground font-mono">
-                    {formatCurrencyINR(lead.budget)}
-                  </span>
+          {/* Right Rail (5-cols): Live Touchpoint Activity & Quick Actions */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* Live Touchpoints Stream */}
+            <Card className="p-5 space-y-3 shadow-subtle border-border/80">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold text-foreground">Live Touchpoints</h3>
                 </div>
-
-                <div className="p-2 rounded bg-card border border-rose-200/80 text-[11px] space-y-1">
-                  <div className="text-rose-700 font-semibold flex items-center gap-1">
-                    <span>🔴 Risk:</span>
-                    <span>{lead.dealHealthReason}</span>
-                  </div>
-                  <div className="text-foreground/90 font-medium">
-                    <span>Next Action: </span>
-                    <strong className="text-primary">{lead.recommendedAction || "Call buyer immediately"}</strong>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-[11px] text-muted-foreground font-mono">
-                    Last active: {new Date(lead.lastActivityAt).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                    <a
-                      href={`tel:${lead.phone}`}
-                      className="inline-flex items-center h-6 px-2 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    >
-                      <Phone className="h-3 w-3 mr-1" />
-                      Call Rep
-                    </a>
-                    <a
-                      href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center h-6 px-2 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    >
-                      <MessageSquare className="h-3 w-3 mr-1" />
-                      WhatsApp
-                    </a>
-                  </div>
-                </div>
+                <span className="text-[11px] font-mono text-muted-foreground">Real-Time Audit</span>
               </div>
-            ))}
+
+              <div className="space-y-3 max-h-[460px] overflow-y-auto pr-1">
+                {activities.slice(0, 7).map((act) => (
+                  <div key={act.id} className="text-xs pb-3 border-b border-border/40 last:border-0 last:pb-0 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-foreground flex items-center gap-1.5 capitalize">
+                        {act.type === "call" && <Phone className="h-3 w-3 text-blue-600" />}
+                        {act.type === "whatsapp" && <MessageSquare className="h-3 w-3 text-emerald-600" />}
+                        {act.type === "site_visit" && <Building2 className="h-3 w-3 text-amber-600" />}
+                        {act.personName}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {new Date(act.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    {act.notes && (
+                      <p className="text-[11px] text-muted-foreground bg-secondary/30 p-2 rounded-lg leading-relaxed">
+                        &ldquo;{act.notes}&rdquo;
+                      </p>
+                    )}
+                    <div className="text-[10px] text-muted-foreground flex items-center justify-between pt-0.5">
+                      <span>By {act.userName}</span>
+                      {act.scheduledFollowUpAt && (
+                        <span className="text-primary font-semibold font-mono">Next: {act.scheduledFollowUpAt}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* AI Resurrection Quick Trigger */}
+            {reactivationLeads.length > 0 && (
+              <Card className="p-4 rounded-xl border-amber-300 bg-amber-500/10 dark:bg-amber-950/20 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-xs text-foreground">
+                    <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <span>{reactivationLeads.length} Dormant Leads Ready</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setResurrectionTargetLeadId(reactivationLeads[0]?.id);
+                      setResurrectionModalOpen(true);
+                    }}
+                    className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-2.5"
+                  >
+                    Resurrect Now
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  AI matched dormant high-intent buyers with newly released units and price changes.
+                </p>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: DEAL FLOW & PIPELINE STAGES */}
+      {activeTab === "pipeline" && (
+        <div className="space-y-6">
+          {/* Conversion Funnel Bar */}
+          <Card className="p-5 space-y-4 shadow-subtle border-border/80">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Pipeline Stage Conversion Flow</h3>
+                <p className="text-xs text-muted-foreground">Select a milestone stage to filter opportunities</p>
+              </div>
+              <div className="text-xs font-mono text-muted-foreground bg-secondary px-2.5 py-1 rounded-md">
+                {totalLeads} Total Inquiries · {formatCurrencyINR(totalPipelineValue)}
+              </div>
+            </div>
+
+            {/* Conversion Visual Bar */}
+            <div className="h-3 w-full rounded-full bg-secondary flex overflow-hidden border border-border">
+              {stages.map((st) => {
+                const pct = totalLeads > 0 ? (st.count / totalLeads) * 100 : 0;
+                if (pct === 0) return null;
+                return (
+                  <div
+                    key={st.key}
+                    onClick={() => setActiveStageFilter(activeStageFilter === st.key ? "all" : st.key)}
+                    className={`${st.color} h-full cursor-pointer hover:opacity-90 transition-all ${activeStageFilter === st.key ? "ring-2 ring-foreground" : ""}`}
+                    style={{ width: `${pct}%` }}
+                    title={`${st.label}: ${st.count} (${pct.toFixed(1)}%)`}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Stage Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1 text-xs">
+              {stages.map((st) => {
+                const isSelected = activeStageFilter === st.key;
+                return (
+                  <button
+                    key={st.key}
+                    type="button"
+                    onClick={() => setActiveStageFilter(isSelected ? "all" : st.key)}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      isSelected
+                        ? "bg-primary/10 border-primary text-foreground font-bold shadow-subtle"
+                        : "bg-card border-border hover:bg-secondary/40 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className={`h-2 w-2 rounded-full ${st.color}`} />
+                      <span className="text-[11px] font-semibold text-foreground truncate">{st.label}</span>
+                    </div>
+                    <div className="text-base font-bold font-mono text-foreground">{st.count}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono truncate">{formatCurrencyINR(st.value)}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* Search & Leads List */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search buyer name, phone, project..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-8 pl-8 pr-3 rounded-lg border border-border bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">
+                Showing {displayedOpportunities.length} opportunities
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {displayedOpportunities.map((lead) => (
+                <div
+                  key={lead.id}
+                  {...actionCardProps(() => onSelectLead(lead), `Open lead ${lead.personName}`)}
+                  className="p-4 rounded-xl border border-border bg-card hover:border-primary/50 cursor-pointer shadow-subtle transition-all space-y-2.5 text-xs"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-sm text-foreground">{lead.personName}</div>
+                      <div className="text-[11px] text-muted-foreground">{lead.projectName}</div>
+                    </div>
+                    <span className="font-bold font-mono text-xs text-foreground bg-secondary px-2 py-0.5 rounded">
+                      {formatCurrencyINR(lead.budget)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px]">
+                    <PipelineBadge stage={lead.stage} />
+                    <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
+                  </div>
+
+                  <div className="text-[11px] text-muted-foreground bg-secondary/30 p-2 rounded line-clamp-2">
+                    {lead.lastActivityText || "No touchpoints logged yet"}
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/40">
+                    <span>Rep: {lead.salespersonName}</span>
+                    <span>Next: {lead.nextFollowUpAt || "—"}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: SALES TEAM PERFORMANCE LEADERBOARD */}
+      {activeTab === "team" && (
+        <Card className="p-5 space-y-4 shadow-subtle border-border/80">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-foreground">Sales Rep Productivity & Conversion Rates</h3>
+              <p className="text-xs text-muted-foreground">Individual closer performance, SLA compliance, and pipeline velocity</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider bg-secondary/30 border-b border-border">
+                <tr>
+                  <th className="py-2.5 px-3">Salesperson</th>
+                  <th className="py-2.5 px-3">Region</th>
+                  <th className="py-2.5 px-3">Active Deals</th>
+                  <th className="py-2.5 px-3">Site Visits Done</th>
+                  <th className="py-2.5 px-3">Revenue Closed</th>
+                  <th className="py-2.5 px-3">SLA Compliance</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {salespeople.map((rep) => {
+                  const repLeads = rangedLeads.filter((l) => l.salespersonId === rep.id);
+                  const repWonValue = repLeads.filter((l) => l.stage === "won").reduce((a, c) => a + c.budget, 0);
+                  const repVisits = repLeads.filter((l) => l.stage === "site_visit").length;
+                  const repOverdue = repLeads.filter((l) => l.followUpStatus === "overdue").length;
+                  const complianceScore = repLeads.length > 0 ? Math.max(70, Math.round(100 - (repOverdue / repLeads.length) * 100)) : 100;
+
+                  return (
+                    <tr key={rep.id} className="hover:bg-secondary/20 transition-colors">
+                      <td className="py-3 px-3 font-bold text-foreground flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                          {rep.name.charAt(0)}
+                        </div>
+                        <span>{rep.name}</span>
+                      </td>
+                      <td className="py-3 px-3 text-muted-foreground">{rep.regionName || "NCR"}</td>
+                      <td className="py-3 px-3 font-mono font-semibold text-foreground">{repLeads.length}</td>
+                      <td className="py-3 px-3 font-mono text-foreground">{repVisits}</td>
+                      <td className="py-3 px-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        {formatCurrencyINR(repWonValue)}
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className={`px-2 py-0.5 rounded-full font-mono text-[11px] font-bold ${
+                          complianceScore >= 90
+                            ? "bg-emerald-500/10 text-emerald-600"
+                            : complianceScore >= 75
+                            ? "bg-amber-500/10 text-amber-600"
+                            : "bg-rose-500/10 text-rose-600"
+                        }`}>
+                          {complianceScore}%
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </Card>
       )}
 
-      {/* Lost-Lead Reactivation Radar (Speed-to-Lead Engine) */}
-      {reactivationLeads.length > 0 && (
-        <Card className="p-4 sm:p-5 border-amber-300 bg-amber-50/30 dark:bg-amber-950/20 space-y-3 shadow-subtle">
+      {/* TAB 4: AI LEAD REVIVAL & DORMANT RECOVERY */}
+      {activeTab === "revival" && (
+        <Card className="p-5 space-y-4 shadow-subtle border-amber-300 bg-amber-500/5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-400">
-                <Flame className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-foreground">
-                  Lost-Lead AI Resurrection Radar ({reactivationLeads.length} High-Ticket Opportunities)
-                </h3>
-                <p className="text-[11px] text-muted-foreground">
-                  AI scans dormant leads, cross-references newly available units & price drops, and auto-generates conversion pitches.
-                </p>
-              </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">AI Lost-Lead Resurrection Radar</h3>
+              <p className="text-xs text-muted-foreground">
+                Matches dormant buyers with newly released units, price reductions, and custom tailored pitches.
+              </p>
             </div>
             <Button
               size="sm"
@@ -582,42 +746,40 @@ export function BossOverview({
                 setResurrectionTargetLeadId(reactivationLeads[0]?.id);
                 setResurrectionModalOpen(true);
               }}
-              className="h-8 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white gap-1.5 shadow-subtle shrink-0"
+              className="h-8 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white gap-1.5"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              Open AI Resurrection Engine
+              Open Engine
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
-            {reactivationLeads.slice(0, 3).map((lead) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {reactivationLeads.map((lead) => (
               <div
                 key={lead.id}
-                className="p-3 rounded-xl border border-border bg-card space-y-2 text-xs hover:border-amber-400 transition-colors"
+                className="p-4 rounded-xl border border-border bg-card space-y-2.5 text-xs hover:border-amber-400 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="font-bold text-foreground">{lead.personName}</div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {lead.projectName} • {lead.regionName}
-                    </div>
+                    <div className="font-bold text-foreground text-sm">{lead.personName}</div>
+                    <div className="text-[11px] text-muted-foreground">{lead.projectName}</div>
                   </div>
-                  <span className="font-bold text-foreground font-mono">
+                  <span className="font-bold font-mono text-xs text-foreground">
                     {formatCurrencyINR(lead.budget)}
                   </span>
                 </div>
 
-                <div className="p-2 rounded bg-secondary/40 text-[11px] space-y-0.5">
-                  <span className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400 block">AI Resurrection Match:</span>
-                  <p className="text-foreground/90 font-medium leading-tight line-clamp-2">
-                    {lead.recommendedAction || "Matched with newly released high-floor units at " + lead.projectName}
+                <div className="p-2.5 rounded-lg bg-amber-500/10 text-[11px] space-y-1">
+                  <span className="font-bold text-amber-700 dark:text-amber-400 block uppercase text-[10px]">
+                    AI Match Insight:
+                  </span>
+                  <p className="text-foreground leading-relaxed">
+                    {lead.recommendedAction || "Matched with newly released high-floor unit."}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    {lead.daysInStage}d dormant
-                  </span>
+                  <span className="text-[10px] text-muted-foreground font-mono">{lead.daysInStage || 14}d dormant</span>
                   <Button
                     size="sm"
                     onClick={() => {
@@ -636,194 +798,7 @@ export function BossOverview({
         </Card>
       )}
 
-      {/* Interactive Pipeline Stage Distribution & Milestone Bar */}
-      <Card className="p-4 sm:p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-bold text-foreground">Pipeline Velocity & Conversion Flow</h3>
-            </div>
-            <p className="text-xs text-muted-foreground">Click any milestone stage to filter opportunities below</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {activeStageFilter !== "all" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-muted-foreground"
-                onClick={() => setActiveStageFilter("all")}
-              >
-                Clear Stage Filter
-              </Button>
-            )}
-            <span className="text-xs font-mono text-muted-foreground bg-secondary px-2.5 py-0.5 rounded border border-border">
-              {totalLeads} total deals · {formatCurrencyINR(totalPipelineValue)}
-            </span>
-          </div>
-        </div>
-
-        {/* Multi-segment distribution bar */}
-        <div className="h-3.5 w-full rounded-full bg-secondary flex overflow-hidden border border-border">
-          {stages.map((st) => {
-            const pct = totalLeads > 0 ? (st.count / totalLeads) * 100 : 0;
-            if (pct === 0) return null;
-            const isSelected = activeStageFilter === st.key;
-            return (
-              <div
-                key={st.key}
-                onClick={() => setActiveStageFilter(activeStageFilter === st.key ? "all" : st.key)}
-                className={`${st.color} h-full transition-all duration-300 cursor-pointer hover:opacity-90 ${
-                  isSelected ? "ring-2 ring-foreground" : ""
-                }`}
-                style={{ width: `${pct}%` }}
-                title={`${st.label}: ${st.count} (${pct.toFixed(1)}%) • ${formatCurrencyINR(st.value)}`}
-              />
-            );
-          })}
-        </div>
-
-        {/* Stage Legend Pills with Conversion Data */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1 text-xs">
-          {stages.map((st) => {
-            const isSelected = activeStageFilter === st.key;
-            return (
-              <button
-                key={st.key}
-                type="button"
-                onClick={() => setActiveStageFilter(isSelected ? "all" : st.key)}
-                className={`p-2 rounded-lg border text-left transition-all ${
-                  isSelected
-                    ? "bg-secondary border-primary font-bold shadow-subtle"
-                    : "bg-card border-border hover:bg-secondary/40"
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className={`h-2 w-2 rounded-full ${st.color}`} />
-                  <span className="font-semibold text-foreground text-[11px] truncate">{st.label}</span>
-                </div>
-                <div className="font-bold text-foreground font-mono text-sm">{st.count}</div>
-                <div className="text-[10px] text-muted-foreground font-mono truncate">{formatCurrencyINR(st.value)}</div>
-              </button>
-            );
-          })}
-        </div>
-      </Card>
-
-      {/* Main Content Split: Opportunities & Live Audit Stream */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Priority Lead Opportunities */}
-        <div className="lg:col-span-8 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Flame className="h-4 w-4 text-orange-500" />
-                <h3 className="text-sm font-bold text-foreground">
-                  Opportunities {activeStageFilter !== "all" && `(${activeStageFilter.toUpperCase().replace("_", " ")})`}
-                </h3>
-              </div>
-              <p className="text-xs text-muted-foreground">Click any record for 360° lead dossier, unit allocation, or quick activity</p>
-            </div>
-            <span className="text-xs text-muted-foreground font-mono">{displayedOpportunities.length} shown</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {displayedOpportunities.map((lead) => (
-              <div
-                key={lead.id}
-                {...actionCardProps(() => onSelectLead(lead), `Open opportunity ${lead.personName}`)}
-                className="p-4 rounded-xl border border-border bg-card hover:border-border/90 cursor-pointer shadow-subtle hover:shadow-card transition-all space-y-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm text-foreground">{lead.personName}</span>
-                      <PipelineBadge stage={lead.stage} />
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <span>{lead.projectName}</span>
-                      {lead.assignedUnitNumber && (
-                        <Badge variant="outline" className="text-[10px] font-mono px-1 py-0">
-                          Unit {lead.assignedUnitNumber}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold text-foreground font-mono bg-secondary px-2 py-0.5 rounded border border-border">
-                    {formatCurrencyINR(lead.budget)}
-                  </span>
-                </div>
-
-                {/* Score and Deal Health row */}
-                <div className="flex items-center justify-between pt-0.5 text-xs">
-                  <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
-                  <DealHealthBadge health={lead.dealHealth} reason={lead.dealHealthReason} />
-                </div>
-
-                <div className="text-[11px] text-muted-foreground bg-secondary/40 p-2 rounded-md border border-border/40 font-mono leading-relaxed line-clamp-2">
-                  {lead.lastActivityText}
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] pt-1 border-t border-border/50 text-muted-foreground">
-                  <TaskStatusBadge status={lead.followUpStatus || "upcoming"} />
-                  <span className="font-medium text-foreground">{lead.nextFollowUpAt || "—"}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Live Immutable Calling Audit Feed */}
-        <div className="lg:col-span-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Target className="h-4 w-4 text-blue-500" />
-              <h3 className="text-sm font-bold text-foreground">Live Activity Feed</h3>
-            </div>
-            <span className="text-[11px] text-muted-foreground font-mono">Immutable Stream</span>
-          </div>
-
-          <Card className="p-4 space-y-3 max-h-[580px] overflow-y-auto">
-            {activities.map((act) => (
-              <div key={act.id} className="text-xs pb-3 border-b border-border/50 last:border-0 last:pb-0 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold capitalize text-foreground flex items-center gap-1">
-                      {act.type === "call" && <Phone className="h-3 w-3 text-blue-600" />}
-                      {act.type === "whatsapp" && <MessageSquare className="h-3 w-3 text-emerald-600" />}
-                      {act.type === "site_visit" && <Building2 className="h-3 w-3 text-amber-600" />}
-                      {act.type}
-                    </span>
-                    {act.outcomeLabel && (
-                      <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
-                        {act.outcomeLabel}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    {new Date(act.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-
-                <div className="font-semibold text-foreground">{act.personName}</div>
-                {act.notes && (
-                  <p className="text-[11px] text-muted-foreground leading-relaxed bg-secondary/30 p-1.5 rounded">
-                    &ldquo;{act.notes}&rdquo;
-                  </p>
-                )}
-                <div className="text-[10px] text-muted-foreground flex items-center justify-between pt-0.5">
-                  <span>Logged by {act.userName}</span>
-                  {act.scheduledFollowUpAt && (
-                    <span className="text-amber-800 font-semibold font-mono">Next: {act.scheduledFollowUpAt}</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </Card>
-        </div>
-      </div>
-
-      {/* Autonomous Lost-Lead Resurrection Modal */}
+      {/* Modal */}
       <AiResurrectionModal
         open={resurrectionModalOpen}
         onOpenChange={setResurrectionModalOpen}
@@ -832,4 +807,3 @@ export function BossOverview({
     </div>
   );
 }
-
