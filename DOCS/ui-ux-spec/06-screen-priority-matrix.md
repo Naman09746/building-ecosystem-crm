@@ -14,6 +14,11 @@
 | **Leads Directory & Dossier (`leads-page.tsx`)** | **P0 (Critical)** | Rep, Manager | 30+ times/day | **Primary CRM Workflow**. Replaces cramped 8-column table with stacked rows and instant slide-over lead dossier. | Medium | Table component, Slide-over sheet |
 | **Projects & Unit Matrix (`projects-page.tsx`)** | **P0 (Critical)** | Rep, Manager, Admin | 10+ times/day | **Inventory Liquidity**. Streamlines 1034 lines of complex state into modular society and tower selectors. | High | Unit status badges, Tower selector |
 | **Seller Opportunities (`seller-opportunities-modal.tsx`)** | **P0 (Critical)** | Rep, Manager | 5+ times/day | **Exclusive Resale Inventory Capture**. Evidence-based resale intelligence with transparent factor scoring. | Low | Seller intelligence types |
+| **Digital Site Visit Pass (`site-visit-pass-modal.tsx`)** | **P0 (Critical)** | Rep, Security | 10+ times/day | **Zero-Friction Society Access**. Cryptographic QR pass, Gate 2 PIN, vehicle logs, and geofenced check-in. | Low | Pass API & WhatsApp sharing |
+| **Multi-Party Bidding Ledger (`bidding-ledger-modal.tsx`)** | **P0 (Critical)** | Rep, Manager | 10+ times/day | **Closing Negotiation Velocity**. Immutable round-by-round price counter-offers and token advance tracking. | Medium | Bidding API & Deal state |
+| **Indian Cost Sheet Calculator (`cost-sheet-modal.tsx`)** | **P0 (Critical)** | Rep, Buyer | 15+ times/day | **Instant Quotation Generation**. Automated CLP, Stamp Duty (5-7%), GST (5%), and registration breakdown. | Low | Cost sheet engine |
+| **Visual Tower Stacking Matrix (`stacking-chart-dialog.tsx`)** | **P1 (Important)** | Rep, Specialist | 8+ times/day | **High-Rise Spatial Exploration**. Floor-by-floor occupancy, unit configuration, and price heatmap. | Medium | Tower & Units dataset |
+| **Broker Commission Engine (`commissions-page.tsx`)** | **P1 (Important)** | Manager, Broker | 5+ times/day | **Partner Liquidity**. Tiered broker payouts, RERA compliance, and TDS Section 194H withholding ledger. | Medium | Commission API & RLS |
 | **Pipeline Kanban Board (`pipeline-board.tsx`)** | **P1 (Important)** | Rep, Manager | 10+ times/day | **Deal Progression**. Adds stage value headers, stage velocity indicators, and smoother drag-and-drop. | Medium | Pipeline status mappers |
 | **Global Command Palette (`global-search-dialog.tsx`)** | **P1 (Important)** | All Personas | 25+ times/day | **10-Second Keyboard Navigation**. Instant <10ms lookup across leads, units, societies, and quick actions. | Low | Global search API endpoint |
 | **Follow-up Queue & Tasks (`tasks-page.tsx`)** | **P1 (Important)** | Sales Rep | 10+ times/day | **SLA Compliance**. Streamlines overdue and due-today commitments with 1-click dialer triggers. | Low | Task completion mappers |
@@ -34,8 +39,8 @@
 
 ```
 Total Scope Breakdown:
-- P0 (Critical):    6 Screens (65% of daily user time)
-- P1 (Important):   7 Screens (25% of daily user time)
-- P2 (Enhancement): 4 Screens (8% of daily user time)
-- P3 (Future):      2 Screens (2% of daily user time)
+- P0 (Critical):    9 Screens (75% of daily user time)
+- P1 (Important):   9 Screens (20% of daily user time)
+- P2 (Enhancement): 4 Screens (4% of daily user time)
+- P3 (Future):      2 Screens (1% of daily user time)
 ```

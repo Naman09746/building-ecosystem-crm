@@ -375,23 +375,28 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth, extensions
 as $$
 declare
   new_org_id uuid;
   org_slug text;
+  v_full_name text;
+  v_org_name text;
+  v_phone text;
 begin
-  -- Generate unique slug from org name + short random suffix
-  org_slug := lower(regexp_replace(
-    coalesce(nullif(new.raw_user_meta_data->>'org_name', ''), 'Org'),
-    '[^a-zA-Z0-9]+', '-', 'g'
-  )) || '-' || substr(encode(gen_random_bytes(4), 'hex'), 1, 6);
+  v_org_name := coalesce(nullif(new.raw_user_meta_data->>'org_name', ''), 'My Organization');
+  v_full_name := coalesce(
+    nullif(new.raw_user_meta_data->>'full_name', ''),
+    nullif(split_part(coalesce(new.email, ''), '@', 1), ''),
+    'Real Estate Agent'
+  );
+  v_phone := nullif(new.raw_user_meta_data->>'phone', '');
+
+  -- Generate unique slug from org name + short random suffix using built-in gen_random_uuid
+  org_slug := lower(regexp_replace(v_org_name, '[^a-zA-Z0-9]+', '-', 'g')) || '-' || substr(gen_random_uuid()::text, 1, 6);
 
   insert into public.orgs (name, slug)
-  values (
-    coalesce(nullif(new.raw_user_meta_data->>'org_name', ''), 'My Organization'),
-    org_slug
-  )
+  values (v_org_name, org_slug)
   returning id into new_org_id;
 
   insert into public.profiles (user_id, org_id, role, full_name, phone)
@@ -399,8 +404,8 @@ begin
     new.id,
     new_org_id,
     'owner',
-    coalesce(nullif(new.raw_user_meta_data->>'full_name', ''), split_part(new.email, '@', 1)),
-    nullif(new.raw_user_meta_data->>'phone', '')
+    v_full_name,
+    v_phone
   );
 
   perform public.seed_default_pipeline_stages(new_org_id);

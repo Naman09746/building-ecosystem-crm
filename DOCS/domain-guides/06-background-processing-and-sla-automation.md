@@ -117,10 +117,15 @@ No audit records are created if the deal status remains unchanged during cron ex
 
 ## 6. Manual Testing & Invocation Instructions
 
-### Testing the Cron Endpoint via CLI
+### Testing the Cron Endpoints via CLI
 ```bash
+# 1. Trigger SLA & Deal Health Monitor
 curl -X GET http://localhost:3000/api/cron/sla-monitor \
-  -H "Authorization: Bearer dev_cron_secret"
+  -H "Authorization: Bearer ${CRON_SECRET}"
+
+# 2. Trigger Domain Event Outbox Processing
+curl -X POST "http://localhost:3000/api/integrations/outbox/process?batchSize=50" \
+  -H "Authorization: Bearer ${CRON_SECRET}"
 ```
 
 ### Triggering On-Demand Recomputation (Manager Role)
@@ -131,14 +136,12 @@ curl -X POST http://localhost:3000/api/automation/recompute \
 
 ### Running the Test & Validation Suite
 ```bash
-# 1. Run migration validation harness against real PostgreSQL
-node scripts/validate-migrations.mjs
+# 1. Run automated pre-flight CI pipeline
+make ci
 
-# 2. Run Vitest test suite
-npm test -- --run
+# 2. Run migration validation harness against real PostgreSQL
+make test-migrations
 
-# 3. Verify TypeScript, Linting, and Next.js Build
-npx tsc --noEmit
-npm run lint
-npm run build
+# 3. Run all 239 Vitest tests across 28 suites
+make verify
 ```

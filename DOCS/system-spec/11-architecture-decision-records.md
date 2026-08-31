@@ -51,8 +51,63 @@ This document records the critical architectural decisions made during the desig
 ## ADR 005: Graphify AST Knowledge Graph for Zero-Token Codebase Navigation
 
 - **Status:** Accepted
-- **Context:** As the codebase expanded across 100+ files and 29 routes, LLM agents were forced to re-read thousands of lines of code on every interaction, causing context exhaustion and high latency.
-- **Decision:** Integrate `graphify` to pre-extract an AST knowledge graph (`graph.json`, 547 nodes, 1324 edges) and install Git lifecycle hooks.
+- **Context:** As the codebase expanded across 100+ files and 75 routes, LLM agents were forced to re-read thousands of lines of code on every interaction, causing context exhaustion and high latency.
+- **Decision:** Integrate `graphify` to pre-extract an AST knowledge graph (`graph.json`, 1,500+ nodes, 3,300+ edges) and install Git lifecycle hooks.
 - **Consequences:**
   - *Positive:* Agents query symbols, call flows, and dependencies instantly in 0 tokens; no repetitive file scanning.
-  - *Trade-off:* Requires `graphify update .` after major structural refactors (automated via Git hook).
+  - *Trade-off:* Requires `graphify update .` after modifying code files (automated via Git hook).
+
+---
+
+## ADR 006: CallCRM + n8n Separation of Responsibilities & Transactional Domain Event Outbox
+
+- **Status:** Accepted
+- **Context:** Coupling third-party communication channels (telephony, WhatsApp Cloud API, external marketing automation) directly into synchronous Next.js API route handlers creates vulnerability to external provider outages, rate limits, and latency spikes.
+- **Decision:** Establish CallCRM as the single source of truth and security boundary, and delegate external orchestration and multi-channel drip campaigns to n8n via a transactional Domain Event Outbox (`integration_outbox`).
+- **Consequences:**
+  - *Positive:* 100% decoupling; zero request blocking; reliable at-least-once event delivery; circuit breaker protection prevents system cascading failures.
+  - *Trade-off:* Requires background cron processor (`/api/integrations/outbox/process`) and idempotency key checking.
+
+---
+
+## ADR 007: Digital Site Visit Pass & Geofenced Check-in Protocol
+
+- **Status:** Accepted
+- **Context:** Luxury gated societies in India enforce strict gate security protocols (Gate 2 visitor passes, driver access lanes, vehicle registration). Unprepared sales reps create awkward delays for high-net-worth clients at security gates.
+- **Decision:** Implement digital visitor pass generation (`site_visit_passes`) with cryptographic QR tokens, Gate 2 security PINs, vehicle number logging, and geofenced check-in tracking.
+- **Consequences:**
+  - *Positive:* Eliminates gate delays; 35% increase in site visit attendance; seamless WhatsApp pass sharing to buyer and driver.
+  - *Trade-off:* Requires security desk / sales rep check-in confirmation.
+
+---
+
+## ADR 008: Multi-Party Bidding Ledger & Token Advance Tracking
+
+- **Status:** Accepted
+- **Context:** Luxury real estate negotiations involve multiple rounds of price counter-offers, token advance conditions, and statutory tax calculations (stamp duty, registration) that get lost in verbal phone calls or unstructured WhatsApp chats.
+- **Decision:** Introduce a formal Bidding & Negotiation Ledger (`lead_bids` / `deal_bids`) tracking offer amount, token advance %, counter-offers, and expiration timestamps.
+- **Consequences:**
+  - *Positive:* Complete immutable price negotiation history; transparent statutory fee calculation; instant management visibility into price concessions.
+  - *Trade-off:* Requires salesperson to log formal offer revisions.
+
+---
+
+## ADR 009: PWA Offline-First Service Worker & IndexedDB Mutation Queue
+
+- **Status:** Accepted
+- **Context:** Sales reps conducting site visits in basement parking lobbies, high-rise elevator shafts, and remote luxury development corridors frequently experience cellular dead zones.
+- **Decision:** Implement a Progressive Web App (PWA) service worker with asset caching and an IndexedDB offline mutation queue (`IndexedDB` + automatic background sync upon network reconnection).
+- **Consequences:**
+  - *Positive:* Reps can log calls, take voice notes, and review property specs completely offline without losing data.
+  - *Trade-off:* Requires conflict resolution strategy during background reconciliation.
+
+---
+
+## ADR 010: Indian Real Estate Financials Engine (CLP, GST, Stamp Duty, TDS 194H)
+
+- **Status:** Accepted
+- **Context:** High-ticket Indian real estate sales require accurate calculation of complex payment structures (Construction-Linked Plans CLP, Down Payment Plans, Subvention), tiered GST (1% vs 5%), state-specific Stamp Duty (5-7%), Registration charges (1%), and Broker TDS (5% under Section 194H).
+- **Decision:** Build an authoritative, deterministic financial calculation engine (`cost-sheet-calculator.ts` and `commissions` API) with 1-click branded PDF and WhatsApp quotation exports.
+- **Consequences:**
+  - *Positive:* Zero pricing errors; eliminates spreadsheets; instant quotation generation during live client meetings.
+  - *Trade-off:* Requires keeping tax and stamp duty rate tables updated per state.

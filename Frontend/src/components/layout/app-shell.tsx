@@ -39,19 +39,13 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
   // Tier 2: Salesperson, Closer (Field Sales Cockpit)
   const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
 
-  // Auth & onboarding gating — every CRM route shares this contract.
+  // Auth gating — every CRM route shares this contract.
   React.useEffect(() => {
     if (authLoading) return;
-    if (!user || workflowStep === "auth") {
+    if (!user) {
       router.replace("/login");
-    } else if (workflowStep === "org") {
-      router.replace("/setup-org");
-    } else if (workflowStep === "plan") {
-      router.replace("/choose-plan");
-    } else if (workflowStep === "onboarding") {
-      router.replace("/onboarding");
     }
-  }, [user, workflowStep, authLoading, router]);
+  }, [user, authLoading, router]);
 
   // Navigation State with localStorage persistence
   const [activeTab, setActiveTabState] = React.useState<string>(initialTab || "overview");

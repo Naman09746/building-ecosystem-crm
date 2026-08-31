@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary & Core UX Diagnosis
 
-CallCRM is technically robust with **222 passing tests, 19 database migrations, and 63 API routes**. It accurately models the **Flat/Unit as the atomic asset**, supports bi-directional 100-point matching, proactive seller signals, and human-in-the-loop AI.
+CallCRM is technically robust with **239 passing tests across 28 test suites, 21 database migrations, and 63+ API routes**. It accurately models the **Flat/Unit as the atomic asset**, supports bi-directional 100-point matching, proactive seller signals, multi-party bidding ledger, digital site visit passes, tiered broker commissions, Indian cost sheet calculations, PWA offline caching, and human-in-the-loop AI.
 
 However, the user experience suffers from **cognitive density, structural fragmentation, and visual uniformity**:
 1. **The "Everything Everywhere" Problem**: The sidebar exposes 9–13 equal-weight navigation items regardless of user focus. Sales reps are forced to context-switch between Tasks, Leads, Pipeline, Activities, and Projects.

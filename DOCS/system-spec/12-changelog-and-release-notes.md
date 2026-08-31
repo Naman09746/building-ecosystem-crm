@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [2.0.0] - 2026-08-31 — CallCRM 2.0 & n8n Separation of Responsibilities Architecture
+
+### 🚀 Added
+- **CallCRM + n8n Separation of Responsibilities Architecture:**
+  - CallCRM is established as the self-contained, authoritative source of truth (PostgreSQL + RLS).
+  - Transactional Outbox table `crm_domain_events` with non-blocking asynchronous dispatcher (`lib/server/domain-event-bus.ts`) using HMAC-SHA256 signatures, 3-second timeouts, and automatic circuit breakers.
+  - Inbound idempotency audit log (`inbound_integration_events`) preventing duplicate lead or contact creation on repeated Meta/WhatsApp webhook deliveries.
+  - Interactive `N8nIntegrationDrawer` UI showing live outbox depth, manual retry queue flush, and channel health.
+- **Enterprise Domain Model (Migrations 0020 & 0021):**
+  - **`people` Registry:** Decoupled from leads, enabling a single real-world identity to hold multiple inquiries, own properties, and refer clients without contact duplication.
+  - **`buyer_requirements`:** Multi-criteria structured requirement engine (min/max budgets, floor preferences, Vaastu, parking).
+  - **`property_listings` & `seller_mandates`:** Mandate lifecycle management with **role-protected seller price floor shielding** (`minimum_acceptable_price` masked from junior reps).
+  - **`negotiation_rounds`:** Chronological bidding ledger tracking buyer offers, seller counters, ask price deltas, conditions, and token cheques (`NegotiationModal`).
+  - **`site_visit_dispatches`:** Operational visit dispatching with digital Gate 2 visitor pass PINs, visitor parking bays, caretaker contacts, and pre-visit checklists (`SiteVisitDispatchModal`).
+  - **`commission_ledgers`:** Statutory Indian real estate brokerage engine with 1% buyer + 1% seller splits, 18% GST addition, 1% TDS deduction (u/s 194H), and rep incentives (`CommissionModal`).
+- **REST Endpoints & Testing:**
+  - Added endpoints `/api/people`, `/api/listings/mandates`, `/api/deals/[id]/negotiations`, `/api/site-visits/dispatch`, `/api/finance/commissions`, and `/api/integrations/*`.
+  - Expanded Vitest suite to 239 tests across 28 suites with 100% pass rate.
+  - Next.js production build verified cleanly across all 83 routes.
+
+---
+
 ## [1.0.0] - 2026-08-22 — Enterprise Production Release
 
 ### 🚀 Added

@@ -155,16 +155,60 @@ sequenceDiagram
 
 ---
 
-## 5. Navigation Depth & Transition Strategy
-
-To avoid "Modal Inception" and lost state:
-- **Level 1 (Full Pages)**: Workspaces, Boards, Directories (`/`, `/leads`, `/pipeline`, `/projects`, `/reports`).
-- **Level 2 (Slide-Over Slide Drawers)**: Detailed dossiers that retain background page context (`Lead Dossier Sheet`, `Flat 360° Dossier Sheet`, `Global Command Palette`).
-- **Level 3 (Focused Action Modals)**: Ephemeral, quick-entry actions that dismiss immediately upon confirmation (`10-Second Quick Logger`, `Human-in-the-Loop AI Meeting Confirm`, `Add Relationship Modal`).
+### Journey 4: Multi-Party Bidding & Counter-Offer Negotiation (Closing Specialist — 1 Minute)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Rep as Closing Specialist
+    participant Bidding as Multi-Party Bidding Ledger
+    participant Pass as Digital Pass & KYC
+    participant DB as Supabase DB
+    
+    Rep->>Bidding: Logs Inbound Buyer Offer: ₹15.8 Cr (10% Token Advance)
+    Bidding-->>Rep: Shows Seller Floor: ₹16.0 Cr (Delta: -₹20 Lakhs / 1.25%)
+    Rep->>Bidding: Submits Counter-Offer: ₹16.0 Cr with 15-day closing clause
+    Bidding->>DB: Records immutable bid round in `public.deal_bids`
+    Bidding-->>Rep: Generates branded WhatsApp negotiation summary for Buyer & Seller
+```
 
 ---
 
-## 6. Global Command Palette (`⌘K` / `/`) Architecture
+### Journey 5: Indian Real Estate Cost Sheet & Milestone Plan Generation (Sales Rep — 30 Seconds)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Rep as Sales Rep
+    participant Calc as Cost Sheet Calculator
+    participant Client as VIP Buyer (WhatsApp)
+    
+    Rep->>Calc: Selects DLF Camellias A-1402 (Base Price ₹16.5 Cr)
+    Calc->>Calc: Computes Stamp Duty (7%), Registration (1%), GST (5%), Club & Car Parking
+    Calc->>Calc: Builds Construction-Linked Plan (CLP) with milestone payment schedule
+    Rep->>Calc: Clicks "Share Quotation on WhatsApp"
+    Calc-->>Client: Sends formatted itemized PDF & breakdown message with breakdown in ₹ Cr / Lakhs
+```
+
+---
+
+## 5. Navigation Depth & Transition Strategy
+
+To avoid "Modal Inception" and lost state:
+- **Level 1 (Full Pages)**: Workspaces, Boards, Directories (`/`, `/leads`, `/pipeline`, `/projects`, `/reports`, `/commissions`).
+- **Level 2 (Slide-Over Slide Drawers)**: Detailed dossiers that retain background page context (`Lead Dossier Sheet`, `Flat 360° Dossier Sheet`, `Global Command Palette`).
+- **Level 3 (Focused Action Modals)**: Ephemeral, quick-entry actions that dismiss immediately upon confirmation (`10-Second Quick Logger`, `Site Visit Pass Modal`, `Bidding Ledger Dialog`, `Cost Sheet Calculator`, `Human-in-the-Loop AI Meeting Confirm`).
+
+---
+
+## 6. Mobile CRM Cockpit & PWA Offline Experience
+
+1. **Bottom Navigation Dock (Mobile)**: Priority (`Home`), Leads (`Leads`), Matrix (`Inventory`), Dialer (`Quick Log`).
+2. **PWA Service Worker**: Instant caching of asset dossiers and property facts.
+3. **IndexedDB Sync Queue**: Sales reps can log calls, take voice notes, and review unit specs offline in basement lobbies. Mutations sync automatically upon network reconnection.
+4. **Voice Note Dictation**: One-tap recording with Web Audio API, automatically structured by Aria into structured deal updates.
+
+---
+
+## 7. Global Command Palette (`⌘K` / `/`) Architecture
 
 The Command Palette is the universal nerve center of CallCRM. It indexes all entities in <10ms:
 
@@ -177,6 +221,8 @@ The Command Palette is the universal nerve center of CallCRM. It indexes all ent
   • Log Call Activity                              [ Hotkey: L ]
   • Create New Lead Inquiry                         [ Hotkey: N ]
   • Open Today's Follow-up Queue                    [ Hotkey: F ]
+  • Generate Indian Cost Sheet                      [ Hotkey: C ]
+  • Issue Site Visit Pass                           [ Hotkey: P ]
   • Run Stale Knowledge Scan                        [ Admin ]
 
 🏢 UNITS & PROPERTIES

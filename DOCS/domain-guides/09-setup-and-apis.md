@@ -14,6 +14,7 @@ Copy `Frontend/.env.local.example` → `Frontend/.env.local` and fill in as you 
 |---|---|---|---|
 | 🔴 **Required** | Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | No login, no data — app runs in demo mode only |
 | 🟠 For AI features | Google Gemini | `GEMINI_API_KEY` *(or* `GOOGLE_GENERATIVE_AI_API_KEY`*)* | `/api/chat` returns 503; AI surfaces run client-side simulation only |
+| 🟡 Optional | n8n Orchestrator | `N8N_SERVICE_SECRET` | Inbound service dispatch falls back to default dev secret |
 | 🟡 Optional | WhatsApp Cloud API | `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` | Inbound webhook refuses traffic (by design) |
 | 🟡 Optional | Meta Lead Ads | `META_LEAD_ADS_VERIFY_TOKEN`, `META_APP_SECRET` | Inbound webhook refuses traffic (by design) |
 | 🟡 Optional | Payments (Stripe or Razorpay) | `BILLING_WEBHOOK_SECRET` + provider key | Checkout runs in "simulated" mode; no real charges |
@@ -37,8 +38,8 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 ```
 
 **Setup steps after creating the project:**
-1. Apply migrations in order — SQL Editor → paste each file from `supabase/migrations/` (`0001_init.sql` through `0019_phase13_intelligence_automation.sql`). This creates all tables, RLS policies, triggers, quota enforcement, Property Intelligence, and Seller Opportunities Automation.
-2. Enable **Realtime**: Database → Replication → enable `postgres_changes` for tables `leads`, `tasks`, `activities`, `property_areas`, `projects`, `project_units`, `entity_relationships`, `property_facts`, `seller_opportunities`.
+1. Apply migrations in order — SQL Editor → paste each file from `supabase/migrations/` (`0001_init.sql` through `0021_n8n_event_bus_and_integration_outbox.sql`). This creates all tables, RLS policies, triggers, quota enforcement, Property Intelligence, Seller Opportunities Automation, Enterprise Domain Layer, and n8n Outbox Event Bus.
+2. Enable **Realtime**: Database → Replication → enable `postgres_changes` for tables `leads`, `tasks`, `activities`, `people`, `buyer_requirements`, `property_listings`, `negotiation_rounds`, `site_visit_dispatches`, `commission_ledgers`, `crm_domain_events`.
 3. Auth providers: Email/password is on by default; add Google OAuth (Authentication → Providers) if you want the "Log in with Google" button to work.
 4. If you allow open signups, consider enabling email confirmation (Auth → Providers → Email → "Confirm email").
 
@@ -168,6 +169,11 @@ When provider secret keys are absent, CallCRM automatically uses **Secure Sandbo
 | `POST` | `/api/properties/site-briefings` | Authenticated User | On-demand synthesize site visit briefing |
 | `POST` | `/api/activities/meeting-summary` | Authenticated User | Structure raw speech/notes (proposal) OR save confirmed meeting disposition |
 | `POST` | `/api/automation/stale-facts` | Manager/Owner | Trigger 180-day stale property knowledge scan and flagging |
+| `GET`, `POST` | `/api/leads/[id]/bids` | Authenticated User | Multi-party bidding ledger & counter-offers |
+| `GET`, `POST` | `/api/leads/[id]/site-visit-pass` | Authenticated User | Digital site visit pass & geofenced gate check-in |
+| `GET`, `POST` | `/api/commissions` | Manager/Owner | Tiered broker commissions & TDS 194H deduction |
+| `POST` | `/api/financials/cost-sheet` | Authenticated User | Compute Indian cost sheet (CLP, GST, Stamp duty) |
+| `POST` | `/api/integrations/outbox/process` | Cron / Secret | Process queued domain events in integration outbox |
 
 ---
 
@@ -193,7 +199,7 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-Apply the six migrations → sign up → your org, owner profile, pipeline stages, and sample data are created automatically. Everything else degrades gracefully.
+Apply the 21 migrations → sign up → your org, owner profile, pipeline stages, and sample data are created automatically. Everything else degrades gracefully.
 
 Demo mode (no env at all): UI exploration only, mock dataset, no persistence, **no fake login**.
 
@@ -203,8 +209,8 @@ Demo mode (no env at all): UI exploration only, mock dataset, no persistence, **
 
 - [ ] All 🔴🟠 variables set in hosting provider (Vercel env settings or Docker `--env-file`)
 - [ ] Secrets **not** committed anywhere; `.env*` is gitignored
-- [ ] Migrations applied to production Supabase (0001→0006); validated locally first with `make test-migrations`
-- [ ] Realtime replication enabled on leads/tasks/activities
+- [ ] Migrations applied to production Supabase (0001→0021); validated locally first with `make test-migrations`
+- [ ] Realtime replication enabled on leads/tasks/activities/outbox
 - [ ] Webhook URLs configured in Meta/Stripe dashboards (if used)
 - [ ] `webhook_sources` rows registered per connected channel
 - [ ] CI green on main (lint · tests · build · DB migration validation) — or run `make ci` locally

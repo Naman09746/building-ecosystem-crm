@@ -1,77 +1,53 @@
-# CallCRM 2.0 — Master Frontend & System Encyclopedia
+# CallCRM 2.0 — Master Product Audit, Selling Playbook & Complete UI/UX Redesign Blueprint
 
-> **The Definitive Single-File Master Reference**: This comprehensive document consolidates **all frontend audits, architecture specifications, design systems, component strategies, screen redesign blueprints, pitch playbooks, and marketing website plans** created for CallCRM 2.0.
+> **Master Consolidated Document**: This document compiles the complete technical audit, pitch playbook, verified production metrics, UX/UI surface inventory, architectural ledger design system, information architecture, component strategy, and screen-by-screen redesign roadmap into a single authoritative reference.
 >
-> **Project**: CallCRM 2.0 (Real Estate Sales & Intelligence Operating System)  
-> **Market Focus**: Luxury Indian Residential Real Estate (Delhi NCR, Mumbai MMR, Bengaluru, Pune, Hyderabad)  
-> **Backend & Platform Status**: 222 Vitest Tests Passing (23 Suites), 19 DB Migrations, 63 Authenticated API Endpoints, 34 RLS Tables, 75 Compiled Next.js Routes.
+> **Project**: CallCRM 2.0 (Real Estate Intelligence & Automation Operating System)  
+> **Target Market**: Luxury Indian Residential Real Estate (Delhi NCR, Mumbai MMR, Bengaluru, Pune, Hyderabad)  
+> **Status**: Verified Production-Grade Backend (239 Vitest Tests Passing across 28 Suites, 21 DB Migrations, 63+ API Routes, 75 Compiled Next.js Routes)
 
 ---
 
-# Master Table of Contents
+# Table of Contents
 
-- [Part I: Executive Vision, Pitch Playbook & Core Real Estate Domain](#part-i-executive-vision-pitch-playbook--core-real-estate-domain)
-  - [1. Executive Summary & Problem Space](#1-executive-summary--problem-space)
-  - [2. 30-Second Elevator Pitch & 2-Minute Presentation](#2-30-second-elevator-pitch--2-minute-presentation)
-  - [3. Competitive Differentiation Matrix](#3-competitive-differentiation-matrix)
-  - [4. The Indian Real Estate Domain: Flat/Unit as Atomic Asset](#4-the-indian-real-estate-domain-flatunit-as-atomic-asset)
-  - [5. 100-Point Bi-Directional Matcher Algorithm](#5-100-point-bi-directional-matcher-algorithm)
-- [Part II: CRM Application UX Audit & Information Architecture](#part-ii-crm-application-ux-audit--information-architecture)
-  - [6. Complete CRM Surface Inventory & Friction Audit](#6-complete-crm-surface-inventory--friction-audit)
-  - [7. Information Architecture & 4-Tier Navigation Taxonomy](#7-information-architecture--4-tier-navigation-taxonomy)
-  - [8. Role-Specific Workspaces (Salesperson, Manager, Boss)](#8-role-specific-workspaces-salesperson-manager-boss)
-  - [9. End-to-End User Journeys & Morning Action Routines](#9-end-to-end-user-journeys--morning-action-routines)
-- [Part III: Architectural Ledger Design System (CRM Core)](#part-iii-architectural-ledger-design-system-crm-core)
-  - [10. Neutral Ledger & Heritage Accent Palettes](#10-neutral-ledger--heritage-accent-palettes)
-  - [11. Typography Scale & Tabular Financial Numerals](#11-typography-scale--tabular-financial-numerals)
-  - [12. Elevation Tiers, Structural Dividers & Spacing](#12-elevation-tiers-structural-dividers--spacing)
-  - [13. Motion, Accessibility & WCAG Contrast Standards](#13-motion-accessibility--wcag-contrast-standards)
-- [Part IV: Screen-by-Screen CRM Redesign Blueprints](#part-iv-screen-by-screen-crm-redesign-blueprints)
-  - [14. Salesperson Daily Priority Cockpit (`salesperson-home.tsx`)](#14-salesperson-daily-priority-cockpit)
-  - [15. Flat 360° Master Property Dossier (`UnitDossierSheet.tsx`)](#15-flat-360-master-property-dossier)
-  - [16. Executive Boss Cockpit & Risk Radar (`boss-overview.tsx`)](#16-executive-boss-cockpit--risk-radar)
-  - [17. Leads Directory & Slide-Over Dossier (`leads-page.tsx`)](#17-leads-directory--slide-over-dossier)
-  - [18. Society Inventory Matrix & Tower Explorer (`projects-page.tsx`)](#18-society-inventory-matrix--tower-explorer)
-  - [19. Proactive Seller Intelligence & Verification Modal (`seller-opportunities-modal.tsx`)](#19-proactive-seller-intelligence--verification-modal)
-  - [20. CRM Screen Priority Matrix (P0–P3)](#20-crm-screen-priority-matrix-p0p3)
-  - [21. Component Architecture & Modal Consolidation Strategy](#21-component-architecture--modal-consolidation-strategy)
-  - [22. Screen-by-Screen Before & After Map](#22-screen-by-screen-before--after-map)
-- [Part V: Marketing Website Visual Redesign & Strategy](#part-v-marketing-website-visual-redesign--strategy)
-  - [23. Marketing Website Visual & Experience Audit](#23-marketing-website-visual--experience-audit)
-  - [24. Marketing Architectural Editorial Design System](#24-marketing-architectural-editorial-design-system)
-  - [25. The 12-Beat Narrative Storytelling Architecture](#25-the-12-beat-narrative-storytelling-architecture)
-  - [26. Screen-by-Screen Landing Page Redesign Specification (`page.tsx`)](#26-screen-by-screen-landing-page-redesign-specification)
-  - [27. Marketing Component Architecture & Asset Refactoring](#27-marketing-component-architecture--asset-refactoring)
-  - [28. Marketing Before & After Transformation Map](#28-marketing-before--after-transformation-map)
-  - [29. Marketing Implementation Sequence & Verification Strategy](#29-marketing-implementation-sequence--verification-strategy)
-- [Part VI: Scorecard & Master Execution Roadmap](#part-vi-scorecard--master-execution-roadmap)
-  - [30. CallCRM UX Scorecard (0–10 Rating across 15 Dimensions)](#30-callcrm-ux-scorecard)
-  - [31. Complete 11-Phase Phased Implementation Roadmap](#31-complete-11-phase-phased-implementation-roadmap)
+1. [Part 1: Executive Project Pitch & Selling Playbook](#part-1-executive-project-pitch--selling-playbook)
+2. [Part 2: Technical Architecture & Real Estate Hierarchy](#part-2-technical-architecture--real-estate-hierarchy)
+3. [Part 3: Complete UX/UI Surface Inventory & Friction Audit](#part-3-complete-uxui-surface-inventory--friction-audit)
+4. [Part 4: Information Architecture, Role Workspaces & User Journeys](#part-4-information-architecture-role-workspaces--user-journeys)
+5. [Part 5: Architectural Ledger Design System Specification](#part-5-architectural-ledger-design-system-specification)
+6. [Part 6: Screen-by-Screen UI Redesign Blueprint](#part-6-screen-by-screen-ui-redesign-blueprint)
+7. [Part 7: Screen Priority & Impact Matrix (P0–P3)](#part-7-screen-priority--impact-matrix-p0p3)
+8. [Part 8: Component Strategy & Consolidation Roadmap](#part-8-component-strategy--consolidation-roadmap)
+9. [Part 9: Screen-by-Screen Before & After Map](#part-9-screen-by-screen-before--after-map)
+10. [Part 10: CallCRM UX Scorecard & Phased Execution Roadmap](#part-10-callcrm-ux-scorecard--phased-execution-roadmap)
 
 ---
 
-# Part I: Executive Vision, Pitch Playbook & Core Real Estate Domain
+# Part 1: Executive Project Pitch & Selling Playbook
 
-## 1. Executive Summary & Problem Space
+## What is this project?
 
 | Dimension | Specification |
 | :--- | :--- |
-| **Product Name** | **CallCRM 2.0** (Luxury Indian Real Estate Sales & Intelligence Operating System) |
-| **Category** | Vertical B2B Real Estate SaaS / Sales Intelligence Operating System |
-| **Core Problem** | Generic CRMs treat real estate like generic SaaS software leads. High-ticket Indian real estate transactions (₹5 Cr to ₹50 Cr+ in DLF Golf Course Road, Worli, Bandra, Whitefield) fail due to **lost property/gate memory**, **inability to capture resale mandates before open-market portals**, **slow speed-to-lead**, and **missing 30-minute pre-site-visit intelligence**. |
-| **Target Users** | Real-estate sales directors, closing specialists, on-site consultants, and brokerage agency founders ("the Boss"). |
-| **Core Value Pillars** | **Proactive Seller Intelligence** (capturing resale mandates before portals), **100-Point Bi-Directional Unit Matching**, **30-Minute Pre-Site-Visit Briefings** (with Gate 2 visitor pass digital PINs & parking bays), **10-Second Hotkey Logging**, and **Human-in-the-Loop AI Meeting Structuring**. |
-| **Tech Stack** | Next.js 15 App Router + React 19 + TypeScript · Supabase (PostgreSQL 16 + Auth + RLS + Realtime) · Google Gemini 2.5 Flash via Vercel AI SDK · Tailwind CSS 3.4 + Radix UI · Vitest + Playwright. |
-| **Production Metrics** | **222 / 222 Vitest tests passing across 23 test suites**, **19 database migrations**, **34 RLS tables**, **63 authenticated API endpoints**, **75 compiled Next.js routes with 0 errors**. |
+| **Project Name** | **CallCRM 2.0** (Luxury Indian Real Estate Sales & Intelligence Operating System) |
+| **One-Sentence Description** | An enterprise Real Estate Intelligence Operating System engineered specifically for Indian luxury property brokerage houses and developer sales teams — modeling the **Flat/Unit as the atomic asset**, detecting proactive seller signals, executing 100-point bi-directional buyer matching, and delivering human-gated AI meeting summaries and site-visit briefings. |
+| **The Core Problem It Solves** | Generic CRMs treat real estate like generic SaaS leads. In reality, high-ticket Indian real estate transactions (₹5 Cr to ₹50 Cr+ in DLF Golf Course Road, Worli, Bandra, Whitefield) fail due to **lost property/gate memory**, **inability to capture resale mandates before open-market portals**, **slow speed-to-lead**, and **missing 30-minute pre-site-visit intelligence**. |
+| **Who Uses It** | Real-estate sales directors, closing specialists, site-visit consultants, and brokerage agency founders ("the Boss"). |
+| **Who Owns / Operates It** | Multi-tenant SaaS; each realty enterprise registers an isolated tenant with strict PostgreSQL Row-Level Security (`0001_init.sql` $\rightarrow$ `0021_n8n_event_bus_and_integration_outbox.sql`). |
+| **Core Value Pillars** | **Proactive Seller Intelligence** (capturing resale mandates before portals), **100-Point Bi-Directional Unit Matching**, **30-Minute Pre-Site-Visit Briefings** (with Gate 2 visitor pass digital PINs & parking bays), **Multi-Party Bidding Ledger**, **Indian Cost Sheet & Payment Plan Calculator**, **10-Second Hotkey Logging**, and **Human-in-the-Loop AI Meeting Structuring**. |
+| **Technology Stack** | Next.js 15 App Router + React 19 + TypeScript · Supabase (PostgreSQL 16 + Auth + RLS + Realtime) · Google Gemini 2.5 Flash via Vercel AI SDK · Tailwind CSS 3.4 + Radix UI · Vitest + Playwright. |
+| **Verified Production Metrics** | **239 / 239 Vitest tests passing across 28 test suites**, **21 database migrations**, **34 RLS tables**, **63+ authenticated API route handlers**, **75 compiled Next.js routes with 0 errors**. |
 
 ---
 
-## 2. 30-Second Elevator Pitch & 2-Minute Presentation
+## 30-Second Elevator Pitch (For Founders & Sales Directors)
 
-### 30-Second Elevator Pitch
 > *"Most real estate CRMs fail because they treat property like generic software leads and lose all institutional memory when an agent leaves. CallCRM 2.0 is an operating system built specifically for how Indian luxury real estate actually works: the **Flat/Unit is the atomic asset**. It monitors expiring tenancies and vacant units to generate exclusive seller mandates before properties reach 99acres or MagicBricks, computes 100-point bi-directional buyer-unit matches, and delivers a 30-minute pre-site-visit briefing with Gate 2 visitor pass codes and owner price floors straight to the rep's phone. Most importantly, AI assists reps but can never mutate data autonomously — every deal transition requires human approval."*
 
-### 2-Minute Full Presentation Script
+---
+
+## 2-Minute Full Presentation Script (For Investors & Agency Heads)
+
 > *"In Indian luxury residential real estate — whether you're transacting at DLF Camellias in Gurgaon, Oberoi 360 West in Mumbai, or Kingfisher Towers in Bengaluru — transactions are high-value, highly sensitive, and relationship-driven.
 >
 > When a flat changes hands after possession:
@@ -92,7 +68,7 @@
 
 ---
 
-## 3. Competitive Differentiation Matrix
+## Competitive Differentiation Matrix
 
 | Capability | Generic CRMs (Salesforce / HubSpot) | Indian Property Portals (99acres / MagicBricks) | **CallCRM 2.0 (Apex Realty)** |
 | :--- | :--- | :--- | :--- |
@@ -106,15 +82,9 @@
 
 ---
 
-## 4. The Indian Real Estate Domain: Flat/Unit as Atomic Asset
+# Part 2: Technical Architecture & Real Estate Hierarchy
 
-In India, after possession:
-- Every flat has a different owner or investor.
-- Some owners own multiple units across towers (portfolio investors).
-- Some units are rented, some are developer inventory, and some are off-market resale opportunities.
-- Society amenities, security desks, visitor parking rules, and RWA bylaws are shared across all units.
-
-Therefore: **The FLAT/UNIT is the core transactional asset, not the society.**
+## Normalized Indian Real Estate Hierarchy
 
 ```mermaid
 flowchart TD
@@ -131,25 +101,33 @@ flowchart TD
     UNIT --- SENG[Seller Signals: Expiring Tenancy, Vacancy, Investor Exit]
 ```
 
+### The 6-Level Hierarchy:
+1. **Region (`regions`)**: Macro geography (e.g., Delhi NCR, Mumbai MMR, Bengaluru).
+2. **Property Area (`property_areas`)**: Micro-market/locality with tier rating (e.g., Golf Course Road, ultra-luxury, Pincode 122002).
+3. **Society / Project (`projects`)**: Complex complex with RERA ID, total towers, units count, master amenities, and maintenance desk contact.
+4. **Tower / Block (`project_towers`)**: Specific building structure with total floor count, units per floor, elevator count, and construction status.
+5. **Floor**: Vertical position.
+6. **Flat / Unit (`project_units`)**: **Core atomic asset** holding carpet area, parking type, asking price, temporal ownership history, and seller intent.
+
 ---
 
-## 5. 100-Point Bi-Directional Matcher Algorithm
+## 100-Point Bi-Directional Matcher Algorithm
 
 $$\text{Match Score} = \text{Location (30)} + \text{Budget (30)} + \text{Configuration (20)} + \text{Floor/Facing (10)} + \text{Mandate (10)}$$
 
 - **Location (30 pts)**: Exact society match = 30 pts; same micro-market = 20 pts; same macro-region = 10 pts.
-- **Budget (30 pts)**: Asking price within $\pm 10\%$ of buyer budget = 30 pts; within $\pm 20\%$ = 20 pts; within $\pm 30\%$ = 10 pts.
+- **Budget (30 pts)**: Unit asking price within $\pm 10\%$ of buyer budget = 30 pts; within $\pm 20\%$ = 20 pts; within $\pm 30\%$ = 10 pts.
 - **Configuration (20 pts)**: Exact BHK & layout match = 20 pts; configuration contains requested rooms = 12 pts.
 - **Floor & Facing (10 pts)**: High floor / park facing preference match = 10 pts.
 - **Mandate Exclusivity (10 pts)**: Direct owner resale mandate = 10 pts; open listing = 5 pts.
 
 ---
 
-# Part II: CRM Application UX Audit & Information Architecture
+# Part 3: Complete UX/UI Surface Inventory & Friction Audit
 
-## 6. Complete CRM Surface Inventory & Friction Audit
+### Complete Surface Inventory
 
-| Screen / Surface | Route & Component | Persona | Purpose | Current UX Implementation | Identified Friction Points | Redesign Priority |
+| Screen / Surface | Route & Component | Persona | Purpose | Current UX | Identified Friction Points | Redesign Priority |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Salesperson Home** | `/` (Sales Role)<br>`salesperson-home.tsx` | Sales Rep, Specialist | "What should I do right now?" — Prioritized queue of high-intent buyers, visits, and follow-ups. | 3 top KPI badges, 3 action buttons, a horizontal 30m Site Visit Briefing alert card, Next Best Action cards, and a vertical timeline queue. | • 3 buttons at top feel detached from priorities.<br>• Timeline queue lacks inline 1-click action triggers.<br>• Next actions list is too long without pagination.<br>• Does not surface today's at-risk deals. | **P0 (Critical)** |
 | **Leads List & Pipeline** | `/leads`<br>`leads-page.tsx` | Sales Rep, Manager | Filter, search, and bulk-manage active buyer and seller inquiries across stages. | Multi-filter header, stage tabs, 8-column data table with inline badges, bulk CSV export/import modals. | • 8-column table causes horizontal compression.<br>• Lacks quick preview drawer (forces full modal opening).<br>• Filter bar takes 80px vertical space. | **P0 (Critical)** |
@@ -164,9 +142,9 @@ $$\text{Match Score} = \text{Location (30)} + \text{Budget (30)} + \text{Configu
 
 ---
 
-## 7. Information Architecture & 4-Tier Navigation Taxonomy
+# Part 4: Information Architecture, Role Workspaces & User Journeys
 
-Rather than exposing a flat list of 13 menu items, the sidebar is organized into **4 Distinct Mental Model Sections**:
+## Navigation Taxonomy (4 Mental Models)
 
 ```mermaid
 graph TD
@@ -202,7 +180,7 @@ graph TD
 
 ---
 
-## 8. Role-Specific Workspaces
+## Role-Specific Workspaces
 
 ### 1. Salesperson Workspace (Action-First)
 - **Primary Question**: *"What should I do right now to advance my deals?"*
@@ -219,32 +197,9 @@ graph TD
 
 ---
 
-## 9. End-to-End User Journeys & Morning Action Routines
+# Part 5: Architectural Ledger Design System Specification
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Rep as Sales Rep (Amit)
-    participant Home as Salesperson Home
-    participant Dialer as 10s Hotkey Logger (L)
-    participant Matcher as 100-Point Matcher
-    participant DB as Supabase DB
-    
-    Rep->>Home: Opens CallCRM at 9:00 AM
-    Home-->>Rep: Displays "Top 3 Priorities for Today"
-    Note over Home,Rep: Priority 1: High-Intent Buyer (Rahul Sharma - ₹4.5 Cr)
-    Rep->>Home: Presses hotkey "L" or clicks "Call Rahul"
-    Home->>Dialer: Launches Rapid Call / WhatsApp Drawer
-    Rep->>Dialer: Dictates voice note: "Rahul liked DLF Park Place 3BHK, wants site visit Sat 4pm"
-    Dialer->>DB: Saves call activity & updates lead stage to "Site Visit Scheduled"
-    Dialer-->>Home: Automatically queues Priority 2: "Verify Seller Intent on Unit B-1204"
-```
-
----
-
-# Part III: Architectural Ledger Design System (CRM Core)
-
-## 10. Neutral Ledger & Heritage Accent Palettes
+## Color Palette Tokens
 
 ```css
 /* Core Neutral Ledger Palette */
@@ -269,7 +224,7 @@ sequenceDiagram
 
 ---
 
-## 11. Typography Scale & Tabular Financial Numerals
+## Typography Scale & Tabular Numerals
 
 ```
 Font Stack:
@@ -286,47 +241,15 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
 
 ---
 
-## 12. Elevation Tiers, Structural Dividers & Spacing
+# Part 6: Screen-by-Screen UI Redesign Blueprint
 
-```css
-/* Elevation Tiers */
---shadow-flat:     none;
---shadow-subtle:   0 1px 2px 0 rgba(15, 23, 42, 0.04);
---shadow-card:     0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
---shadow-elevated: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
---shadow-drawer:   0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
-
-/* Border Radius Tokens */
---radius-sm: 4px;   /* Badges, micro-buttons, hotkey tags */
---radius-md: 6px;   /* Standard buttons, form inputs, dropdown items */
---radius-lg: 8px;   /* Cards, table containers, popovers */
---radius-xl: 12px;  /* Master dossiers, modal shells, hero cockpits */
-```
-
----
-
-## 13. Motion, Accessibility & WCAG Contrast Standards
-
-- **Sub-150ms Easing**: Transitions use `cubic-bezier(0.16, 1, 0.3, 1)` for snappy, professional responsiveness.
-- **Action Confirmation Pulse**: Actions flash a subtle `bg-emerald-500/10` tint for 400ms.
-- **WCAG 2.1 AAA Contrast**: Primary text achieves $\ge 7:1$ contrast against light/dark canvases.
-- **Visible Keyboard Focus**: Unambiguous `ring-2 ring-primary ring-offset-1` outline on `<Tab>` navigation.
-
----
-
-# Part IV: Screen-by-Screen CRM Redesign Blueprints
-
-## 14. Salesperson Daily Priority Cockpit
-
+### Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`)
 - **Structure**: 2-column responsive layout (65% Priority Queue, 35% Daily Timeline & SLA Meter).
 - **Morning Focus Banner**: Prominently highlights Top 3 High-Impact Actions (Calls, Site Visits, Resale verifications).
 - **Active 30m Site Visit Alert**: If visit is scheduled within 45m, prominent Gate 2 PIN & parking bay card with 1-tap navigation.
 - **Action Cards**: Direct triggers: `[📞 Call (L)]`, `[💬 WhatsApp]`, `[🏠 View Matches]`, `[🔍 Verify Intent]`.
 
----
-
-## 15. Flat 360° Master Property Dossier
-
+### Screen 2: Flat 360° Master Property Dossier (`UnitDossierSheet.tsx`)
 - **Structure**: Replaces cramped modal dialog with a full-height right-hand slide-over drawer (`w-full max-w-2xl sm:max-w-3xl`).
 - **Dossier Header**: Unit Number (`A-1402`), Tower, Society, Asking Price (`₹16.5 Cr`), Status Badge.
 - **4 Segmented Tabs**:
@@ -336,10 +259,7 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
   4. *100-Point Matching Buyers* (Ranked active buyer leads with 1-click pitch trigger).
 - **Sticky Footer Action Bar**: `[🎯 Pitch to Matching Buyers]`, `[💰 Revise Price]`, `[📄 Share WhatsApp PDF]`.
 
----
-
-## 16. Executive Boss Cockpit & Risk Radar
-
+### Screen 3: Executive Boss Cockpit (`boss-overview.tsx`)
 - **Structure**: 3-tier modular dashboard.
 - **Tier 1 (Executive Narrative Summary)**: *"Active pipeline is healthy at ₹48.5 Cr (+18% MoM). 3 high-value deals in Negotiation are stagnant >5 days and require pricing intervention."*
 - **Tier 2 (4 Master KPI Cards)**: Total Active Pipeline, Won Revenue, Stalled Deals at Risk, Resale Mandate Pipeline.
@@ -347,33 +267,7 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
 
 ---
 
-## 17. Leads Directory & Slide-Over Dossier
-
-- **Smart Filter Pill Bar**: Fast 1-click filters (`All Active`, `Hot 🔥`, `Site Visits`, `Overdue Follow-up`).
-- **High-Density Lead Table**: Stacked primary column (Name + Phone), Stage Pill, Budget in `₹ Cr`, Deal Health.
-- **Right Slide-Over Lead Dossier**: Buyer preferences, inquiry timeline, matched inventory units, and 10s logger dock.
-
----
-
-## 18. Society Inventory Matrix & Tower Explorer
-
-- **Project Header**: Society Name, Developer, Locality, RERA ID, Total Towers & Units.
-- **Society Shared Intelligence Card**: Security Gate 2 rules, parking bylaws, maintenance desk contact.
-- **Tower Selector**: Visual block cards showing availability percentage per tower.
-- **Interactive Unit Matrix Grid**: Color-coded unit tiles (`Available`, `Hold`, `Sold`, `Resale Opportunity`).
-
----
-
-## 19. Proactive Seller Intelligence & Verification Modal
-
-- **Signal Strength Badge**: `78/100 Opportunity Score` (Transparent breakdown: +20 Tenancy, +15 Holding).
-- **Grounded Evidence List**: Explicit sources (Tenancy record, ownership ledger, market transaction comps).
-- **Recommended Salesperson**: Relationship intelligence recommendation based on past interactions.
-- **Human Verification Flow**: Structured disposition options (`Wants to sell`, `Considering`, `Renewing tenant`, `Do not contact`).
-
----
-
-## 20. CRM Screen Priority Matrix (P0–P3)
+# Part 7: Screen Priority & Impact Matrix (P0–P3)
 
 | Screen / Surface | Tier | Daily Frequency | Revenue & Usability Impact | Complexity |
 | :--- | :--- | :--- | :--- | :--- |
@@ -396,7 +290,9 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
 
 ---
 
-## 21. Component Architecture & Modal Consolidation Strategy
+# Part 8: Component Strategy & Consolidation Roadmap
+
+### Consolidation Strategy
 
 | Existing Component | Identified Redundancy / Friction | Action & Replacement |
 | :--- | :--- | :--- |
@@ -407,7 +303,9 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
 
 ---
 
-## 22. Screen-by-Screen Before & After Map
+# Part 9: Screen-by-Screen Before & After Map
+
+### Transformation Matrix
 
 | Surface | Current State | Redesigned State | Business Payoff |
 | :--- | :--- | :--- | :--- |
@@ -420,107 +318,9 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
 
 ---
 
-# Part V: Marketing Website Visual Redesign & Strategy
+# Part 10: CallCRM UX Scorecard & Phased Execution Roadmap
 
-## 23. Marketing Website Visual & Experience Audit
-
-- **Audit Finding**: The current website suffers from the "Generic AI SaaS Syndrome" (oversized wavy gradients, artificial 3D perspective towers, crypto-like "Ledger v2.4" badges).
-- **Target Aesthetic**: *Architectural Editorial* — Elegant, Architectural, Editorial, Professional, Premium, Trustworthy, Modern, Human, Confident, Indian real-estate relevant.
-
----
-
-## 24. Marketing Architectural Editorial Design System
-
-```css
-:root {
-  /* Canvas & Paper Surfaces */
-  --mktg-canvas:        #f8f7f4; /* Warm alabaster/ivory background */
-  --mktg-surface-card:  #ffffff; /* Clean white card & showcase surface */
-  --mktg-surface-stone: #f0ede6; /* Warm stone secondary surface & table headers */
-  --mktg-surface-muted: #e7e3db; /* Subtle borders & architectural dividers */
-
-  /* Text & Ink Tokens */
-  --mktg-ink-primary:   #181a19; /* Deep charcoal (High emphasis, 14.8:1 contrast) */
-  --mktg-ink-secondary: #4a4d4b; /* Editorial body copy & descriptions */
-  --mktg-ink-muted:     #7a7d7b; /* Metadata, captions, timestamps */
-
-  /* Architectural Heritage Accents */
-  --mktg-forest:        #224a3e; /* Deep verdigris / forest (Credibility, verified status) */
-  --mktg-forest-light:  #edf4f1; /* Soft tint for verification pills */
-  --mktg-brass:         #a68138; /* Restrained heritage brass (High-value accents only) */
-  --mktg-brass-light:   #faf5ec; /* Subtle brass highlight background */
-
-  /* Architectural Divider & Line Strokes */
-  --mktg-line-subtle:   #e2ded6; /* 1px crisp layout grid line */
-  --mktg-line-bold:     #181a19; /* High-contrast section divider */
-}
-```
-
----
-
-## 25. The 12-Beat Narrative Storytelling Architecture
-
-1. **The Hook (Hero)**: Real estate sales intelligence for high-ticket property desks.
-2. **The Industry Reality**: Why generic CRMs fail in Indian luxury real estate.
-3. **The Foundation**: Atomic property intelligence (Flat 360° Dossier).
-4. **The Engine**: 100-Point bi-directional matcher.
-5. **The Sales Rhythm**: Action-first salesperson workflow & 10s hotkey logging.
-6. **On-Site Execution**: 30-minute pre-site briefing (Gate 2 PIN & parking bays).
-7. **Proactive Seller Signals**: Resale mandate capture before portals.
-8. **Contextual AI**: Human-in-the-loop intelligence with zero autonomous data mutation.
-9. **Leadership Command**: Executive Boss cockpit & deal health risk radar.
-10. **Enterprise Credibility**: Multi-city partitioning & bank-grade RLS security.
-11. **Transparent Subscription**: Pricing built for small-to-mid agency realities.
-12. **The Closing Call**: 14-day free trial or private executive walkthrough.
-
----
-
-## 26. Screen-by-Screen Landing Page Redesign Specification
-
-- **Navbar**: Editorial header with logo, `[ REAL ESTATE OS ]` badge, navigation links, and trial CTA.
-- **Hero Showcase**: 2-column showcase pairing architectural facade with live **Flat 360° Unit A-1402 (DLF The Camellias · ₹16.5 Cr)** dossier.
-- **Problem Grid**: 3-column architectural comparison of multi-owner complexity and gate security friction.
-- **Property Showcase**: Interactive tabs for Specs, Ownership Chain, Gate Rules, and Matching Buyers.
-- **Pricing Table**: Monthly/Annual switcher with dynamic 20% discount calculation across Solo, Boutique, and Scale tiers.
-- **FAQ Accordion**: 5 high-clarity questions on portal imports, data privacy, and trial terms.
-
----
-
-## 27. Marketing Component Architecture & Asset Refactoring
-
-- **Asset Replacement**: Replaces CSS 3D isometric cityscape with clean, authentic architectural compositions and grounded interface frames.
-- **Primitives**: `MktgButton`, `ArchitecturalTag`, `ArchitecturalDivider`, `HeroDossierShowcase`, `MatcherMatrixShowcase`, `PreVisitBriefingShowcase`, `BossCockpitShowcase`.
-
----
-
-## 28. Marketing Before & After Transformation Map
-
-| Section | Current State | Redesigned State | Business Payoff |
-| :--- | :--- | :--- | :--- |
-| **Top Navbar** | "LEDGER v2.4" crypto badge | Editorial Real Estate OS Nav | **Elevates brand authority** |
-| **Hero Section** | 3D isometric towers + wavy gradient | Grounded Flat 360° Showcase | **Immediate product clarity** |
-| **Core Problem** | Generic spreadsheet comparison | Multi-Owner & Gate Security | **Speaks real-estate reality** |
-| **Property Intelligence** | CAD vector floorplan in generic box | Atomic Asset Flat 360° Dossier | **Proves unit is the core asset** |
-| **Buyer Matching** | Abstract "AI score" text | 100-Point Algorithmic Matrix | **Demonstrates tangible speed** |
-| **Pre-Site Briefings** | Static text note | 30m Gate 2 PIN & Parking Bay | **Solves on-site friction** |
-| **Seller Intelligence** | Not prominently featured | Expiring Tenancy & Vacancy | **Captures exclusive resale** |
-| **Executive Cockpit** | Standard 4-card metric list | Narrative Bar & Risk Radar | **Immediate founder credibility** |
-
----
-
-## 29. Marketing Implementation Sequence & Verification Strategy
-
-1. **Tokens Setup**: Verify Warm Alabaster (`#f8f7f4`), Deep Charcoal (`#181a19`), Stone (`#f0ede6`), Forest (`#224a3e`), and Heritage Brass (`#a68138`).
-2. **Refactor `architectural-visuals.tsx`**: Replace CSS 3D perspective cityscape with clean architectural compositions.
-3. **Rewrite `page.tsx`**: Implement the complete 12-beat narrative landing page structure.
-4. **Responsive QA**: Validate viewports at 1440px, 1024px, 768px, and 390px.
-5. **Automated Verification**: Run `npm run lint`, `npm test`, and `npm run build` to ensure 0 errors.
-
----
-
-# Part VI: Scorecard & Master Execution Roadmap
-
-## 30. CallCRM UX Scorecard
+## CallCRM UX Scorecard
 
 | Dimension | Rating (0–10) | Evaluation & Diagnosis |
 | :--- | :---: | :--- |
@@ -543,7 +343,7 @@ Financial / Numerals: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospac
 
 ---
 
-## 31. Complete 11-Phase Implementation Roadmap
+## Phased Implementation Roadmap
 
 ```
 PHASE 0: Design Tokens & Foundations (P0)
@@ -584,9 +384,6 @@ PHASE 8: People Directory & Stakeholder Graph (P1)
 PHASE 9: Mobile 1-Thumb Optimization (P1)
 └── Refactor mobile views to action-sheet layouts for on-site visit workflows.
 
-PHASE 10: Marketing Landing Page Redesign (P0)
-└── Implement 12-beat editorial narrative landing page in page.tsx and architectural-visuals.tsx.
-
-PHASE 11: Performance, A11y & Visual Polish (P2)
+PHASE 10: Performance, A11y & Visual Polish (P2)
 └── Lazy-load slide-over dossiers, audit WCAG contrast, and add subtle interaction pulses.
 ```

@@ -72,31 +72,50 @@ function mapDbRole(dbRole: string | null | undefined): UserRole {
   return "salesperson";
 }
 
-async function loadProfileUser(
+async function loadProfileUserAndOrg(
   supabase: SupabaseClient,
   sessionUser: { id: string; email?: string; user_metadata?: Record<string, any> }
-): Promise<AuthUser> {
+): Promise<{ authUser: AuthUser; authOrg: AuthOrg | null }> {
   const fallbackName =
     sessionUser.user_metadata?.full_name || sessionUser.email?.split("@")[0] || "User";
 
   let role: UserRole = "salesperson";
+  let authOrg: AuthOrg | null = null;
+
   try {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, full_name, org_id, org:orgs(*)")
       .eq("user_id", sessionUser.id)
       .maybeSingle();
-    role = mapDbRole(profile?.role);
-  } catch {
-    // Fail safe to least privilege
+
+    if (profile) {
+      role = mapDbRole(profile.role);
+      const orgData = Array.isArray(profile.org) ? profile.org[0] : profile.org;
+      if (orgData) {
+        authOrg = {
+          id: orgData.id,
+          name: orgData.name || "Apex Realty",
+          plan: orgData.plan || "growth",
+          billingCycle: orgData.billing_cycle || "monthly",
+          primaryRegion: "Gurgaon",
+          teamSize: "1-10",
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Error fetching profile and org:", err);
   }
 
   return {
-    id: sessionUser.id,
-    email: sessionUser.email || "",
-    name: fallbackName,
-    role,
-    avatarUrl: sessionUser.user_metadata?.avatar_url,
+    authUser: {
+      id: sessionUser.id,
+      email: sessionUser.email || "",
+      name: fallbackName,
+      role,
+      avatarUrl: sessionUser.user_metadata?.avatar_url,
+    },
+    authOrg,
   };
 }
 
@@ -126,9 +145,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user && !cancelled) {
-            const authUser = await loadProfileUser(supabase, session.user);
+            const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, session.user);
             if (!cancelled) {
               setUser(authUser);
+              if (authOrg) setOrg(authOrg);
+              setWorkflowStepState("app");
               lastActiveRef.current = Date.now();
             }
           }
@@ -139,27 +160,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
           if (cancelled) return;
           if (session?.user) {
-            const authUser = await loadProfileUser(supabase, session.user);
+            const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, session.user);
             if (!cancelled) {
               setUser(authUser);
+              if (authOrg) setOrg(authOrg);
+              setWorkflowStepState("app");
               lastActiveRef.current = Date.now();
             }
           } else {
-            if (!cancelled) setUser(null);
+            if (!cancelled) {
+              setUser(null);
+              setOrg(null);
+              setWorkflowStepState("auth");
+            }
           }
         });
 
         unsubscribe = () => subscription.unsubscribe();
       }
 
-      // Restore non-security UI state
+      // Restore non-security UI state if not already in app
       try {
         const savedOrgStr = localStorage.getItem(STORAGE_KEYS.ORG);
         const savedStep = localStorage.getItem(STORAGE_KEYS.STEP) as WorkflowStep | null;
         const savedOnboardingStr = localStorage.getItem(STORAGE_KEYS.ONBOARDING);
 
-        if (savedOrgStr && !cancelled) setOrg(JSON.parse(savedOrgStr));
-        if (savedStep && !cancelled) setWorkflowStepState(savedStep);
+        if (savedOrgStr && !cancelled) setOrg((prev) => prev || JSON.parse(savedOrgStr));
+        if (savedStep && !cancelled) setWorkflowStepState((prev) => (prev === "app" ? "app" : savedStep || "auth"));
         if (savedOnboardingStr && !cancelled) setOnboardingData(JSON.parse(savedOnboardingStr));
       } catch (e) {
         console.warn("Could not read UI state from localStorage", e);
@@ -176,7 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const interval = setInterval(() => {
-      if (user && Date.now() - lastActiveRef.current > 45 * 60 * 1000) {
+      if (Date.now() - lastActiveRef.current > 45 * 60 * 1000) {
         console.warn("[SECURITY] Session marked idle after 45 minutes of inactivity.");
         signOut();
       }
@@ -194,8 +221,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("keydown", updateActivity);
       window.removeEventListener("touchstart", updateActivity);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []);
 
   const setWorkflowStep = (step: WorkflowStep) => {
     setWorkflowStepState(step);
@@ -237,10 +263,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.user && data.session) {
-        const authUser = await loadProfileUser(supabase, data.user);
+        const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, data.user);
         setUser(authUser);
-        // Org/profile row is provisioned server-side by the handle_new_user trigger.
-        setWorkflowStep(org?.plan ? "app" : org ? "plan" : "org");
+        if (authOrg) setOrg(authOrg);
+        setWorkflowStep("app");
         return { success: true };
       }
 
@@ -270,16 +296,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: error.message };
       }
       if (data.user) {
-        const authUser = await loadProfileUser(supabase, data.user);
+        const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, data.user);
         setUser(authUser);
-        // If they already have an org and plan, go to app, else continue setup
-        if (org?.plan) {
-          setWorkflowStep("app");
-        } else if (org) {
-          setWorkflowStep("plan");
-        } else {
-          setWorkflowStep("org");
-        }
+        if (authOrg) setOrg(authOrg);
+        setWorkflowStep("app");
         return { success: true };
       }
       return { success: false, error: "Invalid credentials." };

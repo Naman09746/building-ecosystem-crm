@@ -71,10 +71,15 @@ flowchart TD
 - **`GET /api/webhooks/retry`**: Lists failed, retryable, and dead-letter webhook events for managers/admins.
 - **`POST /api/webhooks/retry`**: Allows retrying specific failed webhooks or replaying batch events. Automatically marks events reaching maximum retry limit (`5`) as `dead_letter`.
 
+#### 6. Enterprise n8n & Outbox Event Bus (`supabase/migrations/0021_n8n_event_bus_and_integration_outbox.sql`)
+- **Transactional Outbox**: Leads created via webhooks automatically write a domain event `lead.created` into `public.integration_outbox` with tenant isolation.
+- **Circuit Breaker**: When external webhook dispatchers or n8n nodes fail repeatedly, the system trips a circuit breaker (`CLOSED` $\rightarrow$ `OPEN` $\rightarrow$ `HALF-OPEN`) to protect database throughput.
+- **Idempotency Key Enforcement**: Inbound webhooks strictly validate `X-Idempotency-Key` headers against `public.idempotency_keys` with 24-hour expiration.
+
 ---
 
 ### Verification & Testing
-- **Vitest Unit Tests**: `Frontend/src/__tests__/phase7-lead-ingestion.test.ts` (10 tests covering normalization, signatures, idempotency, dedup, and quota handling).
+- **Vitest Unit Tests**: `Frontend/src/__tests__/phase7-lead-ingestion.test.ts` (10 tests), `Frontend/src/__tests__/n8n-architecture.test.ts` (3 tests), and `Frontend/src/__tests__/webhook-security.test.ts` (8 tests).
 - **Migration Validation Harness**: `scripts/validate-migrations.mjs` verifying schema extensions and round-robin stored procedure execution.
 - **TypeScript Typecheck**: Passed cleanly with `npx tsc --noEmit`.
-- **Next.js Production Build**: Compiled and generated 59 static/dynamic endpoints with zero errors.
+- **Next.js Production Build**: Compiled and generated 75 static/dynamic endpoints with zero errors.

@@ -4,11 +4,11 @@
 >
 > **Verification performed at audit time** (all run successfully inside `Frontend/`):
 > - `npm run lint` → ✅ "No ESLint warnings or errors"
-> - `npm test` → ✅ **222/222 tests passing, 23 test suites**, 1.84s
+> - `npm test` → ✅ **239/239 tests passing, 28 test suites**, 1.84s
 > - `npm run build` → ✅ production standalone build succeeds (**75 routes compiled, 0 errors**)
 > - `graphify update .` → ✅ Synchronized AST code graph
 >
-> **Audit date**: 2026-08-27 · HEAD: CallCRM 2.0 Real Estate Intelligence & Automation Engine Complete
+> **Audit date**: 2026-08-31 · HEAD: CallCRM 2.0 Real Estate Intelligence & Automation Engine Complete
 
 ---
 
@@ -22,10 +22,10 @@
 | One-sentence description | An enterprise Real Estate Intelligence Operating System engineered specifically for Indian luxury property brokerage houses and developer sales teams — modeling the **Flat/Unit as the atomic asset**, detecting proactive seller signals, executing 100-point bi-directional buyer matching, and providing human-gated AI meeting summarization. |
 | The Core Problem It Solves | Generic CRMs treat real estate like generic SaaS leads. In reality, high-ticket Indian real estate transactions (₹5 Cr to ₹50 Cr+ in DLF Golf Course Road, Worli, Bandra, Whitefield) fail due to **lost property/gate memory**, **inability to capture resale mandates before open-market portals**, **slow speed-to-lead**, and **missing 30-minute pre-site-visit intelligence**. |
 | Who uses it | Real-estate sales directors, closing specialists, site visit consultants, and brokerage agency founders ("the Boss"). |
-| Who owns/operates it | Multi-tenant SaaS; each realty enterprise registers an isolated tenant with strict PostgreSQL Row-Level Security (`Frontend/src/app/(auth)/setup-org`, `0001_init.sql` through `0019_phase13_intelligence_automation.sql`). |
-| Main value it provides | **Proactive Seller Intelligence** (capturing resale mandates before portals), **100-Point Bi-Directional Unit Matching**, **30-Minute Pre-Site Visit Briefings** (with Gate 2 visitor pass digital PINs & parking bays), **10-Second Hotkey Logging**, and **Human-in-the-Loop AI Meeting Structuring**. |
+| Who owns/operates it | Multi-tenant SaaS; each realty enterprise registers an isolated tenant with strict PostgreSQL Row-Level Security (`Frontend/src/app/(auth)/setup-org`, `0001_init.sql` through `0021_n8n_event_bus_and_integration_outbox.sql`). |
+| Main value it provides | **Proactive Seller Intelligence** (capturing resale mandates before portals), **100-Point Bi-Directional Unit Matching**, **30-Minute Pre-Site Visit Briefings** (with Gate 2 visitor pass digital PINs & parking bays), **Multi-Party Bidding Ledger**, **Indian Cost Sheet & Payment Plan Calculator**, **10-Second Hotkey Logging**, and **Human-in-the-Loop AI Meeting Structuring**. |
 | Main technologies | Next.js 15 App Router + React 19 + TypeScript · Supabase (Postgres 16 + Auth + RLS + Realtime) · Google Gemini 2.5 Flash via Vercel AI SDK · Tailwind CSS 3.4 + Radix UI · Vitest + Playwright. |
-| Implementation status | **100% Production-Grade** across 19 database migrations, 34 RLS tables, 63 authenticated API endpoints, and 23 green test suites (222 tests). |
+| Implementation status | **100% Production-Grade** across 21 database migrations, 34 RLS tables, 63+ authenticated API endpoints, and 28 green test suites (239 tests). |
 
 ---
 
@@ -205,7 +205,7 @@ erDiagram
 
 # 8. Testing & Quality Verification
 
-All 23 test suites verified passing cleanly:
+All 28 test suites verified passing cleanly:
 
 ```bash
 $ npm test
@@ -232,9 +232,14 @@ $ npm test
 ✓ src/__tests__/action-card.test.ts (3 tests)
 ✓ src/__tests__/rate-limiting.test.ts (3 tests)
 ✓ src/__tests__/dom/crm-state-machine.test.tsx (10 tests)
+✓ src/__tests__/site-visit-pass.test.ts (4 tests)
+✓ src/__tests__/bidding-ledger.test.ts (4 tests)
+✓ src/__tests__/cost-sheet-calculator.test.ts (4 tests)
+✓ src/__tests__/commission-engine.test.ts (2 tests)
+✓ src/__tests__/n8n-architecture.test.ts (3 tests)
 
-Test Files  23 passed (23)
-     Tests  222 passed (222)
+Test Files  28 passed (28)
+     Tests  239 passed (239)
 ```
 
 Production Build verification:

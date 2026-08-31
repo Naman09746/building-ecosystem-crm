@@ -122,7 +122,16 @@
 | `notes` | TEXT | NULLABLE | Interaction summary notes |
 | `occurred_at` | TIMESTAMPTZ | DEFAULT NOW() | Event timestamp |
 
-### 2.7 Supporting Infrastructure Tables
+### 2.7 Supporting Infrastructure & Enterprise Domain Tables (Migrations 0020 & 0021)
+- `public.people`: Decoupled real-world identity registry with multi-field deduplication.
+- `public.buyer_requirements`: Structured multi-variable requirement profiles (budget, configuration, location, Vaastu).
+- `public.property_listings`: Mandate listings with **role-protected seller price floors** (`minimum_acceptable_price`).
+- `public.negotiation_rounds`: Chronological bidding ledger capturing buyer offers, seller counters, and token deposit state.
+- `public.site_visit_dispatches`: Operational visit dispatches with digital Gate 2 visitor pass PINs and parking bays.
+- `public.commission_ledgers`: Statutory Indian real estate brokerage engine with 1% buyer + 1% seller splits, 18% GST addition, and 1% TDS deduction (u/s 194H).
+- `public.crm_domain_events`: Asynchronous transactional outbox for n8n webhook dispatch with HMAC signatures.
+- `public.integration_endpoints`: Configuration for n8n webhooks, HMAC secrets, and circuit breaker trip counters.
+- `public.inbound_integration_events`: Idempotent audit log for external webhook deliveries and AI extraction suggestions.
 - `public.tasks`: Prioritized follow-ups with `due_at` and SLA status (`overdue`, `due_today`, `upcoming`, `completed`).
 - `public.documents`: Floor plans, brochures, and KYC docs linked to projects and leads.
 - `public.webhook_events`: Idempotent log of inbound WhatsApp, Meta Ads, and Stripe events.
@@ -140,7 +149,11 @@ CREATE INDEX idx_leads_org_rep ON public.leads(org_id, assigned_salesperson_id);
 CREATE INDEX idx_units_project_status ON public.project_units(org_id, project_id, status);
 CREATE INDEX idx_activities_org_lead ON public.activities(org_id, lead_id, occurred_at DESC);
 CREATE INDEX idx_tasks_org_rep_status ON public.tasks(org_id, assigned_to_user_id, status);
-CREATE INDEX idx_webhooks_idempotency ON public.webhook_events(idempotency_key);
+CREATE INDEX idx_negotiations_deal ON public.negotiation_rounds(org_id, deal_id, round_number);
+CREATE INDEX idx_dispatches_lead ON public.site_visit_dispatches(org_id, lead_id);
+CREATE INDEX idx_commissions_deal ON public.commission_ledgers(org_id, deal_id);
+CREATE INDEX idx_domain_events_dispatch ON public.crm_domain_events(org_id, dispatch_status, next_retry_at);
+CREATE INDEX idx_inbound_events_idempotency ON public.inbound_integration_events(org_id, source_provider, external_event_id);
 ```
 
 ---
@@ -148,4 +161,4 @@ CREATE INDEX idx_webhooks_idempotency ON public.webhook_events(idempotency_key);
 ## 4. Automatic Database Triggers
 
 1. **`trg_people_phone_normalization`:** Normalizes phone numbers before insert/update on `public.people` into standard E.164 (`+91XXXXXXXXXX`).
-2. **`trg_set_updated_at`:** Automatically refreshes the `updated_at` timestamp on mutations across `leads`, `projects`, `tasks`, and `organizations`.
+2. **`trg_set_updated_at`:** Automatically refreshes the `updated_at` timestamp on mutations across `leads`, `projects`, `tasks`, `people`, `property_listings`, and `organizations`.

@@ -939,22 +939,6 @@
     "mtime": 1787373233.2750733,
     "hash": "b31a5012e17200640d699c00ec2c6c9e"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/archive/schema.sql.deprecated.sql": {
-    "mtime": 1787292512.7082174,
-    "hash": "a7ba7a88a283960e3ce8ac123905d719"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/archive/20260821000001_tenant_isolation_rls.sql.source.sql": {
-    "mtime": 1787312990.9076116,
-    "hash": "c4fe0d8e259081eb9aab1ff1416b2415"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/archive/seed.sql.deprecated.sql": {
-    "mtime": 1787329253.8296351,
-    "hash": "30252329004f07a9d79d53473490af3b"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/archive/20260821_enterprise_schema.sql.deprecated.sql": {
-    "mtime": 1787329240.7280977,
-    "hash": "a1ea081b6b917a66ebde2d28cf3702c6"
-  },
   "/Users/namanjoshi/SAAS/Real-estate/supabase/migrations/0014_phase8_deal_health.sql": {
     "mtime": 1787389410.0017958,
     "hash": "a7af85b8f0d198588c720d1c78b51fb6"
@@ -968,8 +952,8 @@
     "hash": "83053710aafbf5da86b4d9b19e2d8228"
   },
   "/Users/namanjoshi/SAAS/Real-estate/supabase/migrations/0001_init.sql": {
-    "mtime": 1787335251.5947845,
-    "hash": "7251f37bc50ce6ce1e392a3d80f672c6"
+    "mtime": 1788190827.392207,
+    "hash": "e24b67bbba7161e3a4b271c48e10a5ac"
   },
   "/Users/namanjoshi/SAAS/Real-estate/supabase/migrations/0003_rate_limiting.sql": {
     "mtime": 1787339302.7680852,
@@ -1043,213 +1027,193 @@
     "mtime": 1787391856.0249124,
     "hash": "e32724c521a0f9edd204b3edc9f89a3e"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/BEFORE_AFTER_MAP.md": {
-    "mtime": 1787776843.3873181,
-    "hash": "53595f420a3ad486b695fca14ce329b1"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/MARKETING_MASTER_REDESIGN_PLAN.md": {
-    "mtime": 1787778392.0635173,
-    "hash": "a7f0aa2312aeeb190c5b2779fda3a50f"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/UI_MASTER_REDESIGN_PLAN.md": {
-    "mtime": 1787777768.1999414,
-    "hash": "fa580a458d98f26621dba32a64b80e52"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/prompt.txt": {
-    "mtime": 1787336518.8743384,
-    "hash": "80d347cec8215bd1bc59ca4e25ca1362"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/UI_AUDIT.md": {
-    "mtime": 1787776763.1383839,
-    "hash": "db33de48704258581c3803922eae7530"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/MARKETING_IMPLEMENTATION_PLAN.md": {
-    "mtime": 1787778377.9162865,
-    "hash": "fa48d0569b66d77a98d58371191a0803"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/CALLCRM_MASTER_FRONTEND_AND_SYSTEM_ENCYCLOPEDIA.md": {
-    "mtime": 1787778454.3305137,
-    "hash": "12645d63249a98cd75acac289218167f"
-  },
   "/Users/namanjoshi/SAAS/Real-estate/README.md": {
-    "mtime": 1787775671.4646194,
-    "hash": "6d1f428d72c9d37665aa56e7dc42ca67"
+    "mtime": 1788189916.4605865,
+    "hash": "0cd76d0f388fd872b605352deab1c903"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/MARKETING_INFORMATION_ARCHITECTURE.md": {
-    "mtime": 1787778331.0038636,
-    "hash": "df1b1f0a763ce4cf466a0ef1038b4c43"
+  "/Users/namanjoshi/SAAS/Real-estate/CLAUDE.md": {
+    "mtime": 1788189926.400314,
+    "hash": "ec19c0013c70876f55d99fb562c2acc4"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DESIGN_SYSTEM.md": {
-    "mtime": 1787776794.2893937,
-    "hash": "0cd52ad30f3de7f434490f965da1e05b"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/README.md": {
+    "mtime": 1788189906.5889633,
+    "hash": "c0b2c71285b3d46f0de874921b89a5c4"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/CALLCRM_COMPLETE_BLUEPRINT.md": {
-    "mtime": 1787777694.8701737,
-    "hash": "94a4135df88ad1b0a6106182f74cd2b9"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/10-environment-configuration-reference.md": {
+    "mtime": 1788182962.183529,
+    "hash": "334cb7684ec2903d481ec53f819cc545"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/UX_ARCHITECTURE.md": {
-    "mtime": 1787776778.0170078,
-    "hash": "dbbb21247ea7e7818f105f41150bc0bc"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/02-system-architecture-document.md": {
+    "mtime": 1788181101.2856905,
+    "hash": "9e7fecc1caf1429ee1bee0c35f183bed"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/MARKETING_COMPONENT_STRATEGY.md": {
-    "mtime": 1787778356.0490866,
-    "hash": "21b6534df672079bb1c3b77df752074a"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/12-changelog-and-release-notes.md": {
+    "mtime": 1788181017.3561387,
+    "hash": "f396dbe0c4cfb1b537818193f2ffd266"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/LANDING_PAGE_REDESIGN.md": {
-    "mtime": 1787778346.835218,
-    "hash": "53e8fcefe789617f7e5def9b3a8c0447"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/03-api-documentation.md": {
+    "mtime": 1788182874.248213,
+    "hash": "77c511d490dc5a63a481fe62e5c58eee"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/COMPONENT_STRATEGY.md": {
-    "mtime": 1787776826.915997,
-    "hash": "5b34dcdfc9f619e4a96567d5bad093b2"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/08-test-strategy-and-test-plan.md": {
+    "mtime": 1788182936.7459931,
+    "hash": "3d0aede415e32d4520fc7192b785563a"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/task.md": {
-    "mtime": 1787775782.4289663,
-    "hash": "f29c65cc350aeb45f31fa21ef2e0865a"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/06-deployment-operations-runbook.md": {
+    "mtime": 1788182909.5831628,
+    "hash": "c0f92779a6fc37b88e2c849831c04384"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/MARKETING_SITE_AUDIT.md": {
-    "mtime": 1787778306.099693,
-    "hash": "9696c1df0e96bd40126bb7cac9a39047"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/11-architecture-decision-records.md": {
+    "mtime": 1788182983.671251,
+    "hash": "2f11455be48d71afe4d974eb8c5f28fb"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/walkthrough.md": {
-    "mtime": 1787392005.0595174,
-    "hash": "864f898541ce6238bf7eed21fadb88a6"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/04-database-data-model.md": {
+    "mtime": 1788181061.853404,
+    "hash": "1a47ccf503b556335c33c6cff0f6e8b2"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/FINAL_FRONTEND_IMPLEMENTATION_SPEC.md": {
-    "mtime": 1787778519.0117724,
-    "hash": "348876caff3ed757c2734604e12b436d"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/07-ai-agent-system-specification.md": {
+    "mtime": 1788182921.3839302,
+    "hash": "caa6efbe8a38d59bfb7154b95087722c"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/UI_REDESIGN_PLAN.md": {
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/01-product-requirements-document.md": {
+    "mtime": 1788182856.8628342,
+    "hash": "c77fba99834e6c22c28f596770891dfe"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/05-security-and-threat-model.md": {
+    "mtime": 1788182894.0815756,
+    "hash": "38f79868c2017a642f5eb2e0090a0c74"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/09-ux-product-specification.md": {
+    "mtime": 1788182950.651461,
+    "hash": "6928524d6e8c20ee694fd01f58f81c1e"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/02-ui-audit.md": {
+    "mtime": 1788183112.0195122,
+    "hash": "b662c27ecfbbc7c426ef7e8868ecdae0"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/05-ui-redesign-plan.md": {
     "mtime": 1787776808.8133302,
     "hash": "a1e1c6f06075d713efb24b65ac3e431d"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/MARKETING_DESIGN_SYSTEM.md": {
-    "mtime": 1787778318.743801,
-    "hash": "022066f8581b750b23f6308a65d07d5d"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/04-design-system.md": {
+    "mtime": 1787776794.2893937,
+    "hash": "0cd52ad30f3de7f434490f965da1e05b"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/CLAUDE.md": {
-    "mtime": 1787775630.1337988,
-    "hash": "1b6887f731bcaa355c4d9bb4a68e5e33"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/09-final-frontend-implementation-spec.md": {
+    "mtime": 1788183046.3194554,
+    "hash": "49c4c7a83159ff41aa6140fb96d6ca6a"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/BEFORE_AFTER_MARKETING_MAP.md": {
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/03-ux-architecture.md": {
+    "mtime": 1788183058.129848,
+    "hash": "c8b2b3b6d49b2a0659c0fe98fd5832c6"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/07-component-strategy.md": {
+    "mtime": 1787776826.915997,
+    "hash": "5b34dcdfc9f619e4a96567d5bad093b2"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/01-ui-master-redesign-plan.md": {
+    "mtime": 1788183102.1704702,
+    "hash": "1473a7754e937102ceadff109d457d39"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/06-screen-priority-matrix.md": {
+    "mtime": 1788183076.854519,
+    "hash": "aac65f34dc6a9a38a5349849ce26a65e"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ui-ux-spec/08-before-after-map.md": {
+    "mtime": 1787776843.3873181,
+    "hash": "53595f420a3ad486b695fca14ce329b1"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/01-callcrm-complete-blueprint.md": {
+    "mtime": 1788183041.158767,
+    "hash": "f953569fc28c5703fa07dd9599e04075"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/04-implementation-audit.md": {
+    "mtime": 1788183029.5505877,
+    "hash": "8d5f9c9d2cad459d1746a1d5cab3037a"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/02-callcrm-master-frontend-and-system-encyclopedia.md": {
+    "mtime": 1788183129.060727,
+    "hash": "f39e709f117ca48f21764c9dfb9dc374"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/03-project-audit.md": {
+    "mtime": 1788183091.9376643,
+    "hash": "7eb8f5c273b7d0e045a9efc6db2b6584"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/05-landing-page-redesign.md": {
+    "mtime": 1787778346.835218,
+    "hash": "53e8fcefe789617f7e5def9b3a8c0447"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/03-marketing-information-architecture.md": {
+    "mtime": 1787778331.0038636,
+    "hash": "df1b1f0a763ce4cf466a0ef1038b4c43"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/01-marketing-master-redesign-plan.md": {
+    "mtime": 1787778392.0635173,
+    "hash": "a7f0aa2312aeeb190c5b2779fda3a50f"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/07-marketing-implementation-plan.md": {
+    "mtime": 1787778377.9162865,
+    "hash": "fa48d0569b66d77a98d58371191a0803"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/08-before-after-marketing-map.md": {
     "mtime": 1787778367.4501307,
     "hash": "461c4888b9e08d7f1acef0ce31e0b9c9"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/SCREEN_PRIORITY_MATRIX.md": {
-    "mtime": 1787776817.5786173,
-    "hash": "03b1bb5d453e91d9025f3ffc3651de3e"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/04-marketing-design-system.md": {
+    "mtime": 1787778318.743801,
+    "hash": "022066f8581b750b23f6308a65d07d5d"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/IMPLEMENTATION-AUDIT.md": {
-    "mtime": 1787382639.639407,
-    "hash": "3e15e895a4ceecf775735f3b7371cf68"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/02-marketing-site-audit.md": {
+    "mtime": 1787778306.099693,
+    "hash": "9696c1df0e96bd40126bb7cac9a39047"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/production-readiness-and-deployment.md": {
-    "mtime": 1787393517.2648284,
-    "hash": "3dfddf2df5963a4cbf000f74bb6486d5"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/marketing-spec/06-marketing-component-strategy.md": {
+    "mtime": 1787778356.0490866,
+    "hash": "21b6534df672079bb1c3b77df752074a"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/re_arch.txt": {
-    "mtime": 1787311467.4396892,
-    "hash": "7e66ad279acfde926915361918ef0929"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/lead-ingestion-automation.md": {
-    "mtime": 1787388103.658862,
-    "hash": "77e88fa682e2f647ce095ec09fb9c544"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/deal-health-engine.md": {
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/03-deal-health-engine.md": {
     "mtime": 1787389475.9470708,
     "hash": "e0d4dd981e681d78795b17617bddcb36"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/enterprise-saas-backend-architecture.md": {
-    "mtime": 1787767285.6736915,
-    "hash": "c5e9e8d6d72eff47aa441c62cbc3eb87"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/01-enterprise-saas-backend-architecture.md": {
+    "mtime": 1788180941.34534,
+    "hash": "81bb10682a706aca74932e249b27d73f"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/setup-and-apis.md": {
-    "mtime": 1787775751.0517712,
-    "hash": "af4a073b923e69f8dece4642e7accd4d"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/10-production-readiness-and-deployment.md": {
+    "mtime": 1788183015.7931492,
+    "hash": "0257a937fce15846d7a1f45522d4b072"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/notifications-and-realtime.md": {
-    "mtime": 1787387049.0610633,
-    "hash": "e6bedfbe041f101f2721b809241c2fcf"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/background-processing-and-sla-automation.md": {
-    "mtime": 1787386077.9302874,
-    "hash": "04aac84e35fc90b47363c6ee3e561b3d"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/resurrection-engine.md": {
-    "mtime": 1787390913.2089474,
-    "hash": "9a2e08375734dbdb13821dd7c04bc4a4"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/graphify.md": {
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/11-graphify-knowledge-graph.md": {
     "mtime": 1787369612.7887459,
     "hash": "79448e8b6f321b63daecec4765f28084"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/server-side-analytics.md": {
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/06-background-processing-and-sla-automation.md": {
+    "mtime": 1788183001.7072039,
+    "hash": "97d2059b0762b526e35d2f636b1207ec"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/04-resurrection-engine.md": {
+    "mtime": 1787390913.2089474,
+    "hash": "9a2e08375734dbdb13821dd7c04bc4a4"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/08-server-side-analytics.md": {
     "mtime": 1787390026.6295362,
     "hash": "8e3982968f344a2fb3e32555549ca514"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/ai-agents-and-automation.md": {
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/02-ai-agents-and-automation.md": {
     "mtime": 1787775708.2891724,
     "hash": "644723e88c32e93fd508b69e82969d8a"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/Present/PROJECT_AUDIT.md": {
-    "mtime": 1787775889.319773,
-    "hash": "bf85018ac5f8bc3666b0ab66b851c0a9"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/09-setup-and-apis.md": {
+    "mtime": 1788183142.1806998,
+    "hash": "27ec8241749cae53a8fc86fc0b38c349"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/Present/prompt.md": {
-    "mtime": 1787719649.526258,
-    "hash": "dd63925ecd6acdfac5692aff13873007"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/07-notifications-and-realtime.md": {
+    "mtime": 1787387049.0610633,
+    "hash": "e6bedfbe041f101f2721b809241c2fcf"
   },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/10-environment-configuration-reference.md": {
-    "mtime": 1787378351.7078905,
-    "hash": "5737d9ac1d12c569371f0bc14279ee6d"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/02-system-architecture-document.md": {
-    "mtime": 1787378275.2691057,
-    "hash": "fa7aef1f15cac9f8990cc752949a78d7"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/12-changelog-and-release-notes.md": {
-    "mtime": 1787378369.8679073,
-    "hash": "0eadb9ea1949fc0c6987f2f782fc13d2"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/03-api-documentation.md": {
-    "mtime": 1787378285.3149035,
-    "hash": "4e3e8403cc6123f1b0507b7ddd3c65ec"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/08-test-strategy-and-test-plan.md": {
-    "mtime": 1787378333.6465716,
-    "hash": "f1b3e89eced6d5b3d710da8af1eb219a"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/06-deployment-operations-runbook.md": {
-    "mtime": 1787378315.9937415,
-    "hash": "31b725266af2e01b0c6ae20ea642c9b1"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/11-architecture-decision-records.md": {
-    "mtime": 1787378360.717115,
-    "hash": "0502e5b962cad124caba0fa6aa82663b"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/04-database-data-model.md": {
-    "mtime": 1787378295.0343301,
-    "hash": "934f3cc6cc20955385d7d6e00394b63a"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/07-ai-agent-system-specification.md": {
-    "mtime": 1787378325.7948492,
-    "hash": "262554e52707834996afdc81a2badc6c"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/01-product-requirements-document.md": {
-    "mtime": 1787378262.8729742,
-    "hash": "ddf87f8a2e0a0dcc4175a7c05dc6ae41"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/05-security-and-threat-model.md": {
-    "mtime": 1787378305.4881477,
-    "hash": "a5b70ede656fc2aea7940e7b653f5bfa"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/09-ux-product-specification.md": {
-    "mtime": 1787378343.361377,
-    "hash": "641d267235a73fcae7c895068863665f"
-  },
-  "/Users/namanjoshi/SAAS/Real-estate/DOCS/real-estate-crm-architecture.md.pdf": {
-    "mtime": 1787229762.2285361,
-    "hash": "d6ab23ba4411e0b928a0ebc04628a37e"
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/05-lead-ingestion-automation.md": {
+    "mtime": 1788182993.6557446,
+    "hash": "d6bd03db44237224c727c4f00791adce"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/images/hero-facade.jpg": {
     "mtime": 1787779201.5540004,

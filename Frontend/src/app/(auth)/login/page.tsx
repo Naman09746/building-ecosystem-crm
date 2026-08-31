@@ -33,15 +33,12 @@ function LoginForm() {
   const [googleLoading, setGoogleLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  // If already logged in, navigate to correct step
+  // If already logged in, navigate to dashboard
   React.useEffect(() => {
-    if (user) {
-      if (workflowStep === "org") router.replace("/setup-org");
-      else if (workflowStep === "plan") router.replace("/choose-plan");
-      else if (workflowStep === "onboarding") router.replace("/onboarding");
-      else if (workflowStep === "app") router.replace("/dashboard");
+    if (user && !loading) {
+      router.replace("/dashboard");
     }
-  }, [user, workflowStep, router]);
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,14 +62,14 @@ function LoginForm() {
         if (!res.success) {
           setErrorMessage(res.error || "Sign up failed");
         } else {
-          router.push("/setup-org");
+          router.push("/dashboard");
         }
       } else {
         const res = await signIn(email, password);
         if (!res.success) {
           setErrorMessage(res.error || "Invalid email or password");
         } else {
-          // Router effect will handle direction
+          router.push("/dashboard");
         }
       }
     } catch (err: any) {
