@@ -48,16 +48,16 @@
     "hash": "416a9a0f68d8739962d1452c78af2ae5"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/types/crm.ts": {
-    "mtime": 1787774490.0400283,
-    "hash": "26e0ed01fc215b33ce58738a9e3480d5"
+    "mtime": 1788180311.8252728,
+    "hash": "53168e73d85ca543cb4e48583de960e8"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/types/billing.ts": {
     "mtime": 1787384729.803143,
     "hash": "735a67f5decf64854d3996d3d0d3ec43"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/context/crm-context.tsx": {
-    "mtime": 1787774775.8822205,
-    "hash": "f212861bf2318692c720b859d3332930"
+    "mtime": 1788180166.348429,
+    "hash": "7596126c9ccb266045b447c6a357231d"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/context/auth-context.tsx": {
     "mtime": 1787383845.8385158,
@@ -171,6 +171,14 @@
     "mtime": 1787335343.824541,
     "hash": "85dc53b530035df87387a1baad146aa1"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/listings/mandates/route.ts": {
+    "mtime": 1788179974.5113015,
+    "hash": "9630f55188cd18621dc04149f2b8af34"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/deals/[id]/negotiations/route.ts": {
+    "mtime": 1788179920.4369047,
+    "hash": "f493845743f92cdfda6b4507e8a33919"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/audit-log/route.ts": {
     "mtime": 1787383465.1283414,
     "hash": "d5cf22369b9aa635697d0b5b18072335"
@@ -243,6 +251,10 @@
     "mtime": 1787383397.4272368,
     "hash": "f41d4ccff5f592cf9c4d6eb19ba65b31"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/people/route.ts": {
+    "mtime": 1788179947.232808,
+    "hash": "b0599df816dd77a08b34e44cc75fe3aa"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/activities/route.ts": {
     "mtime": 1787335168.0226793,
     "hash": "8658294f64fcaacbf1e6bbd798031beb"
@@ -250,6 +262,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/activities/meeting-summary/route.ts": {
     "mtime": 1787775129.049472,
     "hash": "ad9ad8e2312f47e441d1901027d9b5cb"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/finance/commissions/route.ts": {
+    "mtime": 1788180026.4038422,
+    "hash": "30f03a75b8e6ca9a0ac05e78938a2014"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/automation/recompute/route.ts": {
     "mtime": 1787385272.3422067,
@@ -262,6 +278,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/automation/stale-facts/route.ts": {
     "mtime": 1787775148.3658051,
     "hash": "d9998cab287e2db0b8f73889d802b6ee"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/site-visits/dispatch/route.ts": {
+    "mtime": 1788179995.265529,
+    "hash": "66ac71e2dbbd02415fbc4fb96c2d3bae"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/documents/[id]/route.ts": {
     "mtime": 1787383459.0630727,
@@ -567,6 +587,10 @@
     "mtime": 1787371726.1802597,
     "hash": "6ca8961789e88e625ef9934bb6da2116"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/negotiation-modal.tsx": {
+    "mtime": 1788179590.0190957,
+    "hash": "694dd8d54daadc927f7627715a005f04"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/notification-preferences-dialog.tsx": {
     "mtime": 1787386521.2136853,
     "hash": "a6e54cdbe4ce777d5e57d3f74d7c111e"
@@ -595,6 +619,10 @@
     "mtime": 1788169081.328689,
     "hash": "de153f4f723701fa61cd4cb0f9a4522f"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/commission-modal.tsx": {
+    "mtime": 1788179613.0171785,
+    "hash": "ec1d1acd260eec81bfe45e0eb0857121"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/stacking-chart.tsx": {
     "mtime": 1788174458.650772,
     "hash": "920c613682430e3c36c31cab34eba376"
@@ -604,12 +632,16 @@
     "hash": "5b3a259390d739005071d605f51a9ec8"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/salesperson-home.tsx": {
-    "mtime": 1788169609.9299252,
-    "hash": "0391e08a63055950b6e68fb637f1ed41"
+    "mtime": 1788179704.499079,
+    "hash": "75c6738c60561d57d2e7a52394ddb297"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/lead-detail-modal.tsx": {
     "mtime": 1788169898.8291526,
     "hash": "18ee85d1cd8ff0a1997ba7d2bf0adb98"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/site-visit-dispatch-modal.tsx": {
+    "mtime": 1788179601.6016269,
+    "hash": "52e349b670ed3bdaa8e3cd995e002bfe"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/charts/activity-heatmap.tsx": {
     "mtime": 1787246124.1168935,
@@ -686,6 +718,14 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/cost-sheet-calculator.test.ts": {
     "mtime": 1788173379.6076255,
     "hash": "b96c27af70b4a1a1770eec2a73a85b2e"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/people-dedup.test.ts": {
+    "mtime": 1788179715.8005834,
+    "hash": "70b79b9f03413c7df580aed5338f8b28"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/negotiation-and-commission.test.ts": {
+    "mtime": 1788179726.5920048,
+    "hash": "a676ca4748b33a181a483292a5b05ca1"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/role-mapping.test.ts": {
     "mtime": 1787369850.4249182,
@@ -910,6 +950,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/supabase/migrations/0003_rate_limiting.sql": {
     "mtime": 1787339302.7680852,
     "hash": "2c89d70a4f87e6e21b3eacc0e21a2dcd"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/supabase/migrations/0020_enterprise_domain_model.sql": {
+    "mtime": 1788179489.129117,
+    "hash": "3951351676ffc5df5468f02d46392c8d"
   },
   "/Users/namanjoshi/SAAS/Real-estate/supabase/migrations/0012_phase6_aria_intelligence.sql": {
     "mtime": 1787387276.3367631,

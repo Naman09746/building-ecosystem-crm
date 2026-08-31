@@ -225,24 +225,51 @@ export interface Project {
   towers?: ProjectTower[];
 }
 
+export type WealthTier = "uhni" | "hni" | "mass_affluent" | "retail" | "institutional";
+export type KycStatus = "verified" | "pending" | "exempt" | "rejected";
+
 export interface Person {
   id: string;
   orgId: string;
   name: string;
+  fullName?: string;
   phone: string;
+  primaryPhone?: string;
   phoneNormalized?: string;
+  secondaryPhone?: string;
+  whatsappNumber?: string;
   email?: string;
+  secondaryEmail?: string;
+  avatarUrl?: string;
+  preferredLanguage?: string;
+  nationality?: string;
+  isNri?: boolean;
+  residentCity?: string;
   city?: string;
+  residentAddress?: string;
+  address?: string;
+  panNumber?: string;
+  aadhaarLast4?: string;
+  kycStatus?: KycStatus;
+  kycVerifiedAt?: string;
+  wealthTier?: WealthTier;
+  vipTier?: "standard" | "hni" | "ultra_hni" | "investor" | "nri" | string;
+  occupation?: string;
+  primaryProfession?: string;
+  companyName?: string;
+  designation?: string;
+  primaryTags?: string[];
+  tags?: string[];
+  notes?: string;
+  isVip?: boolean;
+  doNotContact?: boolean;
   source?: string;
+  budget?: number;
   regionId?: string;
   regionName?: string;
-  associatedProjectNames?: string[];
   preferredConfiguration?: string;
-  budget?: number;
-  occupation?: string;
-  address?: string;
-  vipTier?: "standard" | "hni" | "ultra_hni" | "investor" | "nri";
-  tags?: string[];
+  associatedProjectNames?: string[];
+  createdBy?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -657,4 +684,180 @@ export interface StructuredMeetingDisposition {
   suggestedFollowUpAt?: string;
   requiresHumanApproval: boolean;
 }
+
+// ====================================================================
+// ENTERPRISE DOMAIN MODEL (MIGRATION 0020)
+// ====================================================================
+
+export type PropertyCategory = "residential" | "commercial" | "plot_land" | "penthouse" | "farmhouse" | "retail";
+export type TransactionIntent = "self_use" | "long_term_investment" | "rental_yield" | "upgrade" | "downsizing" | "relocation";
+export type TimelineUrgency = "immediate_7_days" | "30_days" | "3_months" | "6_months" | "flexible";
+
+export interface BuyerRequirement {
+  id: string;
+  orgId: string;
+  leadId?: string;
+  personId: string;
+  propertyCategory: PropertyCategory;
+  transactionIntent: TransactionIntent;
+  marketSegment: "primary_builder" | "secondary_resale" | "rental_lease" | "both";
+  budgetMin: number;
+  budgetPreferred: number;
+  budgetMax: number;
+  fundingSource: "self_funded" | "bank_loan" | "part_liquidation" | "unknown";
+  configurations: string[];
+  carpetAreaMinSqft?: number;
+  carpetAreaMaxSqft?: number;
+  superAreaMinSqft?: number;
+  superAreaMaxSqft?: number;
+  preferredFloors: "any" | "ground" | "low_1_5" | "mid_6_15" | "high_16_plus" | "penthouse_top";
+  facingDirections?: string[];
+  viewPreferences?: string[];
+  isVaastuCompliantMandatory?: boolean;
+  isCornerUnitPreferred?: boolean;
+  servantRoomMandatory?: boolean;
+  parkingSlotsRequired?: number;
+  targetCities: string[];
+  targetMicroMarkets?: string[];
+  targetProjectIds?: string[];
+  timelineUrgency: TimelineUrgency;
+  confidenceScore: number; // 0 to 100
+  isActive: boolean;
+  lastVerifiedAt?: string;
+  verifiedBy?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type ListingType = "exclusive_mandate" | "semi_exclusive" | "open_market" | "builder_direct" | "pocket_listing";
+export type MandateListingStatus = "active" | "soft_hold" | "under_token" | "under_negotiation" | "sold" | "withdrawn" | "expired";
+
+export interface PropertyListing {
+  id: string;
+  orgId: string;
+  unitId: string;
+  listingType: ListingType;
+  listingStatus: MandateListingStatus;
+  askingPrice: number;
+  expectedPrice: number;
+  minimumAcceptablePrice: number; // Sensitive price floor
+  priceNegotiable: boolean;
+  maintenanceChargesMonthly?: number;
+  mandateStartDate: string;
+  mandateEndDate: string;
+  autoRenew: boolean;
+  sellerBrokeragePct: number;
+  buyerBrokeragePct: number;
+  fixedCommissionAmount?: number;
+  keysHeldBy: "agency_custody" | "society_guard" | "owner" | "tenant" | "caretaker";
+  keyLocationDetails?: string;
+  viewingNoticeRequired: "instant" | "2_hours" | "same_day" | "24_hours";
+  gateVisitorInstructions?: string;
+  portalSyndicationAllowed: boolean;
+  socialMediaAllowed: boolean;
+  photoVideoRightsVerified: boolean;
+  ownerPersonId?: string;
+  assignedAgentId?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface NegotiationRound {
+  id: string;
+  orgId: string;
+  dealId: string;
+  unitId: string;
+  leadId: string;
+  roundNumber: number;
+  bidderType: "buyer_offer" | "seller_counter" | "mediator_compromise";
+  offeredPrice: number;
+  priceDeltaFromAsk?: number;
+  proposedPaymentPlan: "down_payment" | "clp" | "subvention" | "flexi_50_50" | "custom";
+  tokenAmountProposed?: number;
+  tokenChequeAvailable: boolean;
+  closingTimelineDays: number;
+  specialConditions?: string[];
+  furnishingInclusions?: string;
+  carParksRequested?: number;
+  roundStatus: "accepted" | "rejected" | "countered" | "pending_review" | "expired";
+  rejectionReason?: string;
+  recordedBy?: string;
+  recordedAt: string;
+}
+
+export type DispatchStatus = "scheduled" | "confirmed" | "en_route" | "in_progress" | "completed" | "rescheduled" | "no_show" | "cancelled";
+
+export interface SiteVisitDispatch {
+  id: string;
+  orgId: string;
+  leadId: string;
+  unitId: string;
+  projectId: string;
+  scheduledStart: string;
+  scheduledEnd: string;
+  assignedSalespersonId: string;
+  backupSalespersonId?: string;
+  gateEntryName: string;
+  digitalVisitorPassPin?: string;
+  visitorParkingBay?: string;
+  towerElevatorAccessCard?: string;
+  caretakerContactPhone?: string;
+  buyerReconfirmed: boolean;
+  ownerAccessCleared: boolean;
+  keysVerified: boolean;
+  costSheetPrinted: boolean;
+  backupUnitsSelected?: string[];
+  dispatchStatus: DispatchStatus;
+  buyerFeedbackSentiment?: "loved_it" | "interested_needs_family" | "hesitant_on_price" | "disliked_layout" | "rejected";
+  buyerLikedAspects?: string[];
+  buyerObjections?: string[];
+  offerDiscussed?: number;
+  nextFollowupDate?: string;
+  debriefNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type CommissionPaymentStatus = "unpaid" | "partially_paid" | "paid" | "overdue" | "written_off";
+
+export interface CommissionLedger {
+  id: string;
+  orgId: string;
+  dealId: string;
+  unitId: string;
+  finalTransactedValue: number;
+  bookingDate: string;
+  registrationDate?: string;
+  buyerBrokeragePct: number;
+  buyerBrokerageAmount: number;
+  sellerBrokeragePct: number;
+  sellerBrokerageAmount: number;
+  totalGrossBrokerage: number;
+  gstRatePct: number;
+  gstAmount: number;
+  tdsRatePct: number;
+  tdsDeducted: number;
+  netBrokerageReceivable: number;
+  channelPartnerOrgId?: string;
+  channelPartnerCommissionPct: number;
+  channelPartnerPayout: number;
+  salespersonUserId?: string;
+  salespersonIncentivePct: number;
+  salespersonIncentiveAmount: number;
+  managerUserId?: string;
+  managerOverridePct: number;
+  managerOverrideAmount: number;
+  companyNetRetention: number;
+  invoiceNumber?: string;
+  invoiceDate?: string;
+  paymentStatus: CommissionPaymentStatus;
+  amountCollected: number;
+  outstandingBalance: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 

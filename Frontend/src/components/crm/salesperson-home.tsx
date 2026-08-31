@@ -32,9 +32,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PipelineBadge, TaskStatusBadge, DealHealthBadge, LeadScoreBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
-import { Lead, Task, SiteVisitBriefing } from "@/types/crm";
+import { Lead, Task, SiteVisitBriefing, ProjectUnit } from "@/types/crm";
 import { SellerOpportunitiesModal } from "@/components/crm/seller-opportunities-modal";
 import { MeetingSummaryModal } from "@/components/crm/meeting-summary-modal";
+import { NegotiationModal } from "@/components/crm/negotiation-modal";
+import { SiteVisitDispatchModal } from "@/components/crm/site-visit-dispatch-modal";
+import { CommissionModal } from "@/components/crm/commission-modal";
 
 interface SalespersonHomeProps {
   onOpenQuickLog: (leadId?: string) => void;
@@ -61,6 +64,11 @@ export function SalespersonHome({
 
   const [isMeetingModalOpen, setIsMeetingModalOpen] = React.useState(false);
   const [isSellerModalOpen, setIsSellerModalOpen] = React.useState(false);
+  const [isNegotiationOpen, setIsNegotiationOpen] = React.useState(false);
+  const [isDispatchOpen, setIsDispatchOpen] = React.useState(false);
+  const [isCommissionOpen, setIsCommissionOpen] = React.useState(false);
+  const [selectedActionLead, setSelectedActionLead] = React.useState<Lead | null>(null);
+  const [selectedActionUnit, setSelectedActionUnit] = React.useState<ProjectUnit | null>(null);
   const [activeBriefing, setActiveBriefing] = React.useState<SiteVisitBriefing | null>(null);
 
   // Active tasks for this salesperson
@@ -169,6 +177,45 @@ export function SalespersonHome({
         </div>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setSelectedActionLead(filteredLeads[0] || null);
+              setIsDispatchOpen(true);
+            }}
+            className="h-10 px-3 text-xs font-semibold border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 flex items-center gap-1.5 rounded-xl"
+          >
+            <Compass className="h-4 w-4" />
+            <span>Site Visit Pass</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setSelectedActionLead(filteredLeads[0] || null);
+              setIsNegotiationOpen(true);
+            }}
+            className="h-10 px-3 text-xs font-semibold border-purple-500/40 text-purple-400 hover:bg-purple-500/10 flex items-center gap-1.5 rounded-xl"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            <span>Negotiation Room</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setSelectedActionLead(filteredLeads[0] || null);
+              setIsCommissionOpen(true);
+            }}
+            className="h-10 px-3 text-xs font-semibold border-amber-500/40 text-amber-400 hover:bg-amber-500/10 flex items-center gap-1.5 rounded-xl"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span>Commission Ledger</span>
+          </Button>
+
           <Button
             size="sm"
             variant="outline"
@@ -621,6 +668,30 @@ export function SalespersonHome({
           </div>
         </div>
       )}
+
+      {/* Negotiation Room Modal */}
+      <NegotiationModal
+        open={isNegotiationOpen}
+        onOpenChange={setIsNegotiationOpen}
+        lead={selectedActionLead}
+        unit={selectedActionUnit}
+      />
+
+      {/* Operational Site Visit Dispatch & Digital Gate Pass Modal */}
+      <SiteVisitDispatchModal
+        open={isDispatchOpen}
+        onOpenChange={setIsDispatchOpen}
+        lead={selectedActionLead}
+        unit={selectedActionUnit}
+      />
+
+      {/* Indian Real Estate Brokerage & Commission Ledger Modal */}
+      <CommissionModal
+        open={isCommissionOpen}
+        onOpenChange={setIsCommissionOpen}
+        lead={selectedActionLead}
+        unit={selectedActionUnit}
+      />
     </div>
   );
 }
