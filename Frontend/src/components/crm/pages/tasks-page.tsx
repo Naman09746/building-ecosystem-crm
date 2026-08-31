@@ -13,6 +13,7 @@ import {
   Search,
   CheckCircle,
   CalendarCheck,
+  ChevronRight,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,14 @@ import { Input } from "@/components/ui/input";
 import { TaskStatusBadge } from "@/components/ui/status-badge";
 import { formatPhone } from "@/lib/utils";
 import { QuickActivityModal } from "@/components/crm/quick-activity-modal";
+import { Lead } from "@/types/crm";
 
-export function TasksPage() {
+interface TasksPageProps {
+  onSelectLead?: (lead: Lead) => void;
+  onOpenQuickLog?: (leadId?: string) => void;
+}
+
+export function TasksPage({ onSelectLead, onOpenQuickLog }: TasksPageProps = {}) {
   const { filteredTasks, completeTask, users, leads } = useCRM();
   const [filter, setFilter] = React.useState<"all" | "overdue" | "due_today" | "upcoming" | "completed">("all");
   const [search, setSearch] = React.useState("");
@@ -66,35 +73,45 @@ export function TasksPage() {
   }, [filteredTasks, filter, search, repFilter, leads]);
 
   const handleLog = (leadId: string) => {
-    setQuickLogLeadId(leadId);
-    setQuickLogOpen(true);
+    if (onOpenQuickLog) {
+      onOpenQuickLog(leadId);
+    } else {
+      setQuickLogLeadId(leadId);
+      setQuickLogOpen(true);
+    }
+  };
+
+  const handleLeadClick = (leadId: string) => {
+    if (!onSelectLead) return;
+    const lead = leads.find((l) => l.id === leadId);
+    if (lead) onSelectLead(lead);
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-10">
+    <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto pb-10">
       {/* Header with Today's Calling Progress */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-border">
         <div>
           <div className="flex items-center gap-2">
             <ListTodo className="h-5 w-5 text-primary" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Priority Calling & Follow-up Queue
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
+              Follow-up &amp; Outreach Queue
             </h1>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Ranked outreach list prioritizing overdue SLAs and high-value deals with instant calling.
+            Ranked list prioritizing overdue SLAs and high-ticket buyers with 1-tap dialer.
           </p>
         </div>
 
         {/* Priority Summary Badges */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2">
           {overdueCount > 0 && (
-            <div className="px-2.5 py-1 rounded-md bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold flex items-center gap-1">
+            <div className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold flex items-center gap-1">
               <AlertTriangle className="h-3.5 w-3.5" />
               <span>{overdueCount} Overdue</span>
             </div>
           )}
-          <div className="px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold">
+          <div className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold">
             {dueTodayCount} Due Today
           </div>
         </div>
@@ -104,10 +121,10 @@ export function TasksPage() {
       <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle space-y-2">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
-            <span className="font-bold text-foreground">Today&apos;s Outreach Progress:</span>
+            <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span className="font-bold text-foreground">Outreach Progress:</span>
             <span className="font-semibold text-muted-foreground">
-              {completedCount} of {todayTotal} calls logged ({todayProgressPercent}%)
+              {completedCount} of {todayTotal} logged ({todayProgressPercent}%)
             </span>
           </div>
           <span className="text-[11px] font-mono text-muted-foreground font-bold">
@@ -122,46 +139,23 @@ export function TasksPage() {
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative w-52 sm:w-64">
+      {/* Filter Toolbar (Horizontally scrollable on mobile) */}
+      <div className="p-3 rounded-xl border border-border bg-card shadow-subtle space-y-2.5 text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search buyer, phone, task..."
-              className="pl-8 h-8 text-xs bg-secondary/40"
+              className="pl-8 h-9 text-xs bg-secondary/40 rounded-xl"
             />
-          </div>
-
-          {/* Filter Segment Pills */}
-          <div className="flex items-center gap-1 bg-secondary/50 p-1 rounded-lg border border-border">
-            {[
-              { id: "all", label: `All (${filteredTasks.length})` },
-              { id: "overdue", label: `🔴 Overdue (${overdueCount})` },
-              { id: "due_today", label: `🟠 Due Today (${dueTodayCount})` },
-              { id: "upcoming", label: `🔵 Upcoming (${upcomingCount})` },
-              { id: "completed", label: `🟢 Done (${completedCount})` },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setFilter(item.id as any)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                  filter === item.id
-                    ? "bg-card text-foreground font-bold shadow-subtle"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
           </div>
 
           <select
             value={repFilter}
             onChange={(e) => setRepFilter(e.target.value)}
-            className="h-8 px-2 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none"
+            className="h-9 px-3 rounded-xl border border-border bg-secondary/50 text-foreground font-medium text-xs focus:outline-none shrink-0"
           >
             <option value="all">All Sales Reps</option>
             {salespeople.map((s) => (
@@ -172,9 +166,28 @@ export function TasksPage() {
           </select>
         </div>
 
-        <span className="text-xs text-muted-foreground font-mono">
-          Showing {sortedTasks.length} in queue
-        </span>
+        {/* Filter Segment Pills (Scrollable) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {[
+            { id: "all", label: `All (${filteredTasks.length})` },
+            { id: "overdue", label: `🔴 Overdue (${overdueCount})` },
+            { id: "due_today", label: `🟠 Due Today (${dueTodayCount})` },
+            { id: "upcoming", label: `🔵 Upcoming (${upcomingCount})` },
+            { id: "completed", label: `🟢 Done (${completedCount})` },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setFilter(item.id as any)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 min-h-[34px] ${
+                filter === item.id
+                  ? "bg-primary text-primary-foreground font-bold shadow-subtle"
+                  : "bg-secondary/60 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Calling Queue List */}
@@ -191,49 +204,53 @@ export function TasksPage() {
             return (
               <div
                 key={task.id}
-                className={`p-4 rounded-xl border shadow-subtle transition-all space-y-2.5 text-xs ${
+                className={`p-3.5 sm:p-4 rounded-xl border shadow-subtle transition-all space-y-3 text-xs ${
                   task.status === "overdue"
-                    ? "border-rose-300 bg-rose-50/30"
+                    ? "border-rose-300 bg-rose-50/20"
                     : isDone
                     ? "border-border/60 bg-secondary/20 opacity-75"
                     : "border-border bg-card hover:border-border/90"
                 }`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    {/* Instant Complete Checkbox */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {/* Instant Complete Checkbox (44px touch container) */}
                     <button
                       type="button"
                       onClick={() => completeTask(task.id)}
                       disabled={isDone}
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition-colors ${
                         isDone
                           ? "bg-emerald-600 border-emerald-600 text-white"
-                          : "border-border hover:border-primary hover:bg-primary/10"
+                          : "border-border hover:border-primary hover:bg-primary/10 active:scale-95"
                       }`}
                       title={isDone ? "Task Completed" : "Mark Complete"}
                     >
-                      {isDone ? <CheckCircle className="h-3.5 w-3.5" /> : null}
+                      {isDone ? <CheckCircle className="h-4 w-4" /> : null}
                     </button>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-secondary text-muted-foreground">
-                        #{idx + 1}
+                    <div
+                      className="min-w-0 cursor-pointer"
+                      onClick={() => handleLeadClick(task.leadId)}
+                    >
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-secondary text-muted-foreground">
+                          #{idx + 1}
+                        </span>
+                        <span className={`font-bold text-sm text-foreground hover:underline ${isDone ? "line-through text-muted-foreground" : ""}`}>
+                          {task.personName}
+                        </span>
+                        <TaskStatusBadge status={task.status} />
+                      </div>
+                      <span className="text-muted-foreground font-mono text-[11px] block mt-0.5">
+                        {formatPhone(task.phone)} · {task.projectName}
                       </span>
-                      <span className={`font-bold text-sm text-foreground ${isDone ? "line-through text-muted-foreground" : ""}`}>
-                        {task.personName}
-                      </span>
-                      <span className="text-muted-foreground font-mono text-[11px]">
-                        {formatPhone(task.phone)}
-                      </span>
-                      <TaskStatusBadge status={task.status} />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 self-end sm:self-center">
-                    <span className="font-semibold text-foreground">{task.projectName}</span>
+                  <div className="shrink-0 text-right">
                     {task.dueTime && (
-                      <span className="font-mono text-[11px] font-bold text-primary flex items-center gap-1">
+                      <span className="font-mono text-[11px] font-bold text-primary flex items-center gap-1 justify-end">
                         <Clock className="h-3 w-3" />
                         {task.dueTime}
                       </span>
@@ -261,9 +278,9 @@ export function TasksPage() {
                   </div>
                 </div>
 
-                {/* 1-Click Calling & Outreach Actions */}
+                {/* 1-Click Calling & Outreach Actions (44px Touch Rows on Mobile) */}
                 {!isDone && (
-                  <div className="flex items-center justify-between pt-1 border-t border-border/40 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-border/40 text-xs">
                     <span className="text-[11px] text-muted-foreground font-mono">
                       Rep: <strong>{task.salespersonName}</strong>
                     </span>
@@ -271,26 +288,28 @@ export function TasksPage() {
                     <div className="flex items-center gap-2">
                       <a
                         href={`tel:${task.phone}`}
-                        className="inline-flex items-center justify-center h-7 px-2.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-10 sm:h-8 px-3 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white transition-colors"
                       >
-                        <Phone className="h-3 w-3 mr-1" />
+                        <Phone className="h-3.5 w-3.5 mr-1" />
                         Call
                       </a>
 
                       <a
-                        href={`https://wa.me/${task.phone.replace(/\D/g, "")}`}
+                        href={`https://wa.me/${task.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                          `Hi ${task.personName}, following up regarding your requirement in ${task.projectName}. When would you like to discuss next steps?`
+                        )}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center justify-center h-7 px-2.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-10 sm:h-8 px-3 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
+                        <MessageSquare className="h-3.5 w-3.5 mr-1" />
                         WhatsApp
                       </a>
 
                       <Button
                         size="sm"
                         variant="secondary"
-                        className="h-7 px-2 text-[11px] font-medium"
+                        className="h-10 sm:h-8 px-3 text-xs font-medium shrink-0"
                         onClick={() => handleLog(task.leadId)}
                       >
                         Log Touchpoint

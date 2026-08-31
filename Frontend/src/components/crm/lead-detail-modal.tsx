@@ -35,12 +35,7 @@ import { useCRM } from "@/context/crm-context";
 import { Lead, PipelineStage, CRMDocument } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { PipelineBadge, TaskStatusBadge, DealHealthBadge, LeadScoreBadge, UnitStatusBadge } from "@/components/ui/status-badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 import { WhatsAppActionModal } from "@/components/crm/whatsapp-action-modal";
 import { toast } from "sonner";
@@ -155,16 +150,20 @@ export function LeadDetailModal({
         onOpenChange={setWhatsappModalOpen}
       />
 
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[780px] max-h-[92vh] overflow-y-auto p-6 space-y-5 rounded-2xl border border-border shadow-modal">
+      <ResponsiveModal
+        open={open}
+        onOpenChange={onOpenChange}
+        className="sm:max-w-[780px] max-h-[92vh] overflow-y-auto p-6 space-y-5"
+      >
+        <div className="space-y-5">
           {/* 1. HEADER WITH IDENTITY, STAGE, HEALTH, AND ACTIONS */}
-          <DialogHeader className="pb-3 border-b border-border">
+          <div className="pb-3 border-b border-border">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <DialogTitle className="text-xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-foreground">
                     {lead.personName}
-                  </DialogTitle>
+                  </h2>
                   <PipelineBadge stage={lead.stage} />
                   <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
                   <DealHealthBadge health={lead.dealHealth} score={lead.dealHealthScore} reason={lead.dealHealthReason} showScore />
@@ -207,7 +206,7 @@ export function LeadDetailModal({
                 </Button>
               </div>
             </div>
-          </DialogHeader>
+          </div>
 
         {/* 2. DETERMINISTIC DEAL HEALTH & RISK INTELLIGENCE PANEL */}
         <div className={`p-4 rounded-xl border space-y-3 text-xs ${
@@ -710,8 +709,8 @@ export function LeadDetailModal({
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </ResponsiveModal>
     </>
   );
 }

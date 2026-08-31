@@ -380,51 +380,51 @@ export function SalespersonHome({
                   </div>
 
                   {/* 4. 1-Click Operational Action Bar */}
-                  <div className="flex items-center justify-between pt-1 border-t border-border/40 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1.5 border-t border-border/40 text-xs">
                     <button
                       type="button"
                       onClick={() => onSelectLead(lead)}
-                      className="text-primary font-semibold hover:underline flex items-center gap-1 text-[11px]"
+                      className="text-primary font-semibold hover:underline flex items-center gap-1 text-[11px] self-start sm:self-auto"
                     >
                       <span>Open 360° Dossier</span>
                       <ChevronRight className="h-3 w-3" />
                     </button>
 
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {isSiteVisit && (
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 px-2.5 text-[11px] font-bold border-purple-500/40 text-purple-600 hover:bg-purple-500/10 flex items-center gap-1"
+                          className="h-9 sm:h-7 px-3 sm:px-2.5 text-xs sm:text-[11px] font-bold border-purple-500/40 text-purple-600 hover:bg-purple-500/10 flex items-center gap-1"
                           onClick={() => handleOpenBriefing(lead)}
                         >
-                          <Compass className="h-3 w-3" />
+                          <Compass className="h-3.5 w-3.5 sm:h-3 sm:w-3" />
                           <span>Pre-Visit Briefing</span>
                         </Button>
                       )}
                       <a
                         href={`tel:${lead.phone}`}
-                        className="inline-flex items-center justify-center h-7 px-2.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-9 sm:h-7 px-3 sm:px-2.5 rounded-lg text-xs sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
                       >
-                        <Phone className="h-3 w-3 mr-1" />
+                        <Phone className="h-3.5 w-3.5 sm:h-3 sm:w-3 mr-1" />
                         Call
                       </a>
                       <a
                         href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center justify-center h-7 px-2.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-9 sm:h-7 px-3 sm:px-2.5 rounded-lg text-xs sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
+                        <MessageSquare className="h-3.5 w-3.5 sm:h-3 sm:w-3 mr-1" />
                         WhatsApp
                       </a>
                       <Button
                         size="sm"
                         variant="secondary"
-                        className="h-7 px-2 text-[11px] font-medium"
+                        className="h-9 sm:h-7 px-3 sm:px-2 text-xs sm:text-[11px] font-medium shrink-0"
                         onClick={() => onOpenQuickLog(lead.id)}
                       >
-                        Log Touchpoint
+                        Log
                       </Button>
                     </div>
                   </div>

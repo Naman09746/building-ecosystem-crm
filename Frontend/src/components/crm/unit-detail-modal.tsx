@@ -30,7 +30,7 @@ import {
   Share2,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -207,8 +207,12 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 border border-border bg-card shadow-2xl">
+    <ResponsiveModal
+      open={isOpen}
+      onOpenChange={(open) => !open && onClose()}
+      className="max-w-4xl max-h-[90vh] overflow-y-auto p-0"
+    >
+      <div className="flex flex-col">
         {/* Header Banner */}
         <div className="p-6 border-b border-border bg-gradient-to-r from-secondary/60 via-card to-secondary/30 relative">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -851,7 +855,7 @@ export function UnitDetailModal({ unit, isOpen, onClose }: UnitDetailModalProps)
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </ResponsiveModal>
   );
 }

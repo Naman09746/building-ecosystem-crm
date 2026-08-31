@@ -1,7 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { Activity as ActivityIcon, Phone, MessageSquare, Building2, Calendar, User, Search, Filter, Sparkles, CheckCircle2, AlertTriangle } from "lucide-react";
+import {
+  Activity as ActivityIcon,
+  Phone,
+  MessageSquare,
+  Building2,
+  Calendar,
+  User,
+  Search,
+  Filter,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -49,14 +61,14 @@ export function ActivitiesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-10">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto pb-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-border">
         <div>
           <div className="flex items-center gap-2">
             <ActivityIcon className="h-5 w-5 text-primary" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Activity History & Timeline
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
+              Activity History &amp; Timeline
             </h1>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -97,8 +109,8 @@ export function ActivitiesPage() {
           </button>
         </div>
 
-        {/* Activity Type Chips */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* Activity Type Chips (Horizontally scrollable on mobile) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
           {[
             { id: "all", label: "All Types" },
             { id: "calls", label: "Calls" },
@@ -110,7 +122,7 @@ export function ActivitiesPage() {
               key={type.id}
               type="button"
               onClick={() => setTypeFilter(type.id)}
-              className={`h-7 px-2.5 rounded-lg text-xs font-medium border transition-all ${
+              className={`h-8 px-3 rounded-lg text-xs font-medium border transition-all shrink-0 whitespace-nowrap ${
                 typeFilter === type.id
                   ? "bg-primary text-primary-foreground border-primary font-bold shadow-subtle"
                   : "bg-secondary/60 text-muted-foreground border-border hover:bg-secondary hover:text-foreground"
@@ -123,12 +135,12 @@ export function ActivitiesPage() {
 
         {/* Search */}
         <div className="relative w-full sm:w-48">
-          <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search activities..."
-            className="pl-8 h-7 text-xs bg-secondary/40"
+            className="pl-8 h-8 text-xs bg-secondary/40 rounded-lg"
           />
         </div>
       </div>
@@ -146,7 +158,7 @@ export function ActivitiesPage() {
             return (
               <div
                 key={act.id}
-                className="p-4 rounded-xl border border-border bg-card shadow-subtle space-y-2.5 text-xs transition-all hover:border-border/90"
+                className="p-3.5 sm:p-4 rounded-xl border border-border bg-card shadow-subtle space-y-3 text-xs transition-all hover:border-border/90"
               >
                 {/* 1. Contact Header & Timestamp */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
@@ -159,7 +171,7 @@ export function ActivitiesPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-mono self-end sm:self-auto">
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-mono">
                     <span>by <strong>{act.userName}</strong></span>
                     <span>•</span>
                     <span>
@@ -196,8 +208,8 @@ export function ActivitiesPage() {
                   )}
                 </div>
 
-                {/* 3. What Happens Next & 1-Click Outreach */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-border/40 text-xs">
+                {/* 3. What Happens Next & 1-Click Outreach (44px touch targets on mobile) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1 border-t border-border/40 text-xs">
                   <div>
                     {act.scheduledFollowUpAt ? (
                       <span className="text-amber-800 font-semibold font-mono flex items-center gap-1.5">
@@ -213,27 +225,27 @@ export function ActivitiesPage() {
                   </div>
 
                   {lead && (
-                    <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                    <div className="flex items-center gap-2">
                       <a
                         href={`tel:${lead.phone}`}
-                        className="inline-flex items-center justify-center h-6 px-2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-9 sm:h-7 px-3 sm:px-2 rounded-lg text-xs sm:text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
                       >
-                        <Phone className="h-2.5 w-2.5 mr-1" />
+                        <Phone className="h-3 w-3 mr-1" />
                         Call
                       </a>
                       <a
                         href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center justify-center h-6 px-2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center h-9 sm:h-7 px-3 sm:px-2 rounded-lg text-xs sm:text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
                       >
-                        <MessageSquare className="h-2.5 w-2.5 mr-1" />
+                        <MessageSquare className="h-3 w-3 mr-1" />
                         WhatsApp
                       </a>
                       <Button
                         size="sm"
                         variant="secondary"
-                        className="h-6 px-2 text-[10px] font-semibold"
+                        className="h-9 sm:h-7 px-2.5 text-xs sm:text-[10px] font-semibold shrink-0"
                         onClick={() => handleQuickLog(lead.id)}
                       >
                         Log Touchpoint
@@ -255,4 +267,3 @@ export function ActivitiesPage() {
     </div>
   );
 }
-

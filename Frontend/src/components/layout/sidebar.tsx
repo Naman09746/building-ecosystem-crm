@@ -18,7 +18,8 @@ import {
   Shield,
   UserCheck,
   Bot,
-  Sparkles,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { cn } from "@/lib/utils";
@@ -28,24 +29,32 @@ interface SidebarProps {
   className?: string;
   activeTab?: string;
   onSelectTab?: (tab: string) => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
+export function Sidebar({
+  className,
+  activeTab,
+  onSelectTab,
+  collapsed = false,
+  onToggleCollapse,
+}: SidebarProps) {
   const pathname = usePathname();
   const { currentUser } = useCRM();
 
-  // Role-Aware Navigation
-  const isBoss = currentUser.role === "boss";
+  // Role-Aware Navigation (Consolidated Tier 1: Boss/Admin/Owner/Manager vs Tier 2: Salesperson/Closer)
+  const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
 
   const salesWorkspaceItems = [
-    { id: "overview", label: isBoss ? "Executive Overview" : "Today's Priorities", href: "/", icon: isBoss ? LayoutDashboard : Home },
-    { id: "leads", label: isBoss ? "All Leads" : "My Leads", href: "/leads", icon: Users },
+    { id: "overview", label: isExecutive ? "Executive Overview" : "Today's Priorities", href: "/", icon: isExecutive ? LayoutDashboard : Home },
+    { id: "leads", label: isExecutive ? "All Leads" : "My Leads", href: "/leads", icon: Users },
     { id: "pipeline", label: "Deal Pipeline", href: "/pipeline", icon: Kanban },
     { id: "tasks", label: "Follow-up Queue", href: "/tasks", icon: ListTodo },
   ];
 
   const propertyIntelItems = [
-    { id: "projects", label: "Projects & Societies", href: "/projects", icon: Building2 },
+    { id: "projects", label: "Projects & Inventory", href: "/projects", icon: Building2 },
     { id: "people", label: "People Directory", href: "/people", icon: Contact },
     { id: "activities", label: "Touchpoint Activity", href: "/activities", icon: Activity },
   ];
@@ -72,48 +81,80 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "w-60 shrink-0 border-r border-border bg-card flex flex-col justify-between h-full select-none",
+        "shrink-0 border-r border-border bg-card flex flex-col justify-between h-full select-none transition-all duration-200 ease-in-out",
+        collapsed ? "w-16" : "w-60",
         className
       )}
     >
       {/* Top Organization Header */}
-      <div className="overflow-y-auto">
-        <div className="h-14 px-4 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-subtle">
-              C
-            </div>
-            <div className="leading-none">
-              <span className="font-semibold text-xs text-foreground tracking-tight block">
-                CallCRM
-              </span>
-              <span className="text-[10px] text-muted-foreground">Apex Realty</span>
-            </div>
-          </div>
+      <div className="overflow-y-auto overflow-x-hidden">
+        <div className={cn("h-14 px-3 border-b border-border flex items-center justify-between", collapsed && "justify-center px-2")}>
+          {!collapsed ? (
+            <>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-subtle shrink-0">
+                  C
+                </div>
+                <div className="leading-none truncate">
+                  <span className="font-semibold text-xs text-foreground tracking-tight block truncate">
+                    CallCRM
+                  </span>
+                  <span className="text-[10px] text-muted-foreground truncate">Apex Realty</span>
+                </div>
+              </div>
 
-          <Badge variant={isBoss ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
-            {isBoss ? "Boss" : "Sales"}
-          </Badge>
+              <div className="flex items-center gap-1">
+                <Badge variant={isExecutive ? "default" : "secondary"} className="text-[9px] px-1.5 py-0 capitalize">
+                  {currentUser.role}
+                </Badge>
+                {onToggleCollapse && (
+                  <button
+                    type="button"
+                    onClick={onToggleCollapse}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    title="Collapse Sidebar"
+                  >
+                    <PanelLeftClose className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-1">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-subtle hover:opacity-90"
+                title="Expand Sidebar"
+              >
+                C
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 4-Tier Navigation Taxonomy */}
-        <div className="px-3 py-3 space-y-4">
+        <div className={cn("py-3 space-y-4", collapsed ? "px-2" : "px-3")}>
           {/* TIER 1: SALES WORKSPACE */}
           <div className="space-y-1">
-            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Sales Workspace
-            </div>
+            {!collapsed && (
+              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Sales Workspace
+              </div>
+            )}
             {salesWorkspaceItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab ? activeTab === item.id : pathname === item.href;
 
               return (
                 <a
-                  key={item.label}
+                  key={item.id}
                   href={item.href}
                   onClick={(e) => handleNavClick(item.id, e)}
+                  title={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                    "flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer min-h-[36px]",
+                    collapsed ? "justify-center p-2" : "justify-between px-2.5 py-1.5",
                     isActive
                       ? "bg-secondary text-foreground font-semibold shadow-subtle"
                       : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
@@ -121,7 +162,7 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
-                    <span>{item.label}</span>
+                    {!collapsed && <span>{item.label}</span>}
                   </div>
                 </a>
               );
@@ -130,20 +171,24 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
 
           {/* TIER 2: PROPERTY INTELLIGENCE */}
           <div className="space-y-1">
-            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Property Intelligence
-            </div>
+            {!collapsed && (
+              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Property Intelligence
+              </div>
+            )}
             {propertyIntelItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab ? activeTab === item.id : pathname === item.href;
 
               return (
                 <a
-                  key={item.label}
+                  key={item.id}
                   href={item.href}
                   onClick={(e) => handleNavClick(item.id, e)}
+                  title={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                    "flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer min-h-[36px]",
+                    collapsed ? "justify-center p-2" : "justify-between px-2.5 py-1.5",
                     isActive
                       ? "bg-secondary text-foreground font-semibold shadow-subtle"
                       : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
@@ -151,29 +196,33 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
-                    <span>{item.label}</span>
+                    {!collapsed && <span>{item.label}</span>}
                   </div>
                 </a>
               );
             })}
           </div>
 
-          {/* TIER 3: INTELLIGENCE & AUTOMATION */}
+          {/* TIER 3: INTELLIGENCE & AI */}
           <div className="space-y-1">
-            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Intelligence &amp; AI
-            </div>
+            {!collapsed && (
+              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Intelligence &amp; AI
+              </div>
+            )}
             {intelligenceItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab ? activeTab === item.id : pathname === item.href;
 
               return (
                 <a
-                  key={item.label}
+                  key={item.id}
                   href={item.href}
                   onClick={(e) => handleNavClick(item.id, e)}
+                  title={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                    "flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer min-h-[36px]",
+                    collapsed ? "justify-center p-2" : "justify-between px-2.5 py-1.5",
                     isActive
                       ? "bg-secondary text-foreground font-semibold shadow-subtle"
                       : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
@@ -181,9 +230,9 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon className={cn("h-4 w-4 shrink-0 stroke-[1.75]", item.highlight && "text-verdigris")} />
-                    <span>{item.label}</span>
+                    {!collapsed && <span>{item.label}</span>}
                   </div>
-                  {item.highlight && (
+                  {!collapsed && item.highlight && (
                     <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-verdigris-light text-verdigris border border-verdigris-border">
                       LIVE
                     </span>
@@ -193,30 +242,36 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
             })}
           </div>
 
-          {/* TIER 4: MANAGEMENT & ADMIN (Boss only) */}
-          {isBoss && (
+          {/* TIER 4: MANAGEMENT & ADMIN (Boss / Owner / Admin / Manager) */}
+          {isExecutive && (
             <div className="space-y-1">
-              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Management &amp; Admin
-              </div>
+              {!collapsed && (
+                <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Management &amp; Admin
+                </div>
+              )}
               {adminNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab ? activeTab === item.id : pathname === item.href;
 
                 return (
                   <a
-                    key={item.label}
+                    key={item.id}
                     href={item.href}
                     onClick={(e) => handleNavClick(item.id, e)}
+                    title={collapsed ? item.label : undefined}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer",
+                      "flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer min-h-[36px]",
+                      collapsed ? "justify-center p-2" : "justify-between px-2.5 py-1.5",
                       isActive
                         ? "bg-secondary text-foreground font-semibold"
                         : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
-                    <span>{item.label}</span>
+                    <div className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4 shrink-0 stroke-[1.75]" />
+                      {!collapsed && <span>{item.label}</span>}
+                    </div>
                   </a>
                 );
               })}
@@ -226,24 +281,34 @@ export function Sidebar({ className, activeTab, onSelectTab }: SidebarProps) {
       </div>
 
       {/* Current User Identity */}
-      <div className="p-3 border-t border-border bg-secondary/30 space-y-2 shrink-0">
-        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
-          Signed in as
-        </div>
+      <div className={cn("border-t border-border bg-secondary/30 shrink-0", collapsed ? "p-2" : "p-3 space-y-2")}>
+        {!collapsed ? (
+          <>
+            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
+              Signed in as
+            </div>
 
-        <div className="flex items-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium bg-card text-foreground border border-border">
-          {isBoss ? (
-            <Shield className="h-3 w-3 shrink-0 text-brass" />
-          ) : (
-            <UserCheck className="h-3 w-3 shrink-0 text-verdigris" />
-          )}
-          <span className="capitalize">{currentUser.role}</span>
-        </div>
+            <div className="flex items-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium bg-card text-foreground border border-border">
+              {isExecutive ? (
+                <Shield className="h-3 w-3 shrink-0 text-brass" />
+              ) : (
+                <UserCheck className="h-3 w-3 shrink-0 text-verdigris" />
+              )}
+              <span className="capitalize">{currentUser.role}</span>
+            </div>
 
-        <div className="text-[10px] text-muted-foreground text-center pt-0.5">
-          Active: <span className="font-semibold text-foreground">{currentUser.name}</span>
-          {currentUser.regionName && ` (${currentUser.regionName})`}
-        </div>
+            <div className="text-[10px] text-muted-foreground text-center pt-0.5 truncate">
+              Active: <span className="font-semibold text-foreground">{currentUser.name}</span>
+              {currentUser.regionName && ` (${currentUser.regionName})`}
+            </div>
+          </>
+        ) : (
+          <div className="flex justify-center" title={`${currentUser.name} (${currentUser.role})`}>
+            <div className="h-7 w-7 rounded-full bg-secondary text-foreground flex items-center justify-center font-bold text-xs border border-border">
+              {currentUser.name.slice(0, 1).toUpperCase()}
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

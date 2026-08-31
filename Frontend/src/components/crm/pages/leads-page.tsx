@@ -35,8 +35,18 @@ import { QuickActivityModal } from "@/components/crm/quick-activity-modal";
 import { Lead, PipelineStage, DealHealth } from "@/types/crm";
 import { actionCardProps } from "@/components/ui/action-card";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-device";
+import { LeadCard } from "@/components/crm/lead-card";
+import { FilterSheet, FilterState } from "@/components/crm/filter-sheet";
 
-export function LeadsPage() {
+interface LeadsPageProps {
+  onSelectLead?: (lead: Lead) => void;
+  onOpenQuickLog?: (leadId?: string) => void;
+}
+
+export function LeadsPage({ onSelectLead, onOpenQuickLog }: LeadsPageProps = {}) {
+  const isMobile = useIsMobile();
+  const [filterSheetOpen, setFilterSheetOpen] = React.useState(false);
   const {
     filteredLeads,
     createLead,
@@ -185,6 +195,15 @@ export function LeadsPage() {
     salespersonFilter !== "all" ||
     projectFilter !== "all";
 
+  const activeFilterCount =
+    (search !== "" ? 1 : 0) +
+    (stageFilter !== "all" ? 1 : 0) +
+    (healthFilter !== "all" ? 1 : 0) +
+    (regionFilter !== "all" ? 1 : 0) +
+    (salespersonFilter !== "all" ? 1 : 0) +
+    (projectFilter !== "all" ? 1 : 0) +
+    (sortBy !== "score_desc" ? 1 : 0);
+
   const allSelected = leads.length > 0 && selectedIds.length === leads.length;
 
   const toggleSelectAll = () => {
@@ -203,13 +222,21 @@ export function LeadsPage() {
   };
 
   const handleOpenLead = (lead: Lead) => {
-    setSelectedLead(lead);
-    setDetailOpen(true);
+    if (onSelectLead) {
+      onSelectLead(lead);
+    } else {
+      setSelectedLead(lead);
+      setDetailOpen(true);
+    }
   };
 
   const handleLogActivity = (leadId: string) => {
-    setQuickLogLeadId(leadId);
-    setQuickLogOpen(true);
+    if (onOpenQuickLog) {
+      onOpenQuickLog(leadId);
+    } else {
+      setQuickLogLeadId(leadId);
+      setQuickLogOpen(true);
+    }
   };
 
   const handleCreateLead = async (e: React.FormEvent) => {
@@ -601,8 +628,37 @@ export function LeadsPage() {
         </div>
       )}
 
-      {/* Multi-Dimensional Filter Toolbar */}
-      <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
+      {/* Responsive Filter Toolbar */}
+      {/* Mobile-Only Toolbar */}
+      <div className="flex sm:hidden items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search leads..."
+            className="pl-8 h-9 text-xs bg-secondary/40 rounded-xl"
+          />
+        </div>
+        <Button
+          type="button"
+          variant={hasActiveFilters ? "default" : "outline"}
+          size="sm"
+          onClick={() => setFilterSheetOpen(true)}
+          className="h-9 px-3 rounded-xl text-xs gap-1.5 shrink-0"
+        >
+          <Filter className="h-3.5 w-3.5" />
+          <span>Filters</span>
+          {activeFilterCount > 0 && (
+            <span className="ml-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+              {activeFilterCount}
+            </span>
+          )}
+        </Button>
+      </div>
+
+      {/* Desktop Multi-Dimensional Filter Toolbar */}
+      <div className="hidden sm:flex p-3.5 rounded-xl border border-border bg-card shadow-subtle flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Box */}
           <div className="relative w-56 sm:w-64">
@@ -857,148 +913,194 @@ export function LeadsPage() {
         </div>
       )}
 
-      {/* VIEW 3: FULL DATA TABLE */}
+      {/* VIEW 3: DATA TABLE ON DESKTOP / CARD LIST ON MOBILE */}
       {viewMode === "list" && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-10">
-                <button
-                  type="button"
-                  onClick={toggleSelectAll}
-                  className="flex items-center justify-center p-1 rounded hover:bg-secondary"
-                  aria-label="Select All"
-                >
-                  {allSelected ? (
-                    <CheckSquare className="h-4 w-4 text-primary" />
-                  ) : (
-                    <Square className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </button>
-              </TableHead>
-              <TableHead>Buyer & Identity</TableHead>
-              <TableHead>Score & Health</TableHead>
-              <TableHead>Target Project & Unit</TableHead>
-              <TableHead>Budget</TableHead>
-              <TableHead>Stage</TableHead>
-              <TableHead>Assigned Rep</TableHead>
-              <TableHead>Follow-up Schedule</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        isMobile ? (
+          <div className="space-y-3">
             {leads.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} className="h-32 text-center text-xs text-muted-foreground">
-                  No leads found matching current search and filter criteria.
-                </TableCell>
-              </TableRow>
+              <div className="p-8 text-center text-xs text-muted-foreground bg-card rounded-xl border border-dashed border-border">
+                No leads found matching current search and filter criteria.
+              </div>
             ) : (
-              leads.map((lead) => {
-                const isChecked = selectedIds.includes(lead.id);
-                return (
-                  <TableRow
-                    key={lead.id}
-                    onClick={() => handleOpenLead(lead)}
-                    className={`cursor-pointer transition-colors ${
-                      isChecked ? "bg-primary/5 hover:bg-primary/10" : ""
-                    }`}
-                  >
-                    {/* Row Checkbox */}
-                    <TableCell onClick={(e) => toggleSelectOne(lead.id, e)} className="w-10">
-                      <div className="flex items-center justify-center">
-                        {isChecked ? (
-                          <CheckSquare className="h-4 w-4 text-primary" />
-                        ) : (
-                          <Square className="h-4 w-4 text-muted-foreground/60 hover:text-foreground" />
-                        )}
-                      </div>
-                    </TableCell>
-
-                    {/* Buyer & Identity */}
-                    <TableCell>
-                      <div className="font-bold text-foreground text-sm">{lead.personName}</div>
-                      <div className="text-[11px] text-muted-foreground font-mono">{formatPhone(lead.phone)}</div>
-                    </TableCell>
-
-                    {/* Score & Health */}
-                    <TableCell>
-                      <div className="flex flex-col gap-1 items-start">
-                        <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
-                        <DealHealthBadge health={lead.dealHealth} score={lead.dealHealthScore} reason={lead.dealHealthReason} showScore />
-                      </div>
-                    </TableCell>
-
-                    {/* Target Project & Unit */}
-                    <TableCell>
-                      <div className="font-medium text-foreground text-xs">{lead.projectName}</div>
-                      <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                        <span>{lead.regionName}</span>
-                        {lead.assignedUnitNumber && (
-                          <span className="font-mono font-bold text-foreground">· Unit {lead.assignedUnitNumber}</span>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    {/* Budget */}
-                    <TableCell className="font-bold text-foreground font-mono text-xs">
-                      {formatCurrencyINR(lead.budget)}
-                    </TableCell>
-
-                    {/* Stage */}
-                    <TableCell>
-                      <PipelineBadge stage={lead.stage} />
-                    </TableCell>
-
-                    {/* Rep */}
-                    <TableCell>
-                      <span className="text-xs font-semibold text-foreground">{lead.salespersonName}</span>
-                    </TableCell>
-
-                    {/* Follow-up Schedule */}
-                    <TableCell>
-                      <div className="text-xs font-medium text-foreground">
-                        {lead.nextFollowUpAt || "—"}
-                      </div>
-                      <TaskStatusBadge status={lead.followUpStatus || "upcoming"} />
-                    </TableCell>
-
-                    {/* Actions */}
-                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-1.5">
-                        <a
-                          href={`tel:${lead.phone}`}
-                          className="inline-flex items-center justify-center h-7 px-2 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                        >
-                          <Phone className="h-3 w-3 mr-1" />
-                          Call
-                        </a>
-                        <a
-                          href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`WhatsApp ${lead.personName}`}
-                          className="inline-flex items-center justify-center h-7 px-2 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                        >
-                          <MessageSquare className="h-3 w-3" />
-                        </a>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="h-7 px-2 text-[11px] font-medium"
-                          onClick={() => handleLogActivity(lead.id)}
-                        >
-                          Log
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+              leads.map((lead) => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  onSelect={handleOpenLead}
+                  onLogActivity={handleLogActivity}
+                />
+              ))
             )}
-          </TableBody>
-        </Table>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-10">
+                  <button
+                    type="button"
+                    onClick={toggleSelectAll}
+                    className="flex items-center justify-center p-1 rounded hover:bg-secondary"
+                    aria-label="Select All"
+                  >
+                    {allSelected ? (
+                      <CheckSquare className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Square className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </TableHead>
+                <TableHead>Buyer &amp; Identity</TableHead>
+                <TableHead>Score &amp; Health</TableHead>
+                <TableHead>Target Project &amp; Unit</TableHead>
+                <TableHead>Budget</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Assigned Rep</TableHead>
+                <TableHead>Follow-up Schedule</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {leads.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-32 text-center text-xs text-muted-foreground">
+                    No leads found matching current search and filter criteria.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                leads.map((lead) => {
+                  const isChecked = selectedIds.includes(lead.id);
+                  return (
+                    <TableRow
+                      key={lead.id}
+                      onClick={() => handleOpenLead(lead)}
+                      className={`cursor-pointer transition-colors ${
+                        isChecked ? "bg-primary/5 hover:bg-primary/10" : ""
+                      }`}
+                    >
+                      {/* Row Checkbox */}
+                      <TableCell onClick={(e) => toggleSelectOne(lead.id, e)} className="w-10">
+                        <div className="flex items-center justify-center">
+                          {isChecked ? (
+                            <CheckSquare className="h-4 w-4 text-primary" />
+                          ) : (
+                            <Square className="h-4 w-4 text-muted-foreground/60 hover:text-foreground" />
+                          )}
+                        </div>
+                      </TableCell>
+
+                      {/* Buyer & Identity */}
+                      <TableCell>
+                        <div className="font-bold text-foreground text-sm">{lead.personName}</div>
+                        <div className="text-[11px] text-muted-foreground font-mono">{formatPhone(lead.phone)}</div>
+                      </TableCell>
+
+                      {/* Score & Health */}
+                      <TableCell>
+                        <div className="flex flex-col gap-1 items-start">
+                          <LeadScoreBadge score={lead.leadScore} label={lead.leadScoreLabel} />
+                          <DealHealthBadge health={lead.dealHealth} score={lead.dealHealthScore} reason={lead.dealHealthReason} showScore />
+                        </div>
+                      </TableCell>
+
+                      {/* Target Project & Unit */}
+                      <TableCell>
+                        <div className="font-medium text-foreground text-xs">{lead.projectName}</div>
+                        <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                          <span>{lead.regionName}</span>
+                          {lead.assignedUnitNumber && (
+                            <span className="font-mono font-bold text-foreground">· Unit {lead.assignedUnitNumber}</span>
+                          )}
+                        </div>
+                      </TableCell>
+
+                      {/* Budget */}
+                      <TableCell className="font-bold text-foreground font-mono text-xs">
+                        {formatCurrencyINR(lead.budget)}
+                      </TableCell>
+
+                      {/* Stage */}
+                      <TableCell>
+                        <PipelineBadge stage={lead.stage} />
+                      </TableCell>
+
+                      {/* Rep */}
+                      <TableCell>
+                        <span className="text-xs font-semibold text-foreground">{lead.salespersonName}</span>
+                      </TableCell>
+
+                      {/* Follow-up Schedule */}
+                      <TableCell>
+                        <div className="text-xs font-medium text-foreground">
+                          {lead.nextFollowUpAt || "—"}
+                        </div>
+                        <TaskStatusBadge status={lead.followUpStatus || "upcoming"} />
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <a
+                            href={`tel:${lead.phone}`}
+                            className="inline-flex items-center justify-center h-7 px-2 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                          >
+                            <Phone className="h-3 w-3 mr-1" />
+                            Call
+                          </a>
+                          <a
+                            href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`WhatsApp ${lead.personName}`}
+                            className="inline-flex items-center justify-center h-7 px-2 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                          >
+                            <MessageSquare className="h-3 w-3" />
+                          </a>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="h-7 px-2 text-[11px] font-medium"
+                            onClick={() => handleLogActivity(lead.id)}
+                          >
+                            Log
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        )
       )}
+
+      {/* Mobile Filter Sheet */}
+      <FilterSheet
+        open={filterSheetOpen}
+        onOpenChange={setFilterSheetOpen}
+        filters={{
+          stage: stageFilter,
+          health: healthFilter,
+          region: regionFilter,
+          salesperson: salespersonFilter,
+          project: projectFilter,
+          sortBy: sortBy,
+        }}
+        onFilterChange={(f) => {
+          handleStageFilterChange(f.stage);
+          handleHealthFilterChange(f.health);
+          handleRegionFilterChange(f.region);
+          handleSalespersonFilterChange(f.salesperson);
+          handleProjectFilterChange(f.project);
+          handleSortByChange(f.sortBy);
+        }}
+        onReset={handleResetFilters}
+        projects={projects}
+        regions={regions}
+        salespeople={salespeople}
+        activeCount={activeFilterCount}
+      />
 
       {/* Modals */}
       <LeadDetailModal

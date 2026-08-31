@@ -131,10 +131,68 @@ export function UsersPage() {
         )}
       </div>
 
-      {/* Active Team Members Table */}
+      {/* Active Team Members List/Table */}
       <div className="space-y-3">
         <h2 className="text-sm font-bold text-foreground">Active Organization Members ({users.length})</h2>
-        <div className="rounded-xl border border-border bg-card overflow-hidden shadow-subtle">
+
+        {/* Mobile View: Cards */}
+        <div className="space-y-2.5 sm:hidden">
+          {users.map((u) => (
+            <div key={u.id} className="p-3.5 rounded-xl border border-border bg-card shadow-subtle space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Avatar className="h-8 w-8 text-xs">
+                    <AvatarFallback className="bg-secondary text-foreground font-bold">
+                      {u.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-bold text-foreground">{u.name}</div>
+                    <div className="text-muted-foreground text-[11px] font-mono">{u.email || "—"}</div>
+                  </div>
+                </div>
+
+                <Badge
+                  variant={
+                    u.role === "boss" || u.role === "owner"
+                      ? "default"
+                      : u.role === "manager"
+                      ? "secondary"
+                      : "outline"
+                  }
+                  className="capitalize text-[10px]"
+                >
+                  {u.role}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[11px]">
+                <span className="text-muted-foreground">
+                  {u.regionName ? `${u.regionName} Hub` : "All Regions (Admin)"}
+                </span>
+
+                {isManager && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditingUser(u);
+                      setEditRole(u.role);
+                      setEditRegionId(u.regionId || "");
+                    }}
+                    className="h-8 text-xs px-2.5 gap-1 font-semibold"
+                  >
+                    <Edit2 className="h-3 w-3" />
+                    <span>Edit Role</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden sm:block rounded-xl border border-border bg-card overflow-hidden shadow-subtle">
           <Table>
             <TableHeader>
               <TableRow>

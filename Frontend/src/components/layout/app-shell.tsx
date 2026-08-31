@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { useCRM } from "@/context/crm-context";
 import { useAuth } from "@/context/auth-context";
 import { BossOverview } from "@/components/crm/boss-overview";
@@ -14,20 +15,6 @@ import { GlobalSearchDialog } from "@/components/crm/global-search-dialog";
 import { LeadDetailModal } from "@/components/crm/lead-detail-modal";
 import { Lead } from "@/types/crm";
 import { Loader2 } from "lucide-react";
-import {
-  Home as HomeIcon,
-  Users,
-  Kanban,
-  ListTodo,
-  Plus,
-  ChartNoAxesCombined,
-  Building2,
-  Contact,
-  Activity as ActivityIcon,
-  Shield,
-  MapPin,
-  Settings,
-} from "lucide-react";
 import { LeadsPage } from "@/components/crm/pages/leads-page";
 import { ReportsPage } from "@/components/crm/pages/reports-page";
 import { ProjectsPage } from "@/components/crm/pages/projects-page";
@@ -37,14 +24,20 @@ import { UsersPage } from "@/components/crm/pages/users-page";
 import { RegionsPage } from "@/components/crm/pages/regions-page";
 import { SettingsPage } from "@/components/crm/pages/settings-page";
 import { TasksPage } from "@/components/crm/pages/tasks-page";
+import { BillingPage } from "@/components/crm/pages/billing-page";
 import { AiAgentCommandCenter } from "@/components/crm/ai-agent-command-center";
 import { AiLeadBot } from "@/components/crm/ai-lead-bot";
+import { useIsMobile } from "@/hooks/use-device";
 
 export function AppShell({ initialTab }: { initialTab?: string }) {
   const router = useRouter();
   const { currentUser, leads } = useCRM();
   const { user, workflowStep, isLoading: authLoading } = useAuth();
-  const isBoss = currentUser.role === "boss";
+  const isMobile = useIsMobile();
+
+  // Tier 1: Boss, Admin, Owner, Manager (Executive & Oversight View)
+  // Tier 2: Salesperson, Closer (Field Sales Cockpit)
+  const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
 
   // Auth & onboarding gating — every CRM route shares this contract.
   React.useEffect(() => {
@@ -62,6 +55,7 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
 
   // Navigation State with localStorage persistence
   const [activeTab, setActiveTabState] = React.useState<string>(initialTab || "overview");
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (initialTab) return; // deep-linked tab wins over persisted state
@@ -69,6 +63,10 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
       const savedTab = localStorage.getItem("callcrm_active_tab");
       if (savedTab) {
         setActiveTabState(savedTab);
+      }
+      const savedCollapsed = localStorage.getItem("callcrm_sidebar_collapsed");
+      if (savedCollapsed === "true") {
+        setSidebarCollapsed(true);
       }
     } catch {}
   }, [initialTab]);
@@ -78,6 +76,16 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
     try {
       localStorage.setItem("callcrm_active_tab", tab);
     } catch {}
+  };
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("callcrm_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
   };
 
   // Modals state
@@ -151,10 +159,12 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden selection:bg-primary/10">
-      {/* Desktop Persistent Sidebar */}
+      {/* Desktop & Tablet Sidebar */}
       <Sidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
         className="hidden md:flex"
       />
 
@@ -162,10 +172,10 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative z-50 w-64 max-w-[80vw]">
+          <div className="relative z-50 w-72 max-w-[85vw] h-full shadow-2xl animate-in slide-in-from-left duration-200">
             <Sidebar
               activeTab={activeTab}
               onSelectTab={(tab) => {
@@ -179,7 +189,7 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
       )}
 
       {/* Main App Container */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         <TopBar
           onOpenQuickLog={() => handleOpenQuickLog()}
           onOpenSearch={() => setSearchOpen(true)}
@@ -187,14 +197,18 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
         />
 
         {/* Dynamic Main Workspace Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 md:pb-8">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 pb-24 md:pb-8">
           {activeTab === "overview" && (
-            isBoss ? (
-              <BossOverview onSelectLead={handleOpenLead} />
+            isExecutive ? (
+              <BossOverview
+                onSelectLead={handleOpenLead}
+                onNavigateToTab={setActiveTab}
+              />
             ) : (
               <SalespersonHome
                 onOpenQuickLog={handleOpenQuickLog}
                 onSelectLead={handleOpenLead}
+                onNavigateTab={setActiveTab}
               />
             )
           )}
@@ -203,7 +217,9 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
             <AiAgentCommandCenter onSelectLead={handleOpenLead} />
           )}
 
-          {activeTab === "leads" && <LeadsPage />}
+          {activeTab === "leads" && (
+            <LeadsPage onSelectLead={handleOpenLead} onOpenQuickLog={handleOpenQuickLog} />
+          )}
 
           {activeTab === "pipeline" && (
             <div className="space-y-6 max-w-7xl mx-auto">
@@ -211,75 +227,23 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
             </div>
           )}
 
-          {activeTab === "tasks" && <TasksPage />}
+          {activeTab === "tasks" && <TasksPage onSelectLead={handleOpenLead} onOpenQuickLog={handleOpenQuickLog} />}
           {activeTab === "reports" && <ReportsPage />}
           {activeTab === "projects" && <ProjectsPage />}
           {activeTab === "people" && <PeoplePage />}
           {activeTab === "activities" && <ActivitiesPage />}
           {activeTab === "users" && <UsersPage />}
           {activeTab === "regions" && <RegionsPage />}
+          {activeTab === "billing" && <BillingPage />}
           {activeTab === "settings" && <SettingsPage />}
         </main>
 
-        {/* Mobile Bottom Navigation (1-Thumb Reachability) */}
-        <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 h-14 border-t border-border bg-card/95 backdrop-blur-sm px-4 flex items-center justify-around z-40"
-          aria-label="Primary"
-        >
-          <button
-            onClick={() => setActiveTab("overview")}
-            aria-current={activeTab === "overview" ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 text-[10px] font-medium ${
-              activeTab === "overview" ? "text-primary font-bold" : "text-muted-foreground"
-            }`}
-          >
-            <HomeIcon className="h-4 w-4" />
-            <span>Home</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("leads")}
-            aria-current={activeTab === "leads" ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 text-[10px] font-medium ${
-              activeTab === "leads" ? "text-primary font-bold" : "text-muted-foreground"
-            }`}
-          >
-            <Users className="h-4 w-4" />
-            <span>Leads</span>
-          </button>
-
-          {/* Quick 10s Activity Hero Button on Mobile */}
-          <button
-            type="button"
-            onClick={() => handleOpenQuickLog()}
-            className="flex items-center justify-center h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-card -translate-y-2 border-2 border-background"
-            aria-label="Quick Log Activity"
-          >
-            <Plus className="h-5 w-5" />
-          </button>
-
-          <button
-            onClick={() => setActiveTab("pipeline")}
-            aria-current={activeTab === "pipeline" ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 text-[10px] font-medium ${
-              activeTab === "pipeline" ? "text-primary font-bold" : "text-muted-foreground"
-            }`}
-          >
-            <Kanban className="h-4 w-4" />
-            <span>Pipeline</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("reports")}
-            aria-current={activeTab === "reports" ? "page" : undefined}
-            className={`flex flex-col items-center gap-1 text-[10px] font-medium ${
-              activeTab === "reports" ? "text-primary font-bold" : "text-muted-foreground"
-            }`}
-          >
-            <ChartNoAxesCombined className="h-4 w-4" />
-            <span>Reports</span>
-          </button>
-        </nav>
+        {/* Mobile Bottom Navigation Bar (44px min touch targets & role-aware) */}
+        <BottomNav
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          onOpenQuickLog={() => handleOpenQuickLog()}
+        />
       </div>
 
       {/* Global Interactive Modals */}
