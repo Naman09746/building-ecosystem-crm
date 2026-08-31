@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { VoiceNoteRecorder } from "@/components/crm/voice-note-recorder";
 import { ActivityType } from "@/types/crm";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 
@@ -178,7 +179,15 @@ export function QuickActivityModal({
 
           {/* Notes Input */}
           <div className="space-y-1">
-            <Label htmlFor="quick-notes" className="text-xs font-bold text-foreground">Notes</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="quick-notes" className="text-xs font-bold text-foreground">Notes</Label>
+              <VoiceNoteRecorder
+                buttonLabel="Dictate"
+                onTranscribed={(transcriptText) => {
+                  setNotes((prev) => (prev ? `${prev} ${transcriptText}` : transcriptText));
+                }}
+              />
+            </div>
             <Input
               id="quick-notes"
               value={notes}

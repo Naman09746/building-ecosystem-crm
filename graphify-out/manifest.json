@@ -23,6 +23,10 @@
     "mtime": 1787373367.515302,
     "hash": "bdc141f1f6b59071619d4fffc59ecc34"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/public/sw.js": {
+    "mtime": 1788174390.6217046,
+    "hash": "438c4eeca6733a360c49aea7c03eb613"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/e2e/smoke.spec.ts": {
     "mtime": 1787376474.83606,
     "hash": "cfcb0339b06a9d9b3c1c977ea5d7ebc6"
@@ -60,8 +64,8 @@
     "hash": "04380719b6a1b01f8c35b7cdabd65922"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/layout.tsx": {
-    "mtime": 1788170130.4300911,
-    "hash": "7e5bb8f4d88f15001d484a011255edb4"
+    "mtime": 1788174438.2958002,
+    "hash": "d8252f763ca61f8d3bc7f936993205b7"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/error.tsx": {
     "mtime": 1787372774.5006723,
@@ -186,6 +190,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/search/global/route.ts": {
     "mtime": 1787766656.6175647,
     "hash": "dd6c35efdbe8cd73a30b0c766e928935"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/audio/transcribe/route.ts": {
+    "mtime": 1788174766.6619203,
+    "hash": "20a11a620e92771289deda9cfad56397"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/app/api/properties/site-briefings/route.ts": {
     "mtime": 1787775111.327739,
@@ -499,6 +507,10 @@
     "mtime": 1787386995.1193137,
     "hash": "37d20f808dce1dff50f906cb00f48f17"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/layout/pwa-registrar.tsx": {
+    "mtime": 1788174402.8352487,
+    "hash": "31f37020c21381d0ed9f055cd12b7ad4"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/layout/nav-more-sheet.tsx": {
     "mtime": 1788170051.3720927,
     "hash": "12d8fe16977c31d2f5522c252d419492"
@@ -532,8 +544,12 @@
     "hash": "3f654672e4f363c25d2d4f07843d7246"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/quick-activity-modal.tsx": {
-    "mtime": 1788169390.1658933,
-    "hash": "8b9b2bae97b5499b3ce7635b803f673a"
+    "mtime": 1788174380.61316,
+    "hash": "13cbf39582f1cd56f81820f3577a7d53"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/voice-note-recorder.tsx": {
+    "mtime": 1788174294.3837059,
+    "hash": "f44ede5a4c4ecaf937bf77ff8dc7e2a2"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/seller-opportunities-modal.tsx": {
     "mtime": 1787774805.6547513,
@@ -544,8 +560,8 @@
     "hash": "212d6f4685689ca5ac47013766139225"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/meeting-summary-modal.tsx": {
-    "mtime": 1787774819.1191988,
-    "hash": "4c42af1392823e4f46876ecdd0c076da"
+    "mtime": 1788174679.007744,
+    "hash": "ec2e5ecbbdb1794a7065e4d174128226"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/ai-agent-command-center.tsx": {
     "mtime": 1787371726.1802597,
@@ -578,6 +594,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/filter-sheet.tsx": {
     "mtime": 1788169081.328689,
     "hash": "de153f4f723701fa61cd4cb0f9a4522f"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/stacking-chart.tsx": {
+    "mtime": 1788174458.650772,
+    "hash": "920c613682430e3c36c31cab34eba376"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/boss-overview.tsx": {
     "mtime": 1787389866.8714702,
@@ -628,8 +648,8 @@
     "hash": "d589315df490ed88112336ae765fd912"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/pages/projects-page.tsx": {
-    "mtime": 1788173572.7294807,
-    "hash": "90fc626bb2b019ae38295707268e66ef"
+    "mtime": 1788174520.9027615,
+    "hash": "195395fd3ec10d7ea50f4d9d686de43e"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/pages/billing-page.tsx": {
     "mtime": 1787384882.5942202,
@@ -751,9 +771,17 @@
     "mtime": 1787369840.3475683,
     "hash": "85b8955fec5c78bf7a030c8fde6301bf"
   },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/audio-transcription.test.ts": {
+    "mtime": 1788174576.5073664,
+    "hash": "8188c497b0f4857076e215336c8295ad"
+  },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/__tests__/dom/crm-state-machine.test.tsx": {
     "mtime": 1787374653.3272104,
     "hash": "e08edff3f7b321a1301cf3c57db6a3d1"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/hooks/use-voice-recorder.ts": {
+    "mtime": 1788174784.2402842,
+    "hash": "0e99ce1835d33e48aa79e32fae3dc7ee"
   },
   "/Users/namanjoshi/SAAS/Real-estate/Frontend/src/hooks/use-device.ts": {
     "mtime": 1788169019.2887406,

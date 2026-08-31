@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PipelineBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR } from "@/lib/utils";
+import { VoiceNoteRecorder } from "@/components/crm/voice-note-recorder";
 import type { Lead, PipelineStage, ActivityType, CallOutcome, StructuredMeetingDisposition } from "@/types/crm";
 import { toast } from "sonner";
 
@@ -202,9 +203,12 @@ export function MeetingSummaryModal({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-muted-foreground">Raw Meeting / Call Notes</label>
-              <span className="text-[10px] text-muted-foreground font-mono">
-                Supports conversational English & Hinglish
-              </span>
+              <VoiceNoteRecorder
+                buttonLabel="1-Tap Mic Dictation"
+                onTranscribed={(transcriptText) => {
+                  setRawNotes((prev) => (prev ? `${prev}\n${transcriptText}` : transcriptText));
+                }}
+              />
             </div>
             <textarea
               rows={4}

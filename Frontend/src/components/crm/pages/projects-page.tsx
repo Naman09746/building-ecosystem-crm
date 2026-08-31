@@ -31,6 +31,7 @@ import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 import { ProjectUnit, UnitStatus, Project } from "@/types/crm";
 import { UnitDetailModal } from "@/components/crm/unit-detail-modal";
 import { CostSheetModal } from "@/components/crm/cost-sheet-modal";
+import { StackingChart } from "@/components/crm/stacking-chart";
 import { toast } from "sonner";
 
 export function ProjectsPage() {
@@ -54,6 +55,7 @@ export function ProjectsPage() {
   const [selectedProjectId, setSelectedProjectId] = React.useState<string>(projects[0]?.id || "");
   const [selectedTower, setSelectedTower] = React.useState<string>("all");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
+  const [inventoryViewMode, setInventoryViewMode] = React.useState<"stacking" | "grid">("stacking");
 
   // Dialog State
   const [isAddProjectOpen, setIsAddProjectOpen] = React.useState(false);
@@ -525,179 +527,225 @@ export function ProjectsPage() {
         </Card>
       )}
 
-      {/* Inventory Filters (Tower & Status) */}
+      {/* Inventory Filters & View Mode Switcher */}
       <div className="p-3.5 rounded-xl border border-border bg-card shadow-subtle flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-foreground">Tower:</span>
-            <select
-              value={selectedTower}
-              onChange={(e) => setSelectedTower(e.target.value)}
-              className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none"
+          {/* View Mode Switcher */}
+          <div className="flex items-center gap-1 bg-secondary/60 p-1 rounded-lg border border-border">
+            <button
+              onClick={() => setInventoryViewMode("stacking")}
+              className={`px-3 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all ${
+                inventoryViewMode === "stacking"
+                  ? "bg-primary text-primary-foreground shadow-sm font-bold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <option value="all">All Towers ({towers.length})</option>
-              {towers.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+              <Layers className="h-3.5 w-3.5" />
+              <span>Tower Stacking Chart</span>
+            </button>
+            <button
+              onClick={() => setInventoryViewMode("grid")}
+              className={`px-3 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all ${
+                inventoryViewMode === "grid"
+                  ? "bg-primary text-primary-foreground shadow-sm font-bold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Home className="h-3.5 w-3.5" />
+              <span>Unit Grid Matrix</span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-foreground">Unit Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none"
-            >
-              <option value="all">All Statuses</option>
-              <option value="available">🟢 Available</option>
-              <option value="hold">⚪ Hold</option>
-              <option value="site_visit">🟡 Site Visit Scheduled</option>
-              <option value="negotiation">🟣 Negotiation</option>
-              <option value="booked">🔵 Booked</option>
-              <option value="sold">🔒 Sold</option>
-            </select>
-          </div>
+          {inventoryViewMode === "grid" && (
+            <>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-foreground">Tower:</span>
+                <select
+                  value={selectedTower}
+                  onChange={(e) => setSelectedTower(e.target.value)}
+                  className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none"
+                >
+                  <option value="all">All Towers ({towers.length})</option>
+                  {towers.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-foreground">Unit Status:</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="h-8 px-2.5 rounded-md border border-border bg-secondary/50 text-foreground font-medium focus:outline-none"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="available">🟢 Available</option>
+                  <option value="hold">⚪ Hold</option>
+                  <option value="site_visit">🟡 Site Visit Scheduled</option>
+                  <option value="negotiation">🟣 Negotiation</option>
+                  <option value="booked">🔵 Booked</option>
+                  <option value="sold">🔒 Sold</option>
+                </select>
+              </div>
+            </>
+          )}
         </div>
 
         <span className="text-xs text-muted-foreground font-mono">
-          Showing {filteredUnits.length} of {projectUnits.length} inventory units
+          Showing {projectUnits.length} total units in {currentProject?.name}
         </span>
       </div>
 
-      {/* Unit Availability Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-        {filteredUnits.length === 0 ? (
-          <div className="col-span-full p-8 text-center text-xs text-muted-foreground rounded-xl border border-dashed border-border bg-card">
-            No units found for current filter selection.
-          </div>
-        ) : (
-          filteredUnits.map((unit) => {
-            const hasBuyer = !!unit.assignedBuyerName || !!unit.assignedLeadName;
-            return (
-              <Card
-                key={unit.id}
-                onClick={() => {
-                  setSelectedDossierUnit(unit);
-                  setIsDossierOpen(true);
-                }}
-                className={`p-4 space-y-3 transition-all hover:shadow-card border cursor-pointer ${
-                  unit.status === "available"
-                    ? "border-emerald-200 bg-emerald-50/20 hover:border-emerald-400"
-                    : unit.status === "booked" || unit.status === "sold"
-                    ? "border-blue-200 bg-blue-50/20 hover:border-blue-400"
-                    : "border-border bg-card hover:border-primary/40"
-                }`}
-              >
-                {/* Top Row: Tower & Unit # + Status */}
-                <div className="flex items-start justify-between gap-1">
-                  <div>
-                    <div className="font-bold text-sm text-foreground flex items-center gap-1">
-                      <Home className="h-3.5 w-3.5 text-primary" />
-                      <span>
-                        {unit.tower} • {unit.unitNumber}
+      {inventoryViewMode === "stacking" ? (
+        <StackingChart
+          project={currentProject}
+          units={projectUnits}
+          towers={currentProject?.towers || []}
+          onSelectUnit={(unit) => {
+            setSelectedDossierUnit(unit);
+            setIsDossierOpen(true);
+          }}
+          onOpenCostSheet={(unit) => {
+            setCostSheetUnit(unit);
+            setIsCostSheetOpen(true);
+          }}
+        />
+      ) : (
+        /* Unit Availability Grid */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+          {filteredUnits.length === 0 ? (
+            <div className="col-span-full p-8 text-center text-xs text-muted-foreground rounded-xl border border-dashed border-border bg-card">
+              No units found for current filter selection.
+            </div>
+          ) : (
+            filteredUnits.map((unit) => {
+              const hasBuyer = !!unit.assignedBuyerName || !!unit.assignedLeadName;
+              return (
+                <Card
+                  key={unit.id}
+                  onClick={() => {
+                    setSelectedDossierUnit(unit);
+                    setIsDossierOpen(true);
+                  }}
+                  className={`p-4 space-y-3 transition-all hover:shadow-card border cursor-pointer ${
+                    unit.status === "available"
+                      ? "border-emerald-200 bg-emerald-50/20 hover:border-emerald-400"
+                      : unit.status === "booked" || unit.status === "sold"
+                      ? "border-blue-200 bg-blue-50/20 hover:border-blue-400"
+                      : "border-border bg-card hover:border-primary/40"
+                  }`}
+                >
+                  {/* Top Row: Tower & Unit # + Status */}
+                  <div className="flex items-start justify-between gap-1">
+                    <div>
+                      <div className="font-bold text-sm text-foreground flex items-center gap-1">
+                        <Home className="h-3.5 w-3.5 text-primary" />
+                        <span>
+                          {unit.tower} • {unit.unitNumber}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        Floor {unit.floor} • {unit.superAreaSqFt || unit.sizeSqFt} sq.ft
                       </span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      Floor {unit.floor} • {unit.superAreaSqFt || unit.sizeSqFt} sq.ft
-                    </span>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <UnitStatusBadge status={unit.status} />
+                      {isManager && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingUnit(unit);
+                            setUnitTower(unit.tower);
+                            setUnitNumber(unit.unitNumber);
+                            setUnitFloor(String(unit.floor));
+                            setUnitConfig(unit.configuration);
+                            setUnitArea(String(unit.superAreaSqFt || unit.sizeSqFt));
+                            setUnitPrice(String(unit.price));
+                            setUnitFacing(unit.facing || "");
+                            setUnitStatus(unit.status);
+                            setIsAddUnitOpen(true);
+                          }}
+                          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                    <UnitStatusBadge status={unit.status} />
-                    {isManager && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingUnit(unit);
-                          setUnitTower(unit.tower);
-                          setUnitNumber(unit.unitNumber);
-                          setUnitFloor(String(unit.floor));
-                          setUnitConfig(unit.configuration);
-                          setUnitArea(String(unit.superAreaSqFt || unit.sizeSqFt));
-                          setUnitPrice(String(unit.price));
-                          setUnitFacing(unit.facing || "");
-                          setUnitStatus(unit.status);
-                          setIsAddUnitOpen(true);
-                        }}
-                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+
+                  {/* Configuration & Price */}
+                  <div className="p-2.5 rounded-lg border border-border/80 bg-secondary/40 flex items-center justify-between text-xs">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold block">Layout</span>
+                      <span className="font-semibold text-foreground">{unit.configuration}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold block">Asking Price</span>
+                      <span className="font-bold text-foreground font-mono">{formatCurrencyINR(unit.askingPrice || unit.price)}</span>
+                    </div>
+                  </div>
+
+                  {/* Buyer / Lead Assignment Info */}
+                  {hasBuyer ? (
+                    <div className="p-2 rounded-md border border-primary/20 bg-primary/5 text-xs space-y-0.5">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold block">Assigned Buyer</span>
+                      <div className="font-bold text-foreground">{unit.assignedBuyerName || unit.assignedLeadName}</div>
+                      {unit.assignedLeadPhone && (
+                        <div className="text-[10px] text-muted-foreground font-mono">
+                          {formatPhone(unit.assignedLeadPhone)}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-muted-foreground italic py-1 text-center flex items-center justify-center gap-1">
+                      <Sparkles className="h-3 w-3 text-primary/60" />
+                      <span>Click for Flat 360° Dossier & History</span>
+                    </div>
+                  )}
+
+                  {/* Status Dropdown Controller & Quick Cost Sheet */}
+                  <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-muted-foreground font-medium">Status:</span>
+                      <select
+                        value={unit.status}
+                        onChange={(e) => updateUnitStatus(unit.id, e.target.value as UnitStatus)}
+                        className="h-6 text-[10px] font-bold rounded border border-border bg-secondary px-1 text-foreground focus:outline-none"
                       >
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                        <option value="available">Available</option>
+                        <option value="hold">Hold</option>
+                        <option value="site_visit">Site Visit</option>
+                        <option value="negotiation">Negotiation</option>
+                        <option value="booked">Booked</option>
+                        <option value="sold">Sold</option>
+                      </select>
+                    </div>
 
-                {/* Configuration & Price */}
-                <div className="p-2.5 rounded-lg border border-border/80 bg-secondary/40 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">Layout</span>
-                    <span className="font-semibold text-foreground">{unit.configuration}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">Asking Price</span>
-                    <span className="font-bold text-foreground font-mono">{formatCurrencyINR(unit.askingPrice || unit.price)}</span>
-                  </div>
-                </div>
-
-                {/* Buyer / Lead Assignment Info */}
-                {hasBuyer ? (
-                  <div className="p-2 rounded-md border border-primary/20 bg-primary/5 text-xs space-y-0.5">
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold block">Assigned Buyer</span>
-                    <div className="font-bold text-foreground">{unit.assignedBuyerName || unit.assignedLeadName}</div>
-                    {unit.assignedLeadPhone && (
-                      <div className="text-[10px] text-muted-foreground font-mono">
-                        {formatPhone(unit.assignedLeadPhone)}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-[11px] text-muted-foreground italic py-1 text-center flex items-center justify-center gap-1">
-                    <Sparkles className="h-3 w-3 text-primary/60" />
-                    <span>Click for Flat 360° Dossier & History</span>
-                  </div>
-                )}
-
-                {/* Status Dropdown Controller & Quick Cost Sheet */}
-                <div className="pt-2 border-t border-border/60 flex items-center justify-between text-xs gap-2" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-muted-foreground font-medium">Status:</span>
-                    <select
-                      value={unit.status}
-                      onChange={(e) => updateUnitStatus(unit.id, e.target.value as UnitStatus)}
-                      className="h-6 text-[10px] font-bold rounded border border-border bg-secondary px-1 text-foreground focus:outline-none"
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCostSheetUnit(unit);
+                        setIsCostSheetOpen(true);
+                      }}
+                      className="h-6 px-2 text-[10px] font-bold gap-1 border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
                     >
-                      <option value="available">Available</option>
-                      <option value="hold">Hold</option>
-                      <option value="site_visit">Site Visit</option>
-                      <option value="negotiation">Negotiation</option>
-                      <option value="booked">Booked</option>
-                      <option value="sold">Sold</option>
-                    </select>
+                      <Calculator className="h-3 w-3" />
+                      <span>Cost Sheet</span>
+                    </Button>
                   </div>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCostSheetUnit(unit);
-                      setIsCostSheetOpen(true);
-                    }}
-                    className="h-6 px-2 text-[10px] font-bold gap-1 border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
-                  >
-                    <Calculator className="h-3 w-3" />
-                    <span>Cost Sheet</span>
-                  </Button>
-                </div>
-              </Card>
-            );
-          })
-        )}
-      </div>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* Modal: Add / Edit Project */}
       {isAddProjectOpen && (

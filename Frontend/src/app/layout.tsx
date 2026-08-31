@@ -3,6 +3,7 @@ import { Inter, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 import { CRMProvider } from "@/context/crm-context";
+import { PWARegistrar } from "@/components/layout/pwa-registrar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -53,7 +54,10 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-background font-sans text-foreground antialiased flex flex-col">
         <AuthProvider>
-          <CRMProvider>{children}</CRMProvider>
+          <CRMProvider>
+            {children}
+            <PWARegistrar />
+          </CRMProvider>
         </AuthProvider>
       </body>
     </html>
