@@ -105,3 +105,4 @@ Master consolidated documents, pitch playbooks, and audits:
 | 02 | [02-callcrm-master-frontend-and-system-encyclopedia.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/02-callcrm-master-frontend-and-system-encyclopedia.md) | Single-file definitive encyclopedia of all frontend and system architecture. |
 | 03 | [03-project-audit.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/03-project-audit.md) | Executive pitch, selling scripts, and verified production audit scorecard. |
 | 04 | [04-implementation-audit.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/04-implementation-audit.md) | Technical implementation audit verifying all 14 engineering phases. |
+| 05 | [05-callcrm-master-feature-and-screen-encyclopedia.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/05-callcrm-master-feature-and-screen-encyclopedia.md) | Master Screen & Feature Encyclopedia: Technical mechanics, SQL origins, and non-repetition matrix. |
