@@ -1036,8 +1036,8 @@
     "hash": "ec19c0013c70876f55d99fb562c2acc4"
   },
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/README.md": {
-    "mtime": 1788194115.8504028,
-    "hash": "1798d553071e57e713e7671cc6f63ca0"
+    "mtime": 1788194210.1438203,
+    "hash": "0c431b6dfacf9553a7c59511b38e2f7e"
   },
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/system-spec/10-environment-configuration-reference.md": {
     "mtime": 1788182962.183529,
@@ -1210,6 +1210,10 @@
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/09-setup-and-apis.md": {
     "mtime": 1788183142.1806998,
     "hash": "27ec8241749cae53a8fc86fc0b38c349"
+  },
+  "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/13-sales-workspace-and-inventory-matrix-deep-dive.md": {
+    "mtime": 1788194195.552771,
+    "hash": "bf8884fc0d2711f0aa2b3f1c262cf648"
   },
   "/Users/namanjoshi/SAAS/Real-estate/DOCS/domain-guides/07-notifications-and-realtime.md": {
     "mtime": 1787387049.0610633,
