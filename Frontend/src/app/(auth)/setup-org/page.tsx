@@ -32,6 +32,12 @@ const REGIONS = [
   "Other Indian Metro",
 ];
 
+const ROLE_OPTIONS = [
+  { id: "boss", label: "Founder / Boss", desc: "Executive overview, revenue & team SLAs" },
+  { id: "manager", label: "Sales Director / VP", desc: "Pipeline flow & inventory allocation" },
+  { id: "salesperson", label: "Salesperson / Closer", desc: "Daily priorities, dialer & site visits" },
+] as const;
+
 export default function SetupOrgPage() {
   const router = useRouter();
   const { user, org, saveOrgSetup, workflowStep } = useAuth();
@@ -39,7 +45,7 @@ export default function SetupOrgPage() {
   const [orgName, setOrgName] = React.useState(org?.name || "Apex Realty Partners");
   const [teamSize, setTeamSize] = React.useState(org?.teamSize || "6-20");
   const [primaryRegion, setPrimaryRegion] = React.useState(org?.primaryRegion || REGIONS[0]);
-  const [userRole, setUserRole] = React.useState("Founder / Sales Director");
+  const [selectedRole, setSelectedRole] = React.useState<"boss" | "manager" | "salesperson">("boss");
   const [slug, setSlug] = React.useState("apex-realty");
 
   React.useEffect(() => {
@@ -59,6 +65,7 @@ export default function SetupOrgPage() {
       name: orgName.trim(),
       teamSize,
       primaryRegion,
+      role: selectedRole,
     });
 
     router.push("/choose-plan");
@@ -155,25 +162,25 @@ export default function SetupOrgPage() {
             <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Your Role in Organization</span>
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              "Founder / Boss",
-              "Sales Director / VP",
-              "Senior Sales Rep",
-            ].map((role) => (
-              <button
-                type="button"
-                key={role}
-                onClick={() => setUserRole(role)}
-                className={`py-2 px-2 text-center text-xs font-medium rounded-lg border transition-all ${
-                  userRole === role
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background text-foreground border-border hover:bg-muted"
-                }`}
-              >
-                {role}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {ROLE_OPTIONS.map((r) => {
+              const isSelected = selectedRole === r.id;
+              return (
+                <button
+                  type="button"
+                  key={r.id}
+                  onClick={() => setSelectedRole(r.id)}
+                  className={`p-2.5 text-left rounded-lg border transition-all ${
+                    isSelected
+                      ? "bg-primary/5 text-foreground border-primary ring-1 ring-primary"
+                      : "bg-background text-foreground border-border hover:bg-muted"
+                  }`}
+                >
+                  <div className="font-semibold text-xs text-foreground">{r.label}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{r.desc}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
 

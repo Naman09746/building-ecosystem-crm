@@ -190,6 +190,7 @@ interface CRMContextType {
   inviteTeamMember: (email: string, role: string, regionId?: string) => Promise<{ inviteToken?: string; inviteUrl?: string } | null>;
   revokeInvitation: (inviteId: string) => Promise<boolean>;
   updateUserRole: (userId: string, role: string, regionId?: string) => Promise<boolean>;
+  switchActiveUser: (userId: string) => void;
 }
 
 const CRMContext = React.createContext<CRMContextType | undefined>(undefined);
@@ -218,7 +219,32 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
 
   const [currentOrgId, setCurrentOrgId] = React.useState<string>("");
 
+  const [activeUserId, setActiveUserId] = React.useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("callcrm_active_user_id");
+    }
+    return null;
+  });
+
+  const switchActiveUser = React.useCallback((userId: string) => {
+    if (userId === "auth" || !userId) {
+      setActiveUserId(null);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("callcrm_active_user_id");
+      }
+    } else {
+      setActiveUserId(userId);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("callcrm_active_user_id", userId);
+      }
+    }
+  }, []);
+
   const currentUser = React.useMemo<User>(() => {
+    if (activeUserId) {
+      const found = users.find((u) => u.id === activeUserId);
+      if (found) return found;
+    }
     if (authUser) {
       return {
         id: authUser.id,
@@ -230,8 +256,8 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         avatarUrl: authUser.avatarUrl,
       };
     }
-    return INITIAL_USERS[0];
-  }, [authUser, currentOrgId]);
+    return users[0] || INITIAL_USERS[0];
+  }, [activeUserId, users, authUser, currentOrgId]);
 
   const [invitations, setInvitations] = React.useState<TeamInvitation[]>([]);
 
@@ -1406,6 +1432,7 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
       inviteTeamMember,
       revokeInvitation,
       updateUserRole,
+      switchActiveUser,
     }),
     [
       currentUser,
@@ -1482,6 +1509,7 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
       inviteTeamMember,
       revokeInvitation,
       updateUserRole,
+      switchActiveUser,
     ]
   );
 

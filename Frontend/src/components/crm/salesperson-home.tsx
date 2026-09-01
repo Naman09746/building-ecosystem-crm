@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PipelineBadge, TaskStatusBadge, DealHealthBadge, LeadScoreBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
@@ -553,20 +554,14 @@ export function SalespersonHome({
 
       {/* Modals */}
       <SellerOpportunitiesModal
-        open={isSellerModalOpen}
-        onOpenChange={setIsSellerModalOpen}
-        onMatchLead={(lead, opp) => {
-          onSelectLead(lead);
-          setIsSellerModalOpen(false);
-        }}
+        isOpen={isSellerModalOpen}
+        onClose={() => setIsSellerModalOpen(false)}
       />
 
       <MeetingSummaryModal
-        open={isMeetingModalOpen}
-        onOpenChange={setIsMeetingModalOpen}
-        onApplySummary={(summary) => {
-          setIsMeetingModalOpen(false);
-        }}
+        isOpen={isMeetingModalOpen}
+        onClose={() => setIsMeetingModalOpen(false)}
+        lead={selectedActionLead}
       />
 
       <NegotiationModal
@@ -580,7 +575,7 @@ export function SalespersonHome({
         open={isDispatchOpen}
         onOpenChange={setIsDispatchOpen}
         lead={selectedActionLead}
-        briefing={activeBriefing}
+        unit={selectedActionUnit}
       />
 
       <CommissionModal

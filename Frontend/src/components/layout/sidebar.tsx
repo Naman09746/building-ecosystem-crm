@@ -20,6 +20,8 @@ import {
   Bot,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { cn } from "@/lib/utils";
@@ -41,7 +43,8 @@ export function Sidebar({
   onToggleCollapse,
 }: SidebarProps) {
   const pathname = usePathname();
-  const { currentUser } = useCRM();
+  const { currentUser, users, switchActiveUser } = useCRM();
+  const [userMenuOpen, setUserMenuOpen] = React.useState(false);
 
   // Role-Aware Navigation (Consolidated Tier 1: Boss/Admin/Owner/Manager vs Tier 2: Salesperson/Closer)
   const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
@@ -57,10 +60,6 @@ export function Sidebar({
     { id: "projects", label: "Projects & Inventory", href: "/projects", icon: Building2 },
     { id: "people", label: "People Directory", href: "/people", icon: Contact },
     { id: "activities", label: "Touchpoint Activity", href: "/activities", icon: Activity },
-  ];
-
-  const intelligenceItems = [
-    { id: "ai-agent", label: "Aria AI Agent", href: "/agent-live", icon: Bot, highlight: true },
   ];
 
   const adminNavItems = [
@@ -81,7 +80,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "shrink-0 border-r border-border bg-card flex flex-col justify-between h-full select-none transition-all duration-200 ease-in-out",
+        "shrink-0 border-r border-border bg-card flex flex-col justify-between h-full select-none transition-all duration-200 ease-in-out relative",
         collapsed ? "w-16" : "w-60",
         className
       )}
@@ -133,7 +132,7 @@ export function Sidebar({
           )}
         </div>
 
-        {/* 4-Tier Navigation Taxonomy */}
+        {/* 3-Tier Navigation Taxonomy */}
         <div className={cn("py-3 space-y-4", collapsed ? "px-2" : "px-3")}>
           {/* TIER 1: SALES WORKSPACE */}
           <div className="space-y-1">
@@ -203,46 +202,7 @@ export function Sidebar({
             })}
           </div>
 
-          {/* TIER 3: INTELLIGENCE & AI */}
-          <div className="space-y-1">
-            {!collapsed && (
-              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Intelligence &amp; AI
-              </div>
-            )}
-            {intelligenceItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab ? activeTab === item.id : pathname === item.href;
-
-              return (
-                <a
-                  key={item.id}
-                  href={item.href}
-                  onClick={(e) => handleNavClick(item.id, e)}
-                  title={collapsed ? item.label : undefined}
-                  className={cn(
-                    "flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer min-h-[36px]",
-                    collapsed ? "justify-center p-2" : "justify-between px-2.5 py-1.5",
-                    isActive
-                      ? "bg-secondary text-foreground font-semibold shadow-subtle"
-                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className={cn("h-4 w-4 shrink-0 stroke-[1.75]", item.highlight && "text-verdigris")} />
-                    {!collapsed && <span>{item.label}</span>}
-                  </div>
-                  {!collapsed && item.highlight && (
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-verdigris-light text-verdigris border border-verdigris-border">
-                      LIVE
-                    </span>
-                  )}
-                </a>
-              );
-            })}
-          </div>
-
-          {/* TIER 4: MANAGEMENT & ADMIN (Boss / Owner / Admin / Manager) */}
+          {/* TIER 3: MANAGEMENT & ADMIN (Boss / Owner / Admin / Manager) */}
           {isExecutive && (
             <div className="space-y-1">
               {!collapsed && (
@@ -280,34 +240,116 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Current User Identity */}
-      <div className={cn("border-t border-border bg-secondary/30 shrink-0", collapsed ? "p-2" : "p-3 space-y-2")}>
+      {/* Current User Identity & Role Switcher */}
+      <div className={cn("border-t border-border bg-secondary/30 shrink-0 relative", collapsed ? "p-2" : "p-2.5")}>
         {!collapsed ? (
-          <>
-            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
-              Signed in as
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
+              <span>Signed In As</span>
+              <span className="text-[9px] text-primary font-mono lowercase">switch</span>
             </div>
 
-            <div className="flex items-center gap-1.5 py-1 px-2 rounded text-[11px] font-medium bg-card text-foreground border border-border">
-              {isExecutive ? (
-                <Shield className="h-3 w-3 shrink-0 text-brass" />
-              ) : (
-                <UserCheck className="h-3 w-3 shrink-0 text-verdigris" />
-              )}
-              <span className="capitalize">{currentUser.role}</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="w-full flex items-center justify-between gap-1.5 p-2 rounded-lg text-left bg-card text-foreground border border-border hover:border-primary/40 transition-all shadow-xs"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={cn(
+                    "h-6 w-6 rounded-md flex items-center justify-center shrink-0 text-xs font-bold",
+                    isExecutive
+                      ? "bg-amber-100 text-amber-900 border border-amber-300"
+                      : "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                  )}
+                >
+                  {isExecutive ? (
+                    <Shield className="h-3.5 w-3.5 text-amber-700" />
+                  ) : (
+                    <UserCheck className="h-3.5 w-3.5 text-emerald-700" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-xs text-foreground truncate leading-tight">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground capitalize truncate leading-tight">
+                    {currentUser.role === "salesperson"
+                      ? `Sales Rep • ${currentUser.regionName || "NCR"}`
+                      : "Boss / Executive"}
+                  </div>
+                </div>
+              </div>
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform",
+                  userMenuOpen && "rotate-180"
+                )}
+              />
+            </button>
 
-            <div className="text-[10px] text-muted-foreground text-center pt-0.5 truncate">
-              Active: <span className="font-semibold text-foreground">{currentUser.name}</span>
-              {currentUser.regionName && ` (${currentUser.regionName})`}
-            </div>
-          </>
+            {/* User & Role Switcher Dropdown */}
+            {userMenuOpen && (
+              <div className="absolute bottom-full left-2 right-2 mb-1 bg-card border border-border rounded-xl shadow-xl py-1.5 z-50 text-xs space-y-1 animate-in fade-in-50 slide-in-from-bottom-2">
+                <div className="px-2.5 py-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/60">
+                  Switch Role / Persona
+                </div>
+
+                <div className="max-h-52 overflow-y-auto space-y-0.5 px-1">
+                  {users.map((u) => {
+                    const isSelected = currentUser.id === u.id;
+                    const isUserExec = ["owner", "admin", "boss", "manager"].includes(u.role);
+
+                    return (
+                      <button
+                        key={u.id}
+                        type="button"
+                        onClick={() => {
+                          switchActiveUser(u.id);
+                          setUserMenuOpen(false);
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left transition-colors",
+                          isSelected ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted text-foreground"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className={cn(
+                              "h-5 w-5 rounded flex items-center justify-center shrink-0 text-[10px]",
+                              isUserExec ? "bg-amber-100 text-amber-900" : "bg-emerald-100 text-emerald-900"
+                            )}
+                          >
+                            {isUserExec ? "👑" : "⚡"}
+                          </div>
+                          <div className="truncate">
+                            <div className="text-xs truncate">{u.name}</div>
+                            <div className="text-[10px] text-muted-foreground capitalize">
+                              {u.role === "salesperson"
+                                ? `Salesperson (${u.regionName || "Hub"})`
+                                : "Executive Boss"}
+                            </div>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
-          <div className="flex justify-center" title={`${currentUser.name} (${currentUser.role})`}>
+          <button
+            type="button"
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="flex justify-center w-full"
+            title={`${currentUser.name} (${currentUser.role}) — Click to switch`}
+          >
             <div className="h-7 w-7 rounded-full bg-secondary text-foreground flex items-center justify-center font-bold text-xs border border-border">
               {currentUser.name.slice(0, 1).toUpperCase()}
             </div>
-          </div>
+          </button>
         )}
       </div>
     </aside>

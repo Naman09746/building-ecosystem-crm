@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface TopBarProps {
   onOpenQuickLog: () => void;
@@ -17,7 +18,7 @@ interface TopBarProps {
 }
 
 export function TopBar({ onOpenQuickLog, onOpenSearch, onToggleMobileMenu }: TopBarProps) {
-  const { currentUser } = useCRM();
+  const { currentUser, users, switchActiveUser } = useCRM();
   const { user: authUser, org, signOut, resetWorkflow } = useAuth();
   const [profileOpen, setProfileOpen] = React.useState(false);
 
@@ -104,6 +105,37 @@ export function TopBar({ onOpenQuickLog, onOpenSearch, onToggleMobileMenu }: Top
                 <p className="text-[10px] text-primary font-medium mt-1">
                   Org: {org?.name || "Apex Realty"} ({org?.teamSize || "6-20"} reps)
                 </p>
+              </div>
+
+              {/* Role & Persona Switcher */}
+              <div className="py-1 border-b border-border/80">
+                <div className="px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Switch Persona
+                </div>
+                {users.slice(0, 3).map((u) => {
+                  const isSelected = currentUser.id === u.id;
+                  const isUserExec = ["owner", "admin", "boss", "manager"].includes(u.role);
+                  return (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => {
+                        switchActiveUser(u.id);
+                        setProfileOpen(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-1.5 text-left transition-colors text-[11px]",
+                        isSelected ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted text-foreground"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span>{isUserExec ? "👑" : "⚡"}</span>
+                        <span className="truncate">{u.name} ({u.role === "salesperson" ? "Salesperson" : "Boss"})</span>
+                      </div>
+                      {isSelected && <span className="text-[10px] font-bold">✓</span>}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="py-1">

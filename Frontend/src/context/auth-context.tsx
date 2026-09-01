@@ -44,9 +44,10 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  signInAsDemo: (role?: "boss" | "salesperson" | "manager") => void;
   signOut: () => Promise<void>;
 
-  saveOrgSetup: (orgData: { name: string; teamSize: string; primaryRegion: string }) => void;
+  saveOrgSetup: (orgData: { name: string; teamSize: string; primaryRegion: string; role?: UserRole }) => void;
   selectPlan: (plan: "starter" | "growth" | "enterprise", billingCycle: "monthly" | "yearly") => void;
   completeOnboardingStep: (step: "leads" | "team" | "pipeline", payload?: any) => void;
   skipOnboarding: () => void;
@@ -96,6 +97,7 @@ async function loadProfileUserAndOrg(
         authOrg = {
           id: orgData.id,
           name: orgData.name || "Apex Realty",
+          slug: orgData.name ? orgData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "apex-realty",
           plan: orgData.plan || "growth",
           billingCycle: orgData.billing_cycle || "monthly",
           primaryRegion: "Gurgaon",
@@ -335,6 +337,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInAsDemo = (role: "boss" | "salesperson" | "manager" = "salesperson") => {
+    const demoUser: AuthUser = role === "salesperson"
+      ? { id: "usr-rahul", name: "Rahul Sharma", email: "rahul@apexrealty.in", role: "salesperson" }
+      : { id: "usr-vikram", name: "Vikram Malhotra", email: "vikram@apexrealty.in", role: "boss" };
+
+    const demoOrg: AuthOrg = {
+      id: "org-dlf-partners",
+      name: "Apex Realty Partners",
+      slug: "apex-realty",
+      plan: "growth",
+      billingCycle: "monthly",
+      primaryRegion: "Gurgaon",
+      teamSize: "6-20",
+    };
+
+    setUser(demoUser);
+    setOrg(demoOrg);
+    setWorkflowStepState("app");
+    try {
+      localStorage.setItem(STORAGE_KEYS.ORG, JSON.stringify(demoOrg));
+      localStorage.setItem(STORAGE_KEYS.STEP, "app");
+    } catch {}
+  };
+
   const signOut = async () => {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured) {
@@ -350,28 +376,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
-  const saveOrgSetup = async (orgData: { name: string; teamSize: string; primaryRegion: string }) => {
+  const saveOrgSetup = async (orgData: { name: string; teamSize: string; primaryRegion: string; role?: UserRole }) => {
     // Persist the organization name chosen during setup to the real tenant row.
     let realOrgId = org?.id && !String(org.id).startsWith("local") ? org.id : undefined;
 
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured) {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
+        const { data: { user: currentAuthUser } } = await supabase.auth.getUser();
+        if (currentAuthUser) {
           const { data: profile } = await supabase
             .from("profiles")
             .select("org_id")
-            .eq("user_id", user.id)
+            .eq("user_id", currentAuthUser.id)
             .maybeSingle();
           if (profile?.org_id) {
             realOrgId = profile.org_id;
             await supabase.from("orgs").update({ name: orgData.name }).eq("id", profile.org_id);
           }
+          if (orgData.role) {
+            await supabase.from("profiles").update({ role: orgData.role }).eq("user_id", currentAuthUser.id);
+          }
         }
       } catch (e) {
         console.warn("[AUTH] Could not persist organization setup:", e);
       }
+    }
+
+    if (orgData.role) {
+      setUser((prev) => (prev ? { ...prev, role: orgData.role! } : null));
     }
 
     const newOrg: AuthOrg = {
@@ -490,6 +523,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signIn,
         signInWithGoogle,
+        signInAsDemo,
         signOut,
         saveOrgSetup,
         selectPlan,

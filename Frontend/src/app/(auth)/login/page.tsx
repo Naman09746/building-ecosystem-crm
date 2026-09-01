@@ -22,7 +22,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "login" ? "login" : "signup";
 
-  const { signUp, signIn, signInWithGoogle, user, workflowStep, isConfigured } = useAuth();
+  const { signUp, signIn, signInWithGoogle, signInAsDemo, user, workflowStep, isConfigured } = useAuth();
 
   const [mode, setMode] = React.useState<"signup" | "login">(initialMode);
   const [name, setName] = React.useState("");
@@ -236,6 +236,42 @@ function LoginForm() {
           {mode === "signup" && (
             <p className="text-[11px] text-muted-foreground">Minimum 6 characters</p>
           )}
+        </div>
+
+        {/* Instant 1-Click Demo Login */}
+        <div className="p-3 rounded-xl border border-border/80 bg-secondary/30 space-y-2 text-xs">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            ⚡ Instant Demo Login (1-Click, No Password Needed):
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                signInAsDemo("salesperson");
+                router.push("/dashboard");
+              }}
+              className="p-2 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 text-left transition-all active:scale-[0.98] shadow-xs"
+            >
+              <div className="font-bold text-xs flex items-center gap-1">
+                <span>⚡</span> Salesperson
+              </div>
+              <div className="text-[10px] text-emerald-800 font-medium">Rahul Sharma (Gurgaon)</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                signInAsDemo("boss");
+                router.push("/dashboard");
+              }}
+              className="p-2 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 text-left transition-all active:scale-[0.98] shadow-xs"
+            >
+              <div className="font-bold text-xs flex items-center gap-1">
+                <span>👑</span> Boss / Founder
+              </div>
+              <div className="text-[10px] text-amber-800 font-medium">Vikram Malhotra</div>
+            </button>
+          </div>
         </div>
 
         <button

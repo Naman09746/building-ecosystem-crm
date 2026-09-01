@@ -72,12 +72,6 @@ export function NavMoreSheet({
         { id: "people", label: "People Directory", icon: Contact },
       ],
     },
-    {
-      title: "Intelligence & AI",
-      items: [
-        { id: "ai-agent", label: "Aria AI Agent", icon: Bot, badge: "LIVE" },
-      ],
-    },
     ...(isExecutive
       ? [
           {
