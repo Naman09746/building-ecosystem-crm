@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { isManagerRole, roleLabel } from "@/lib/rbac";
 
 interface TopBarProps {
   onOpenQuickLog: () => void;
@@ -114,7 +115,7 @@ export function TopBar({ onOpenQuickLog, onOpenSearch, onToggleMobileMenu }: Top
                 </div>
                 {users.slice(0, 3).map((u) => {
                   const isSelected = currentUser.id === u.id;
-                  const isUserExec = ["owner", "admin", "boss", "manager"].includes(u.role);
+                  const isUserExec = isManagerRole(u.role);
                   return (
                     <button
                       key={u.id}
@@ -130,7 +131,7 @@ export function TopBar({ onOpenQuickLog, onOpenSearch, onToggleMobileMenu }: Top
                     >
                       <div className="flex items-center gap-2 truncate">
                         <span>{isUserExec ? "👑" : "⚡"}</span>
-                        <span className="truncate">{u.name} ({u.role === "salesperson" ? "Salesperson" : "Boss"})</span>
+                        <span className="truncate">{u.name} ({roleLabel(u.role)})</span>
                       </div>
                       {isSelected && <span className="text-[10px] font-bold">✓</span>}
                     </button>

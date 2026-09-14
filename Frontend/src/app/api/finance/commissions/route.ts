@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     return apiError("Authentication required", 401, "UNAUTHORIZED");
   }
 
-  // Only manager/boss/admin/owner can calculate or post commissions
+  // Only owners and managers can calculate or post commissions
   const isManagerial = MANAGER_ROLES.includes(auth.role as any);
   if (!isManagerial) {
     return apiError("Only management can post commission ledgers", 403, "FORBIDDEN");

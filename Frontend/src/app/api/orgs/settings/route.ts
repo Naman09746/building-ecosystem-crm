@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   try {
     const { data: org, error } = await supabase
       .from("orgs")
-      .select("id, name, slug, plan, max_leads, max_seats, reactivation_days, custom_settings, created_at")
+      .select("id, name, slug, plan, billing_cycle, trial_ends_at, setup_completed_at, team_size, primary_region, max_leads, max_seats, reactivation_days, custom_settings, created_at")
       .eq("id", auth.orgId)
       .single();
 
@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   if (!MANAGER_ROLES.includes(auth.role)) {
-    return apiError("Only managers and admins can modify organization settings", 403, "FORBIDDEN");
+    return apiError("Only owners and managers can modify organization settings", 403, "FORBIDDEN");
   }
 
   const supabase = await getAuthenticatedServerClient();
@@ -64,6 +64,9 @@ export async function PATCH(req: NextRequest) {
     const updatePayload: Record<string, any> = {};
     if (validated.name !== undefined) updatePayload.name = validated.name;
     if (validated.reactivationDays !== undefined) updatePayload.reactivation_days = validated.reactivationDays;
+    if (validated.teamSize !== undefined) updatePayload.team_size = validated.teamSize;
+    if (validated.primaryRegion !== undefined) updatePayload.primary_region = validated.primaryRegion;
+    if (validated.setupCompletedAt !== undefined) updatePayload.setup_completed_at = validated.setupCompletedAt;
     
     if (validated.customSettings !== undefined) {
       // Merge with existing custom settings if available
@@ -83,7 +86,7 @@ export async function PATCH(req: NextRequest) {
       .from("orgs")
       .update(updatePayload)
       .eq("id", auth.orgId)
-      .select("id, name, slug, plan, max_leads, max_seats, reactivation_days, custom_settings, created_at")
+      .select("id, name, slug, plan, billing_cycle, trial_ends_at, setup_completed_at, team_size, primary_region, max_leads, max_seats, reactivation_days, custom_settings, created_at")
       .single();
 
     if (error || !updated) {

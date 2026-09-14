@@ -1,6 +1,7 @@
 "use client";
 
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+import { mapCanonicalRole } from "@/lib/server/rbac";
 import type {
   Activity,
   ActivityType,
@@ -30,6 +31,11 @@ import type {
 // ============================================================================
 
 export const isSyncEnabled = () => Boolean(getSupabaseClient() && isSupabaseConfigured);
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isUuid(v: string | null | undefined): boolean {
+  return !!v && UUID_RE.test(v);
+}
 
 type AnyRow = Record<string, any>;
 
@@ -172,7 +178,7 @@ export function leadToRow(lead: Partial<Lead>): AnyRow {
 
 export async function updateLeadRemote(leadId: string, patch: Partial<Lead>): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(leadId)) return false;
   const { error } = await supabase.from("leads").update(leadToRow(patch)).eq("id", leadId);
   if (error) {
     console.error("[SYNC] Failed to update lead:", error.code);
@@ -243,10 +249,9 @@ export async function insertActivityRemote(activity: Omit<Activity, "id" | "crea
   const supabase = getSupabaseClient();
   if (!supabase) return false;
   const org_id = activity.orgId;
-  if (!org_id) {
-    console.error("[SYNC] Activity insert rejected: missing org_id");
-    return false;
-  }
+  if (!org_id || !isUuid(org_id)) return false;
+  if (!isUuid(activity.userId)) return false;
+  if (activity.leadId && !isUuid(activity.leadId)) return false;
   const { error } = await supabase.from("activities").insert({ ...activityToRow(activity), org_id });
   if (error) {
     console.error("[SYNC] Failed to log activity:", error.code);
@@ -293,7 +298,7 @@ export async function fetchTasks(): Promise<Task[] | null> {
 
 export async function insertTaskRemote(task: Omit<Task, "id"> & { id?: string }): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(task.orgId)) return false;
   const { error } = await supabase.from("tasks").insert({
     org_id: task.orgId,
     lead_id: task.leadId,
@@ -317,7 +322,7 @@ export async function insertTaskRemote(task: Omit<Task, "id"> & { id?: string })
 
 export async function completeTaskRemote(taskId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(taskId)) return false;
   const { error } = await supabase.from("tasks").update({ status: "completed" }).eq("id", taskId);
   if (error) {
     console.error("[SYNC] Failed to complete task:", error.code);
@@ -444,7 +449,7 @@ export async function updateUnitRemote(
   patch: Partial<ProjectUnit>
 ): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(unitId)) return false;
   const { error } = await supabase.from("project_units").update(unitToRow(patch)).eq("id", unitId);
   if (error) {
     console.error("[SYNC] Failed to update unit:", error.code);
@@ -458,7 +463,7 @@ export async function insertUnitRemote(
   orgId: string
 ): Promise<ProjectUnit | null> {
   const supabase = getSupabaseClient();
-  if (!supabase) return null;
+  if (!supabase || !isUuid(orgId)) return null;
   const { data, error } = await supabase
     .from("project_units")
     .insert({
@@ -522,10 +527,7 @@ export async function insertDocumentRemote(
   const supabase = getSupabaseClient();
   if (!supabase) return false;
   const org_id = doc.orgId;
-  if (!org_id) {
-    console.error("[SYNC] Document insert rejected: missing org_id");
-    return false;
-  }
+  if (!org_id || !isUuid(org_id)) return false;
   const { error } = await supabase.from("documents").insert({
     org_id,
     project_id: doc.projectId || null,
@@ -543,7 +545,7 @@ export async function insertDocumentRemote(
 
 export async function deleteDocumentRemote(docId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(docId)) return false;
   const { error } = await supabase.from("documents").delete().eq("id", docId);
   if (error) {
     console.error("[SYNC] Failed to delete document:", error.code);
@@ -660,7 +662,7 @@ export async function fetchProjects(): Promise<Project[] | null> {
 
 export async function insertProjectRemote(p: Partial<Project>, orgId: string): Promise<Project | null> {
   const supabase = getSupabaseClient();
-  if (!supabase) return null;
+  if (!supabase || !isUuid(orgId)) return null;
   const { data, error } = await supabase
     .from("projects")
     .insert({
@@ -679,7 +681,7 @@ export async function insertProjectRemote(p: Partial<Project>, orgId: string): P
 
 export async function updateProjectRemote(projectId: string, patch: Partial<Project>): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(projectId)) return false;
   const { error } = await supabase.from("projects").update(projectToRow(patch)).eq("id", projectId);
   if (error) {
     console.error("[SYNC] Failed to update project:", error.code);
@@ -690,7 +692,7 @@ export async function updateProjectRemote(projectId: string, patch: Partial<Proj
 
 export async function deleteProjectRemote(projectId: string): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(projectId)) return false;
   const { error } = await supabase.from("projects").delete().eq("id", projectId);
   if (error) {
     console.error("[SYNC] Failed to delete project:", error.code);
@@ -910,7 +912,7 @@ export async function fetchRegions(): Promise<Region[] | null> {
 
 export async function insertRegionRemote(r: { name: string; code: string }, orgId: string): Promise<Region | null> {
   const supabase = getSupabaseClient();
-  if (!supabase) return null;
+  if (!supabase || !isUuid(orgId)) return null;
   const { data, error } = await supabase
     .from("regions")
     .insert({
@@ -930,7 +932,7 @@ export async function insertRegionRemote(r: { name: string; code: string }, orgI
 
 export async function updateRegionRemote(regionId: string, patch: Partial<Region>): Promise<boolean> {
   const supabase = getSupabaseClient();
-  if (!supabase) return false;
+  if (!supabase || !isUuid(regionId)) return false;
   const updatePayload: Record<string, any> = {};
   if (patch.name !== undefined) updatePayload.name = patch.name;
   if (patch.code !== undefined) updatePayload.code = patch.code.toUpperCase();
@@ -955,10 +957,7 @@ export async function deleteRegionRemote(regionId: string): Promise<boolean> {
 }
 
 export function mapDbRoleToClient(dbRole: string | null | undefined): UserRole {
-  if (!dbRole) return "salesperson";
-  if (["owner", "admin", "boss"].includes(dbRole)) return "boss";
-  if (["manager", "closer"].includes(dbRole)) return "manager";
-  return "salesperson";
+  return mapCanonicalRole(dbRole) as UserRole;
 }
 
 function mapProfileRow(row: AnyRow, regionName?: string): User {
@@ -1044,6 +1043,12 @@ export interface CrmHydration {
 
 export async function hydrateCrmData(): Promise<CrmHydration | null> {
   if (!isSyncEnabled()) return null;
+
+  // Demo users have no real Supabase session — all data comes from local mocks
+  if (typeof document !== "undefined" && document.cookie.includes("callcrm_demo_session=1")) {
+    return null;
+  }
+
   try {
     await seedIfEmpty();
 

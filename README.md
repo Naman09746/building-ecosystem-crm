@@ -1,118 +1,121 @@
-# CallCRM 2.0 — Architectural Real Estate Sales Operating System & n8n Automation Engine
+# Building Ecosystem CRM — Unified Operating System for Construction, Materials & Real Estate
 
-CallCRM 2.0 is an enterprise-grade Real Estate Sales Operating System and AI Agent platform engineered specifically for high-ticket Indian luxury real estate developers, brokerage houses, channel partners, and advisory desks.
+**Building Ecosystem CRM** is an extensible, enterprise-grade Sales Operating System and AI platform engineered for the entire lifecycle of the built environment. 
 
-Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Vercel AI SDK**, **Google Gemini 2.5 Flash**, and **Supabase** (Postgres + Auth + RLS + Realtime), CallCRM connects **People + Property + Inventory + Relationships + Communication + Activities + Deals + Money + Documents + Operations**.
+Rather than isolating real estate transactions from the supply chain, Building Ecosystem CRM connects **Real Estate Developers, Building Material Suppliers (Bricks, Cement, Marble, Tiles, Sanitaryware, Hardware), Interior & Furniture Studios, Architecture Firms, and Civil Contractors** into a unified, collaborative commercial ecosystem.
+
+Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Vercel AI SDK**, **Google Gemini**, **Supabase** (Postgres + Auth + RLS + Realtime), and an **n8n Event Bus**.
 
 ---
 
-## 🏛️ CallCRM + n8n Separation-of-Responsibilities Architecture
+## 🌐 The Big Picture: One Platform, Five Interconnected Verticals
 
-CallCRM adheres strictly to a **Separation-of-Responsibilities Architecture**:
+Every building project involves a linked chain of commerce. Building Ecosystem CRM provides a **common public website and shared core engine**, with **personalized post-login experiences** tailored to each industry's workflow, vocabulary, and operational depth.
 
 ```mermaid
-flowchart TD
-    subgraph CallCRM [CallCRM Application Core — Source of Truth]
-        A[Next.js 15 App Router] --> B[Domain Services & Validation]
-        B --> C[(PostgreSQL + Supabase RLS)]
-        B --> D[Transactional Outbox: crm_domain_events]
+graph TD
+    A[Public Landing & Auth Engine] --> B{Personalized Workspace Selection}
+    
+    B -->|Developers & Brokers| C[Real Estate Vertical]
+    B -->|Bricks, Cement, Marble, Tiles| D[Building Materials Vertical]
+    B -->|Design & Fit-outs| E[Interior & Furniture Vertical]
+    B -->|Consultants & MEP| F[Architecture & Design Vertical]
+    B -->|Civil & Subcontractors| G[Contractors & Execution Vertical]
+
+    subgraph CoreEngine [Shared Core CRM Foundation]
+        H[People & Identity Registry]
+        I[Omnichannel Leads & WhatsApp Engine]
+        J[Configurable Deal Pipeline]
+        K[Tasks, Activities & Voice Notes]
+        L[Multi-Tenant RBAC & Supabase RLS]
+        M[Transactional Outbox & n8n Automation]
     end
 
-    subgraph EventBus [Asynchronous Event Bus & Circuit Breaker]
-        D -->|HMAC-SHA256 Signed| E[Async Dispatcher Worker]
-        E -->|Exponential Backoff Retries| F[n8n Webhook Endpoint]
-    end
-
-    subgraph n8nLayer [n8n Automation & Integration Layer]
-        F --> G[WhatsApp Business API]
-        F --> H[Meta Lead Ads]
-        F --> I[Google Calendar Sync]
-        F --> J[AI Suggestion Drafts]
-    end
-
-    subgraph InboundFlow [Secure Inbound Pipeline with Idempotency]
-        G & H & J -->|POST /api/integrations/n8n/dispatch| K[Idempotency Guard: inbound_integration_events]
-        K -->|De-duplicated & Sanitized| B
-        J -.->|Human-in-the-Loop Required| L[Awaiting Salesperson Approval]
-    end
+    C & D & E & F & G -.-> CoreEngine
 ```
 
-### Core Architecture Rules:
-1. **CallCRM Owns the Truth**: All core operations (*People, Leads, Buyer Requirements, Listings, Mandates, Units, Negotiations, Deals, Brokerage, and Audit Logs*) run natively inside CallCRM. **CallCRM functions 100% uninterrupted even if n8n is offline**.
-2. **Transactional Outbox & Domain Event Bus (`crm_domain_events`)**: Dispatches HMAC-SHA256 signed domain events (`LeadCreated`, `SiteVisitScheduled`, `NegotiationAgreed`, `MandateExpiring`, `CommissionCreated`) with 3-second timeouts, exponential backoff retries, and automatic **circuit breakers**.
-3. **Inbound Idempotency & Duplicate Shield (`inbound_integration_events`)**: Prevents duplicate lead/contact creation across repeated Meta/WhatsApp webhook deliveries using external event IDs.
-4. **AI Safety Guardrail Enforced**: AI extractions cannot mutate CRM deal stages, property prices, or financial records without explicit human approval.
+---
+
+## 🎯 Supported Industry Verticals
+
+| Vertical | Primary Users | Tailored Capabilities | Core Asset Model |
+| :--- | :--- | :--- | :--- |
+| **Real Estate** | Developers, Brokers, Channel Partners, Mandate Desks | 6-tier unit dossiers, digital gate passes for site visits, bidding room ledger, statutory Indian brokerage (1% + 1% + GST/TDS), buyer matching | **Unit / Flat 360°** (Project $\rightarrow$ Tower $\rightarrow$ Floor $\rightarrow$ Flat) |
+| **Building Materials** | Brick kilns, Cement distributors, Marble/Granite yards, Tiles & Sanitaryware suppliers | Wholesale vs. retail price tiers, MOQ, contractor credit ledger, sample dispatch tracking, quick WhatsApp quotes, delivery challans | **Material SKU / Lot Catalog** (Dimensions, Finishes, Grades, Stock) |
+| **Interior & Furniture** | Interior designers, Modular kitchen studios, Turnkey fit-out firms | Room-by-room staging, moodboards, Bill of Quantities (BOQ), client material approvals, artisan/vendor milestone tracking | **Room & BOQ Specification** (Living, Kitchen, Finishes, Hardware) |
+| **Architecture & Design** | Architects, Structural engineers, MEP consultants | Drawing revisions (GFC), specification sheets, client design sign-offs, site inspection memos, consultant coordination | **Design Project & Drawing Sheets** (Schematic, Working, As-Built) |
+| **Contractors & Civil** | General contractors, Masonry & civil subcontractors, Site supervisors | Daily Site Reports (DSR), labor attendance, material consumption logs, milestone progress tracking, subcontractor measurement bills | **Site Milestone & Work Breakdown** (Excavation, RCC, Finishing) |
 
 ---
 
-## ⚡ Key Differentiators & Value Pillars
+## ⚡ Adaptive Operating Modes: "Simple" vs. "Deep"
 
-1. **People Registry Decoupled from Leads**: A single real-world identity (e.g. *Rahul Sharma*) can simultaneously hold multiple requirements (4BHK Gurgaon + Mumbai investment), own units (A-1402), and refer clients without duplicating contacts.
-2. **Atomic Flat/Unit Asset Model & 360° Dossiers**: 6-tier real estate hierarchy (`Region` $\rightarrow$ `Area/Locality` $\rightarrow$ `Society/Project` $\rightarrow$ `Tower/Block` $\rightarrow$ `Floor` $\rightarrow$ `Flat/Unit`). The Flat/Unit is the core transactional asset holding pricing memory, cost sheets, and temporal ownership histories.
-3. **Property Listings & Exclusive Mandate Engine**: Tracks mandate validity windows, key custodians, viewing notice SLAs, and **role-protected seller price floors** (masked from junior sales reps).
-4. **Chronological Negotiation Room & Bid Ledger**: Multi-round buyer offer vs. seller counter tracking with price gap metrics, token deposit statuses, and special conditions.
-5. **Site Visit Operational OS & Digital Gate Pass**: Synthesizes digital Gate 2 visitor PINs, visitor parking bays, caretaker contacts, 5-point pre-visit checklists, and post-visit survey debriefs.
-6. **Statutory Indian Brokerage & Commission Engine**: Computes 1% buyer + 1% seller brokerage, 18% GST addition, 1% TDS deduction (u/s 194H), channel partner shares, and sales rep incentives.
-7. **Proactive Seller Intelligence Engine**: Identifies expiring lease agreements ($<60$ days), vacant units incurring maintenance holding costs, and 3+ year investor exit windows with 1-click conversion to active resale listings.
-8. **100-Point Bi-Directional Matching Engine**: Algorithmic scoring across Location (30%), Budget (30%), Configuration (20%), Floor/Facing (10%), Mandate Exclusivity (10%).
-9. **Multi-Tenant Security by Construction**: Row-Level Security on all 39 tables, `org_id` always derived from the verified session, fail-closed HMAC webhooks, and DB-enforced plan quotas.
-
----
-
-## 🧠 AI Agents & Automation Modules
-
-| Agent / Engine | Purpose | Trust Model |
-| :--- | :--- | :--- |
-| **Seller Intelligence** | Tenancy expiry, vacant units & investor exit signals | Server scanner (`/api/seller-opportunities`) · 1-click mandate conversion |
-| **100-Point Bi-Directional Matcher** | Multi-factor inventory ↔ buyer matching | Algorithmic scoring · reverse matching on new units |
-| **Site Visit Pre-Briefing & Gate Pass** | 30-min pre-visit gate passes, PINs & checklists | Operational Dispatcher (`/api/site-visits/dispatch`) · WhatsApp share |
-| **Negotiation Room Ledger** | Chronological bidding rounds & price gap analysis | Bidding Ledger (`/api/deals/[id]/negotiations`) · Protected price floors |
-| **Brokerage & Commission Calculator** | Statutory GST (18%), TDS (1%), CP & rep splits | Financial Engine (`/api/finance/commissions`) · Manager role-gated |
-| **Meeting Structurer** | Unstructured speech/notes → structured outcomes | Human-in-the-loop approval gate · zero autonomous DB writes |
-| **Aria 2.0 Intelligence** | Property briefings, buyer matching & intake qualification | Gemini 2.5 Flash · read-only tools · human approval required |
-| **Lost-Lead Resurrector** | Dormant-deal ↔ live-inventory matching | Server-side manager+ scan · client applies via audited writes |
-| **WhatsApp Sales Engine** | 1-click templated outreach & instant logging | Outbound `wa.me/` · inbound webhook HMAC + replay guard |
-
----
-
-## System Architecture
+Different businesses operate at different speeds. The CRM adapts its complexity dynamically:
 
 ```
-Real-estate/
-├── supabase/migrations/            # Canonical DB — apply in order (0001 → 0021):
-│   ├── 0001_init.sql               #   multi-tenant schema, RLS, org bootstrap trigger
-│   ├── 0002_sample_seed.sql        #   first-run sample data RPC
-│   ├── 0003_rate_limiting.sql      #   durable Postgres rate limiter
-│   ├── ...                         #   phases 4-11 hardening, SLAs, analytics, billing
-│   ├── 0018_phase12_property_intelligence_schema.sql # Areas, Towers, Units 360, Relationships, Facts
-│   ├── 0019_phase13_intelligence_automation.sql # Seller opportunities, site visit briefings, stale facts
-│   ├── 0020_enterprise_domain_model.sql # People, Requirements, Mandates, Bids, Dispatches, Commissions
-│   └── 0021_n8n_event_bus_and_integration_outbox.sql # Outbox, Integration Endpoints, Idempotency Logs
-├── .github/workflows/ci.yml        # CI: lint → vitest → next build
-├── DOCS/                           # Complete Architecture & Documentation Hub
-│   ├── system-spec/                # 12-Part Canonical System Specifications (01 → 12)
-│   ├── domain-guides/              # Deep-Dive Engineering, AI & Automation Guides (01 → 11)
-│   ├── ui-ux-spec/                 # CRM UI/UX Redesign & Architectural Ledger Specs (01 → 09)
-│   ├── marketing-spec/             # Marketing Website Editorial Specifications (01 → 08)
-│   ├── playbooks/                  # Executive Blueprints, Audits & Encyclopedias (01 → 04)
-│   └── README.md                   # Master Documentation Catalog & Index
+┌────────────────────────────────────────────────────────────────────────┐
+│                        COMPLEXITY SELECTOR                             │
+├───────────────────────────────────┬────────────────────────────────────┤
+│ 🟢 SIMPLE / HIGH-VELOCITY MODE    │ 🔵 DEEP / ENTERPRISE MODE          │
+│ • Fast 3-stage visual pipeline    │ • Multi-tier approval workflows    │
+│ • 1-click WhatsApp quotes & bills │ • 6-tier real estate hierarchy     │
+│ • Instant lead-to-order logging   │ • Chronological bid ledger         │
+│ • Minimalist, low-friction forms  │ • Transactional outbox & n8n event │
+│ • Best for: Material dealers,     │ • Role-gated pricing floors        │
+│   trade contractors & boutiques   │ • Best for: Developers & large     │
+│                                   │   distributor/dealership networks  │
+└───────────────────────────────────┴────────────────────────────────────┘
+```
+
+---
+
+## 🏛️ Shared Architecture & Technical Foundation
+
+### 1. CallCRM Core + n8n Separation-of-Responsibilities
+- **Core Platform Owns the Truth**: All core business logic (*People, Leads, Accounts, Catalogs, Pipeline, Deals, and Audit Logs*) executes inside Next.js and Supabase. The system works 100% uninterrupted even if external automations are unreachable.
+- **Transactional Outbox & Domain Event Bus (`crm_domain_events`)**: Dispatches HMAC-SHA256 signed events (`LeadCreated`, `QuoteGenerated`, `DispatchScheduled`, `DealWon`, `CommissionCreated`) with retries, exponential backoff, and circuit breakers.
+- **Inbound Idempotency (`inbound_integration_events`)**: Protects against duplicate leads or orders from WhatsApp, IndiaMART, Justdial, or Meta webhook replays.
+- **AI Human-in-the-Loop**: Gemini AI suggestions (audio note structuring, buyer matching, dormant lead resurrection) require explicit user sign-off before committing database mutations.
+
+---
+
+## 📂 Project Structure
+
+```
+building-ecosystem-crm/
+├── supabase/migrations/            # Canonical database migrations (Multi-tenant schema, RLS, Outbox)
+│   ├── 0001_init.sql → 0021_n8n_event_bus.sql # Multi-tenant core, RLS, Outbox
+│   └── 0024_ecosystem_verticals.sql # Org industry vertical & complexity mode settings
+├── DOCS/                           # Specifications & Developer Guides
+│   ├── system-spec/                # Canonical System Specs
+│   ├── domain-guides/              # Engineering, AI & Automation Guides
+│   ├── ui-ux-spec/                 # UI/UX & Architectural Design System Specs
+│   └── ecosystem-architecture.md   # Multi-vertical extensibility blueprint
 └── Frontend/
-    ├── Dockerfile                  # Multi-stage standalone production image (non-root)
-    ├── .env.local.example          # Complete environment template
-    └── src/
-        ├── middleware.ts           # Edge route protection (JWT revalidation)
-        ├── app/                    # App Router: marketing page, auth flow,
-        │   │                       # CRM routes (thin AppShell wrappers), /api/* (83 endpoints)
-        │   └── api/                # people · listings/mandates · deals/[id]/negotiations · site-visits/dispatch · finance/commissions · integrations/*
-        ├── components/crm/         # Negotiation modal · Site visit dispatch · Commission modal · n8n drawer
-        ├── context/                # auth-context (Supabase sessions) · crm-context
-        ├── lib/
-        │   ├── persistence/        # crm-sync (row↔domain mappers) · retry-queue
-        │   ├── server/             # domain-event-bus · seller-intelligence · site-visit-briefing · aria-tools · api-security
-        │   ├── mock-data.ts        # Demo dataset (unauthenticated mode only)
-        │   └── utils.ts            # ₹ Lakh/Cr currency, phone formatters
-        ├── types/crm.ts            # Domain TypeScript definitions
-        └── __tests__/              # 239 tests across 28 suites: unit · security · state-machine · n8n architecture
+    ├── src/
+    │   ├── app/                    # Next.js 15 App Router
+    │   │   ├── (auth)/             # Universal Auth (Login, Org Setup with Industry & Mode selector)
+    │   │   ├── (marketing)/        # Unified Building Ecosystem landing page
+    │   │   ├── dashboard/          # Adaptive dashboard (Developer vs Material Dealer vs Contractor)
+    │   │   ├── leads/              # Universal Lead Inbound & qualification
+    │   │   ├── pipeline/           # Configurable Stage Kanban
+    │   │   ├── people/             # Universal Directory (Buyers, Suppliers, Architects, Contractors)
+    │   │   ├── inventory/          # Dynamic inventory (Real Estate Units vs Material SKUs vs BOQ)
+    │   │   └── api/                # 80+ API endpoints (Auth, Inbound, Outbox, Analytics)
+    │   ├── components/
+    │   │   ├── layout/             # Dynamic AppShell, Sidebar & Mobile Nav (Vertical-driven)
+    │   │   ├── core/               # Shared CRM widgets (Leads table, Pipeline board, Audio recorder)
+    │   │   └── verticals/          # Plug-and-play vertical modules:
+    │   │       ├── real-estate/    # Stacking charts, Gate pass, Bidding room, Cost sheet
+    │   │       ├── materials/      # SKU matrix, Wholesale pricing, Dispatch challan
+    │   │       ├── interior/       # Room moodboards, Bill of Quantities (BOQ) estimator
+    │   │       └── contracting/    # Daily Site Reports (DSR), Material consumption tracker
+    │   ├── config/
+    │   │   ├── ecosystem.ts        # Central Vertical profiles, labels & navigation registry
+    │   │   └── stages.ts           # Industry-specific default pipeline stages
+    │   ├── context/                # auth-context (Org Industry + Mode) · crm-context
+    │   ├── lib/                    # Persistence, Server security, Gemini AI & formatters
+    │   └── types/                  # Domain TypeScript definitions
 ```
 
 ---
@@ -122,25 +125,25 @@ Real-estate/
 ### Prerequisites
 - Node.js 20+
 - npm 9+
-- A Supabase project (free tier works)
+- A Supabase project with Postgres
 
-### 1. Database setup
-Apply migrations in numeric order (SQL Editor or Supabase CLI):
-```
-supabase/migrations/0001_init.sql → 0021_n8n_event_bus_and_integration_outbox.sql
+### 1. Database Setup
+Apply migrations in numerical order:
+```bash
+supabase/migrations/0001_init.sql → supabase/migrations/*.sql
 ```
 
-### 2. Environment
+### 2. Environment Configuration
 ```bash
 cd Frontend
 cp .env.local.example .env.local
-# Fill in: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
-# Optional: GEMINI_API_KEY, webhook secrets, N8N_SERVICE_SECRET
+# Fill in NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+# Optional: GEMINI_API_KEY, N8N_SERVICE_SECRET
 ```
 
-### 3. Run & Test
+### 3. Run Locally
 ```bash
-npm run dev        # http://localhost:3000
-npm test           # Runs all 239 Vitest suites
-npm run build      # Verifies clean Next.js compilation across all 83 routes
+npm run dev        # Starts app on http://localhost:3000
+npm test           # Runs all Vitest test suites
+npm run build      # Verifies clean Next.js compilation
 ```

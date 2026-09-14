@@ -7,7 +7,7 @@ import { describe, it, expect } from "vitest";
 // Documents, and Multi-Tenant Isolation for Salesperson vs Manager roles.
 // ============================================================================
 
-type UserRole = "owner" | "admin" | "boss" | "manager" | "closer" | "salesperson";
+type UserRole = "owner" | "manager" | "salesperson";
 
 interface AuthContext {
   userId: string;
@@ -58,7 +58,7 @@ interface DocumentRecord {
 // Database Security Logic Emulators (Matching 0007_security_hardening.sql)
 // ----------------------------------------------------------------------------
 
-const MANAGER_ROLES = new Set<UserRole>(["owner", "admin", "boss", "manager"]);
+const MANAGER_ROLES = new Set<UserRole>(["owner", "manager"]);
 
 function isManager(role: UserRole): boolean {
   return MANAGER_ROLES.has(role);
@@ -88,7 +88,7 @@ function evaluateLeadUpdate(
   // Lead ownership reassignment guard
   if (patch.salespersonId && patch.salespersonId !== currentLead.salespersonId) {
     if (!isManager(caller.role)) {
-      return { ok: false, error: "42501: LEAD_REASSIGNMENT_FORBIDDEN: Only managers and admins can reassign leads" };
+      return { ok: false, error: "42501: LEAD_REASSIGNMENT_FORBIDDEN: Only owners and managers can reassign leads" };
     }
   }
 
@@ -216,7 +216,7 @@ describe("Phase 1 Security Hardening: Database Authorization & RLS Regression Su
   const rep1: AuthContext = { userId: "usr-sales-rahul", orgId: ORG_A, role: "salesperson" };
   const rep2: AuthContext = { userId: "usr-sales-priya", orgId: ORG_A, role: "salesperson" };
   const manager: AuthContext = { userId: "usr-mgr-vikram", orgId: ORG_A, role: "manager" };
-  const boss: AuthContext = { userId: "usr-boss-alok", orgId: ORG_A, role: "boss" };
+  const owner: AuthContext = { userId: "usr-owner-alok", orgId: ORG_A, role: "owner" };
   const repOrgB: AuthContext = { userId: "usr-rep-b", orgId: ORG_B, role: "salesperson" };
 
   const lead1: LeadRecord = {
@@ -286,18 +286,18 @@ describe("Phase 1 Security Hardening: Database Authorization & RLS Regression Su
       expect(res.error).toContain("RLS_DENIED");
     });
 
-    it("4. Manager / Boss CAN reassign lead to any salesperson", () => {
+    it("4. Manager / Owner CAN reassign lead to any salesperson", () => {
       const managerRes = evaluateLeadUpdate(manager, lead1, {
         salespersonId: rep2.userId,
       });
       expect(managerRes.ok).toBe(true);
       expect(managerRes.lead?.salespersonId).toBe(rep2.userId);
 
-      const bossRes = evaluateLeadUpdate(boss, lead1, {
+      const ownerRes = evaluateLeadUpdate(owner, lead1, {
         salespersonId: rep1.userId,
       });
-      expect(bossRes.ok).toBe(true);
-      expect(bossRes.lead?.salespersonId).toBe(rep1.userId);
+      expect(ownerRes.ok).toBe(true);
+      expect(ownerRes.lead?.salespersonId).toBe(rep1.userId);
     });
 
     it("5. Nobody can alter the org_id of a lead (cross-tenant transfer attack)", () => {

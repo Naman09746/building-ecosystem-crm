@@ -13,6 +13,7 @@ import {
   isLiveSupabaseAvailable,
 } from "@/lib/server/supabase-server";
 import { createNotification } from "@/lib/server/notifications";
+import { mapCanonicalRole } from "@/lib/server/rbac";
 
 const acceptInviteSchema = z.object({
   token: z.string().min(10, "Invalid invitation token"),
@@ -61,13 +62,23 @@ export async function POST(req: NextRequest) {
       return apiError("This invitation has expired", 410, "INVITATION_EXPIRED");
     }
 
-    // 2. Bind authenticated user to organization with assigned role & region
+    const canonicalRole = mapCanonicalRole(invite.role);
+
+    // 2. Capture current membership to support safe phantom-org cleanup.
+    const { data: existingProfile } = await serviceClient
+      .from("profiles")
+      .select("org_id")
+      .eq("user_id", auth.userId)
+      .maybeSingle();
+    const previousOrgId = existingProfile?.org_id || null;
+
+    // 3. Bind authenticated user to organization with assigned role & region
     const { error: profileErr } = await serviceClient
       .from("profiles")
       .upsert({
         user_id: auth.userId,
         org_id: invite.org_id,
-        role: invite.role,
+        role: canonicalRole,
         region_id: invite.region_id || null,
         updated_at: new Date().toISOString(),
       });
@@ -77,7 +88,7 @@ export async function POST(req: NextRequest) {
       return apiError("Failed to update user profile with invitation", 500, "PROFILE_UPDATE_ERROR");
     }
 
-    // 3. Mark invitation as accepted
+    // 4. Mark invitation as accepted
     await serviceClient
       .from("invitations")
       .update({
@@ -86,13 +97,29 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", invite.id);
 
-    // 4. Notify the inviter / org owners
+    // 5. Phantom-org cleanup: delete a previously auto-provisioned org only when
+    // it is now empty and has no domain data.
+    if (previousOrgId && previousOrgId !== invite.org_id) {
+      const [{ count: profileCount }, { count: leadsCount }, { count: peopleCount }, { count: projectsCount }] = await Promise.all([
+        serviceClient.from("profiles").select("user_id", { count: "exact", head: true }).eq("org_id", previousOrgId),
+        serviceClient.from("leads").select("id", { count: "exact", head: true }).eq("org_id", previousOrgId),
+        serviceClient.from("people").select("id", { count: "exact", head: true }).eq("org_id", previousOrgId),
+        serviceClient.from("projects").select("id", { count: "exact", head: true }).eq("org_id", previousOrgId),
+      ]);
+
+      const isPhantom = (profileCount ?? 0) === 0 && (leadsCount ?? 0) === 0 && (peopleCount ?? 0) === 0 && (projectsCount ?? 0) === 0;
+      if (isPhantom) {
+        await serviceClient.from("orgs").delete().eq("id", previousOrgId);
+      }
+    }
+
+    // 6. Notify the inviter / org owners
     if (invite.invited_by) {
       await createNotification({
         orgId: invite.org_id,
         userId: invite.invited_by,
         title: "Invitation Accepted",
-        message: `A new team member (${invite.email}) has joined as ${invite.role}.`,
+        message: `A new team member (${invite.email}) has joined as ${canonicalRole}.`,
         type: "team_invitation",
         priority: "normal",
         entityType: "team",
@@ -105,7 +132,7 @@ export async function POST(req: NextRequest) {
       {
         accepted: true,
         orgId: invite.org_id,
-        role: invite.role,
+        role: canonicalRole,
         regionId: invite.region_id,
       },
       200

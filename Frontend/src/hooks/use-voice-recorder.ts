@@ -3,6 +3,8 @@
 import * as React from "react";
 import { toast } from "sonner";
 
+export type VoiceLanguage = "en-IN" | "hi-IN";
+
 export interface VoiceRecorderState {
   isRecording: boolean;
   isPaused: boolean;
@@ -13,7 +15,11 @@ export interface VoiceRecorderState {
   error: string | null;
 }
 
-export function useVoiceRecorder(onTranscribed?: (transcript: string, structuredData?: any) => void) {
+export function useVoiceRecorder(
+  onTranscribed?: (transcript: string, structuredData?: any) => void,
+  language: VoiceLanguage = "en-IN",
+  saveAudio: boolean = false
+) {
   const [isRecording, setIsRecording] = React.useState(false);
   const [isPaused, setIsPaused] = React.useState(false);
   const [isTranscribing, setIsTranscribing] = React.useState(false);
@@ -28,12 +34,12 @@ export function useVoiceRecorder(onTranscribed?: (transcript: string, structured
   const speechRecognitionRef = React.useRef<any>(null);
   const liveSpeechTextRef = React.useRef<string>("");
   const onTranscribedRef = React.useRef(onTranscribed);
+  const supabaseRef = React.useRef<any>(null);
 
   React.useEffect(() => {
     onTranscribedRef.current = onTranscribed;
   }, [onTranscribed]);
 
-  // Clean up timer on unmount
   React.useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -48,48 +54,53 @@ export function useVoiceRecorder(onTranscribed?: (transcript: string, structured
     };
   }, []);
 
-  const transcribeAudio = React.useCallback(async (blob: Blob, fallbackText?: string) => {
-    setIsTranscribing(true);
-    try {
-      const formData = new FormData();
-      formData.append("audio", blob, "voice_note.webm");
-      if (fallbackText) {
-        formData.append("text", fallbackText);
-      }
-
-      const res = await fetch("/api/audio/transcribe", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const json = await res.json();
-        const text = json.data?.transcript || fallbackText || "";
-        setTranscript(text);
-        if (onTranscribedRef.current) {
-          onTranscribedRef.current(text, json.data);
+  const transcribeAudio = React.useCallback(
+    async (blob: Blob, fallbackText?: string) => {
+      setIsTranscribing(true);
+      try {
+        const formData = new FormData();
+        formData.append("audio", blob, "voice_note.webm");
+        if (fallbackText) {
+          formData.append("text", fallbackText);
         }
-        toast.success("Voice note transcribed successfully!");
-      } else {
+        formData.append("language", language);
+
+        const res = await fetch("/api/audio/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          const text = json.data?.transcript || fallbackText || "";
+          const audioUrl = json.data?.audioUrl;
+          setTranscript(text);
+          if (onTranscribedRef.current) {
+            onTranscribedRef.current(text, { ...json.data, audioUrl });
+          }
+          toast.success("Voice note transcribed successfully!");
+        } else {
+          if (fallbackText) {
+            setTranscript(fallbackText);
+            if (onTranscribedRef.current) onTranscribedRef.current(fallbackText);
+            toast.success("Voice note captured via speech engine");
+          } else {
+            toast.error("Failed to transcribe audio note");
+          }
+        }
+      } catch {
         if (fallbackText) {
           setTranscript(fallbackText);
           if (onTranscribedRef.current) onTranscribedRef.current(fallbackText);
-          toast.success("Voice note captured via speech engine");
         } else {
-          toast.error("Failed to transcribe audio note");
+          toast.error("Network error during audio transcription");
         }
+      } finally {
+        setIsTranscribing(false);
       }
-    } catch {
-      if (fallbackText) {
-        setTranscript(fallbackText);
-        if (onTranscribedRef.current) onTranscribedRef.current(fallbackText);
-      } else {
-        toast.error("Network error during audio transcription");
-      }
-    } finally {
-      setIsTranscribing(false);
-    }
-  }, []);
+    },
+    [language],
+  );
 
   const startRecording = React.useCallback(async () => {
     setError(null);
@@ -118,7 +129,6 @@ export function useVoiceRecorder(onTranscribed?: (transcript: string, structured
       };
 
       recorder.onstop = async () => {
-        // Stop all audio tracks to release microphone
         stream.getTracks().forEach((track) => track.stop());
 
         const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
@@ -126,15 +136,16 @@ export function useVoiceRecorder(onTranscribed?: (transcript: string, structured
         await transcribeAudio(blob, liveSpeechTextRef.current);
       };
 
-      // Also attach Web Speech API for instant real-time live preview if available in Chrome/Safari
+      // Web Speech API with explicit language — no auto-detect
       if (typeof window !== "undefined") {
-        const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const SpeechRec =
+          (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (SpeechRec) {
           try {
             const recognition = new SpeechRec();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = "en-IN"; // English (India) / Hinglish friendly
+            recognition.lang = language;
             recognition.onresult = (event: any) => {
               let currentText = "";
               for (let i = 0; i < event.results.length; i++) {
@@ -143,28 +154,39 @@ export function useVoiceRecorder(onTranscribed?: (transcript: string, structured
               liveSpeechTextRef.current = currentText.trim();
               setTranscript(currentText.trim());
             };
+            recognition.onerror = (event: any) => {
+              if (event.error === "not-allowed") {
+                toast.info("Microphone permission needed for live transcription");
+              }
+            };
             recognition.start();
             speechRecognitionRef.current = recognition;
-          } catch {}
+          } catch {
+            toast.info("Live transcription unavailable — audio will be transcribed after recording.");
+          }
+        } else {
+          toast.info("Live transcription unavailable — audio will be transcribed after recording.");
         }
       }
 
-      recorder.start(500); // 500ms chunks
+      recorder.start(500);
       setIsRecording(true);
       setIsPaused(false);
       setRecordingDuration(0);
 
-      // Start Duration Timer
       timerRef.current = setInterval(() => {
         setRecordingDuration((prev) => prev + 1);
       }, 1000);
     } catch (err: any) {
       console.error("[VOICE_RECORDER_ERROR]", err);
-      const msg = err.name === "NotAllowedError" ? "Microphone permission denied" : err.message || "Could not access microphone";
+      const msg =
+        err.name === "NotAllowedError"
+          ? "Microphone permission denied"
+          : err.message || "Could not access microphone";
       setError(msg);
       toast.error(msg);
     }
-  }, [transcribeAudio]);
+  }, [transcribeAudio, language]);
 
   const stopRecording = React.useCallback(() => {
     if (timerRef.current) {

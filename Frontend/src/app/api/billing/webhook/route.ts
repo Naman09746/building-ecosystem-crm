@@ -10,6 +10,7 @@ import {
 } from "@/lib/server/subscription";
 import { createNotification } from "@/lib/server/notifications";
 import { getServiceRoleClient, isLiveSupabaseAvailable } from "@/lib/server/supabase-server";
+import { MANAGER_ROLES } from "@/lib/server/rbac";
 
 const BILLING_WEBHOOK_SECRET =
   process.env.BILLING_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || "";
@@ -141,7 +142,7 @@ export async function POST(req: NextRequest) {
           });
 
           // Emit In-App Billing Notification to Owners
-          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", ["owner", "admin", "boss", "manager"]);
+          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", [...MANAGER_ROLES]);
           for (const o of owners || []) {
             await createNotification({
               orgId,
@@ -198,7 +199,7 @@ export async function POST(req: NextRequest) {
             receipt_url: obj.hosted_invoice_url,
           });
 
-          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", ["owner", "admin", "boss", "manager"]);
+          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", [...MANAGER_ROLES]);
           for (const o of owners || []) {
             await createNotification({
               orgId,
@@ -226,7 +227,7 @@ export async function POST(req: NextRequest) {
             gracePeriodUntil: graceEnd,
           });
 
-          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", ["owner", "admin", "boss", "manager"]);
+          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", [...MANAGER_ROLES]);
           for (const o of owners || []) {
             await createNotification({
               orgId,
@@ -253,7 +254,7 @@ export async function POST(req: NextRequest) {
             cancellationReason: "Canceled by provider",
           });
 
-          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", ["owner", "admin", "boss", "manager"]);
+          const { data: owners } = await supabase.from("profiles").select("user_id").eq("org_id", orgId).in("role", [...MANAGER_ROLES]);
           for (const o of owners || []) {
             await createNotification({
               orgId,

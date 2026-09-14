@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { formatCurrencyINR } from "@/lib/utils";
 import { PlanId, BillingCycle, BillingOverviewData, BillingInvoice, BillingRefund } from "@/types/billing";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
 
 interface PlanItem {
   id: PlanId;
@@ -116,7 +117,7 @@ const PLANS_DATA: PlanItem[] = [
 
 export function BillingPage() {
   const { currentUser } = useCRM();
-  const isManager = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isManager = isManagerRole(currentUser.role);
 
   const [billingData, setBillingData] = React.useState<BillingOverviewData | null>(null);
   const [invoices, setInvoices] = React.useState<BillingInvoice[]>([]);

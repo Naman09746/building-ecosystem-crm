@@ -1,4 +1,6 @@
-export type UserRole = "owner" | "admin" | "boss" | "manager" | "salesperson" | "closer";
+import type { EcosystemVertical, ComplexityMode } from "./ecosystem";
+
+export type UserRole = "owner" | "manager" | "salesperson";
 
 export interface Organization {
   id: string;
@@ -6,6 +8,9 @@ export interface Organization {
   slug: string;
   plan?: "starter" | "growth" | "enterprise";
   reactivationDays?: number;
+  industry?: EcosystemVertical;
+  complexityMode?: ComplexityMode;
+  verticalSettings?: Record<string, unknown>;
 }
 
 export interface Region {
@@ -119,6 +124,8 @@ export type SellerIntent =
   | "willing_to_sell_at_price"
   | "not_selling"
   | "distress_sale"
+  | "urgent_liquidation"
+  | "evaluating_market"
   | "unknown";
 
 export type ListingStatus =

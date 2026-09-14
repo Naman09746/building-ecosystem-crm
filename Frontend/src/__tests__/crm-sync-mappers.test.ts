@@ -103,7 +103,7 @@ describe("Activity mappers", () => {
 
   it("activityToRow serializes the client shape for insert", () => {
     const row = activityToRow({
-      leadId: "l1", userId: "u1", userName: "Rep", personName: "Buyer",
+      orgId: "o1", leadId: "l1", userId: "u1", userName: "Rep", personName: "Buyer",
       type: "call", outcomeLabel: "Connected", notes: "hello",
     });
     expect(row).toMatchObject({
@@ -123,12 +123,12 @@ describe("Activity mappers", () => {
     }));
     const { insertActivityRemote } = await import("../lib/persistence/crm-sync");
     const ok = await insertActivityRemote(
-      { orgId: "org-123", leadId: "l1", userId: "u1", userName: "Rep",
-        personName: "Buyer", type: "call" },
-      undefined
+      { orgId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d", leadId: "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+        userId: "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f", userName: "Rep",
+        personName: "Buyer", type: "call" }
     );
     expect(ok).toBe(true);
-    expect(captured[0].org_id).toBe("org-123");
+    expect(captured[0].org_id).toBe("a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
     vi.doUnmock("../lib/supabase");
     vi.resetModules();
   });
@@ -137,8 +137,8 @@ describe("Activity mappers", () => {
     vi.resetModules();
     const { insertActivityRemote } = await import("../lib/persistence/crm-sync");
     const ok = await insertActivityRemote(
-      { leadId: "l1", userId: "u1", userName: "Rep", personName: "Buyer", type: "call" },
-      ""
+      { orgId: "", leadId: "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+        userId: "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f", userName: "Rep", personName: "Buyer", type: "call" }
     );
     expect(ok).toBe(false);
   });

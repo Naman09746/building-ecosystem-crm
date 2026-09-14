@@ -28,6 +28,7 @@ import { BillingPage } from "@/components/crm/pages/billing-page";
 import { AiAgentCommandCenter } from "@/components/crm/ai-agent-command-center";
 import { AiLeadBot } from "@/components/crm/ai-lead-bot";
 import { useIsMobile } from "@/hooks/use-device";
+import { isManagerRole } from "@/lib/rbac";
 
 export function AppShell({ initialTab }: { initialTab?: string }) {
   const router = useRouter();
@@ -35,15 +36,18 @@ export function AppShell({ initialTab }: { initialTab?: string }) {
   const { user, workflowStep, isLoading: authLoading } = useAuth();
   const isMobile = useIsMobile();
 
-  // Tier 1: Boss, Admin, Owner, Manager (Executive & Oversight View)
-  // Tier 2: Salesperson, Closer (Field Sales Cockpit)
-  const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  // Tier 1: Owner, Manager (Executive & Oversight View)
+  // Tier 2: Salesperson (Field Sales Cockpit)
+  const isExecutive = isManagerRole(currentUser.role);
 
   // Auth gating — every CRM route shares this contract.
   React.useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.replace("/login");
+      const isDemoSession = document.cookie.includes("callcrm_demo_session=1");
+      if (!isDemoSession) {
+        router.replace("/login");
+      }
     }
   }, [user, authLoading, router]);
 

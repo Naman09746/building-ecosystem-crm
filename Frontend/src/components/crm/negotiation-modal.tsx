@@ -25,7 +25,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 import type { Lead, ProjectUnit, NegotiationRound } from "@/types/crm";
+import { VoiceNoteRecorder } from "@/components/crm/voice-note-recorder";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
 
 interface NegotiationModalProps {
   open: boolean;
@@ -45,7 +47,7 @@ export function NegotiationModal({
   const activeLead = lead || leads[0];
   const activeUnit = unit || units[0];
 
-  const isManager = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isManager = isManagerRole(currentUser.role);
 
   // Mock negotiation history for immediate responsive demonstration
   const [bids, setBids] = React.useState<NegotiationRound[]>([
@@ -95,6 +97,7 @@ export function NegotiationModal({
   const [paymentPlan, setPaymentPlan] = React.useState<"clp" | "down_payment" | "subvention">("clp");
   const [closingDays, setClosingDays] = React.useState<string>("45");
   const [conditionsText, setConditionsText] = React.useState<string>("");
+  const [negotiationVoiceNotes, setNegotiationVoiceNotes] = React.useState<string[]>([]);
 
   const askPrice = activeUnit?.askingPrice || activeUnit?.price || 150000000;
   // Confidential seller floor (e.g. 94% of ask) - protected for managers
@@ -336,7 +339,15 @@ export function NegotiationModal({
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-300">Special Terms & Inclusions (Comma-separated)</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-slate-300">Special Terms & Inclusions (Comma-separated)</Label>
+              <VoiceNoteRecorder
+                buttonLabel="Dictate"
+                onTranscribed={(text) => {
+                  setConditionsText((prev) => (prev ? `${prev} ${text}` : text));
+                }}
+              />
+            </div>
             <Input
               value={conditionsText}
               onChange={(e) => setConditionsText(e.target.value)}

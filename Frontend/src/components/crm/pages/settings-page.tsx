@@ -18,10 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
 
 export function SettingsPage() {
   const { currentUser } = useCRM();
-  const isManager = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isManager = isManagerRole(currentUser.role);
 
   const [orgName, setOrgName] = React.useState("");
   const [orgSlug, setOrgSlug] = React.useState("");

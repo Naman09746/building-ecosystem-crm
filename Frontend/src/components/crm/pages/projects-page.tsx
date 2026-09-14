@@ -33,10 +33,17 @@ import { UnitDetailModal } from "@/components/crm/unit-detail-modal";
 import { CostSheetModal } from "@/components/crm/cost-sheet-modal";
 import { StackingChart } from "@/components/crm/stacking-chart";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
+import { MaterialsCatalogView } from "@/components/verticals/materials/materials-catalog-view";
+import { InteriorStagingView } from "@/components/verticals/interior/interior-staging-view";
+import { ContractorSiteView } from "@/components/verticals/contracting/contractor-site-view";
+import { EcosystemVertical } from "@/types/ecosystem";
 
 export function ProjectsPage() {
   const {
     currentUser,
+    vertical,
+    verticalProfile,
     projects,
     units,
     regions,
@@ -50,12 +57,19 @@ export function ProjectsPage() {
     deleteUnit,
   } = useCRM();
 
-  const isManager = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isManager = isManagerRole(currentUser.role);
 
   const [selectedProjectId, setSelectedProjectId] = React.useState<string>(projects[0]?.id || "");
   const [selectedTower, setSelectedTower] = React.useState<string>("all");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [inventoryViewMode, setInventoryViewMode] = React.useState<"stacking" | "grid">("stacking");
+  const [activeVerticalTab, setActiveVerticalTab] = React.useState<EcosystemVertical>(vertical || "real_estate");
+
+  React.useEffect(() => {
+    if (vertical) {
+      setActiveVerticalTab(vertical);
+    }
+  }, [vertical]);
 
   // Dialog State
   const [isAddProjectOpen, setIsAddProjectOpen] = React.useState(false);
@@ -354,8 +368,68 @@ export function ProjectsPage() {
         )}
       </div>
 
-      {/* Project Selector Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+      {/* Ecosystem Vertical Selector Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-border text-xs">
+        <button
+          type="button"
+          onClick={() => setActiveVerticalTab("real_estate")}
+          className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
+            activeVerticalTab === "real_estate"
+              ? "bg-primary text-primary-foreground font-semibold"
+              : "bg-secondary/60 hover:bg-secondary text-muted-foreground"
+          }`}
+        >
+          <Building2 className="w-3.5 h-3.5" />
+          <span>Properties & Units</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveVerticalTab("building_materials")}
+          className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
+            activeVerticalTab === "building_materials"
+              ? "bg-emerald-600 text-white font-semibold"
+              : "bg-secondary/60 hover:bg-secondary text-muted-foreground"
+          }`}
+        >
+          <span>📦 Materials (Bricks, Cement, Marble, Tiles)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveVerticalTab("interior_furniture")}
+          className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
+            activeVerticalTab === "interior_furniture"
+              ? "bg-violet-600 text-white font-semibold"
+              : "bg-secondary/60 hover:bg-secondary text-muted-foreground"
+          }`}
+        >
+          <span>🎨 Interior Staging & BOQs</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveVerticalTab("contractor_builder")}
+          className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 ${
+            activeVerticalTab === "contractor_builder"
+              ? "bg-orange-600 text-white font-semibold"
+              : "bg-secondary/60 hover:bg-secondary text-muted-foreground"
+          }`}
+        >
+          <span>👷 Site Milestones & DSR</span>
+        </button>
+      </div>
+
+      {activeVerticalTab === "building_materials" ? (
+        <MaterialsCatalogView />
+      ) : activeVerticalTab === "interior_furniture" ? (
+        <InteriorStagingView />
+      ) : activeVerticalTab === "contractor_builder" ? (
+        <ContractorSiteView />
+      ) : (
+        <>
+          {/* Project Selector Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {projects.map((proj) => {
           const isSelected = proj.id === currentProject?.id;
           const pUnits = units.filter((u) => u.projectId === proj.id);
@@ -1085,6 +1159,8 @@ export function ProjectsPage() {
             </CardContent>
           </Card>
         </div>
+      )}
+        </>
       )}
 
       {/* Flat 360° Dossier Dialog */}

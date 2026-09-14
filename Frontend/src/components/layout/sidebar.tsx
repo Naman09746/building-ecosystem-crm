@@ -22,10 +22,15 @@ import {
   PanelLeftOpen,
   ChevronDown,
   Check,
+  Boxes,
+  Palette,
+  Compass,
+  HardHat,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { isManagerRole, roleLabel } from "@/lib/rbac";
 
 interface SidebarProps {
   className?: string;
@@ -43,21 +48,61 @@ export function Sidebar({
   onToggleCollapse,
 }: SidebarProps) {
   const pathname = usePathname();
-  const { currentUser, users, switchActiveUser } = useCRM();
+  const { currentUser, users, switchActiveUser, vertical, complexityMode, verticalProfile, getTerm } = useCRM();
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
 
-  // Role-Aware Navigation (Consolidated Tier 1: Boss/Admin/Owner/Manager vs Tier 2: Salesperson/Closer)
-  const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  // Role-Aware Navigation (Consolidated Tier 1: Owner/Manager vs Tier 2: Salesperson)
+  const isExecutive = isManagerRole(currentUser.role);
+
+  const inventoryIcon =
+    vertical === "building_materials"
+      ? Boxes
+      : vertical === "interior_furniture"
+      ? Palette
+      : vertical === "architecture_design"
+      ? Compass
+      : vertical === "contractor_builder"
+      ? HardHat
+      : Building2;
 
   const salesWorkspaceItems = [
-    { id: "overview", label: isExecutive ? "Executive Overview" : "Today's Priorities", href: "/", icon: isExecutive ? LayoutDashboard : Home },
-    { id: "leads", label: isExecutive ? "All Leads" : "My Leads", href: "/leads", icon: Users },
-    { id: "pipeline", label: "Deal Pipeline", href: "/pipeline", icon: Kanban },
-    { id: "tasks", label: "Follow-up Queue", href: "/tasks", icon: ListTodo },
+    { 
+      id: "overview", 
+      label: isExecutive 
+        ? verticalProfile?.primaryNav[0]?.label || "Executive Overview" 
+        : "Today's Priorities", 
+      href: "/", 
+      icon: isExecutive ? LayoutDashboard : Home 
+    },
+    { 
+      id: "leads", 
+      label: isExecutive 
+        ? verticalProfile?.terms.leadLabel + "s" || "All Leads" 
+        : "My Leads", 
+      href: "/leads", 
+      icon: Users 
+    },
+    { 
+      id: "pipeline", 
+      label: (verticalProfile?.terms.dealLabel ? `${verticalProfile.terms.dealLabel} Pipeline` : "Deal Pipeline"), 
+      href: "/pipeline", 
+      icon: Kanban 
+    },
+    { 
+      id: "tasks", 
+      label: verticalProfile?.primaryNav[3]?.label || "Follow-up Queue", 
+      href: "/tasks", 
+      icon: ListTodo 
+    },
   ];
 
   const propertyIntelItems = [
-    { id: "projects", label: "Projects & Inventory", href: "/projects", icon: Building2 },
+    { 
+      id: "projects", 
+      label: verticalProfile?.inventoryNav.label || "Projects & Inventory", 
+      href: "/projects", 
+      icon: inventoryIcon 
+    },
     { id: "people", label: "People Directory", href: "/people", icon: Contact },
     { id: "activities", label: "Touchpoint Activity", href: "/activities", icon: Activity },
   ];
@@ -65,7 +110,7 @@ export function Sidebar({
   const adminNavItems = [
     { id: "reports", label: "Executive Reports", href: "/reports", icon: ChartNoAxesCombined },
     { id: "users", label: "Team Users", href: "/users", icon: Users },
-    { id: "regions", label: "Regional Desks", href: "/regions", icon: MapPin },
+    ...(complexityMode === "simple" ? [] : [{ id: "regions", label: "Regional Desks", href: "/regions", icon: MapPin }]),
     { id: "billing", label: "Billing & Plans", href: "/billing", icon: CreditCard },
     { id: "settings", label: "Settings", href: "/settings", icon: Settings },
   ];
@@ -98,11 +143,18 @@ export function Sidebar({
                   <span className="font-semibold text-xs text-foreground tracking-tight block truncate">
                     CallCRM
                   </span>
-                  <span className="text-[10px] text-muted-foreground truncate">Apex Realty</span>
+                  <span className="text-[10px] text-muted-foreground truncate block">
+                    {verticalProfile?.badge || "Building Ecosystem"}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-1">
+                {complexityMode === "simple" && (
+                  <Badge variant="outline" className="text-[8px] px-1 py-0 border-emerald-500/40 text-emerald-500 font-mono">
+                    Lite
+                  </Badge>
+                )}
                 <Badge variant={isExecutive ? "default" : "secondary"} className="text-[9px] px-1.5 py-0 capitalize">
                   {currentUser.role}
                 </Badge>
@@ -202,7 +254,7 @@ export function Sidebar({
             })}
           </div>
 
-          {/* TIER 3: MANAGEMENT & ADMIN (Boss / Owner / Admin / Manager) */}
+          {/* Management section */}
           {isExecutive && (
             <div className="space-y-1">
               {!collapsed && (
@@ -275,8 +327,8 @@ export function Sidebar({
                   </div>
                   <div className="text-[10px] text-muted-foreground capitalize truncate leading-tight">
                     {currentUser.role === "salesperson"
-                      ? `Sales Rep • ${currentUser.regionName || "NCR"}`
-                      : "Boss / Executive"}
+                      ? `Salesperson • ${currentUser.regionName || "NCR"}`
+                      : "Owner / Manager"}
                   </div>
                 </div>
               </div>
@@ -298,7 +350,7 @@ export function Sidebar({
                 <div className="max-h-52 overflow-y-auto space-y-0.5 px-1">
                   {users.map((u) => {
                     const isSelected = currentUser.id === u.id;
-                    const isUserExec = ["owner", "admin", "boss", "manager"].includes(u.role);
+                    const isUserExec = isManagerRole(u.role);
 
                     return (
                       <button
@@ -327,7 +379,7 @@ export function Sidebar({
                             <div className="text-[10px] text-muted-foreground capitalize">
                               {u.role === "salesperson"
                                 ? `Salesperson (${u.regionName || "Hub"})`
-                                : "Executive Boss"}
+                                : `${roleLabel(u.role)} (${u.regionName || "All Regions"})`}
                             </div>
                           </div>
                         </div>

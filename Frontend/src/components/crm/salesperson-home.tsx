@@ -6,24 +6,14 @@ import {
   MessageSquare,
   Plus,
   CheckCircle2,
-  Calendar,
-  Clock,
   Building2,
-  AlertCircle,
-  TrendingUp,
-  Target,
   Zap,
   Flame,
   User,
-  ArrowRight,
-  ShieldAlert,
   Compass,
   FileSpreadsheet,
   Check,
   Sparkles,
-  ChevronRight,
-  AlertTriangle,
-  Key,
   ShieldCheck,
   FileText,
   Workflow,
@@ -35,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PipelineBadge, TaskStatusBadge, DealHealthBadge, LeadScoreBadge } from "@/components/ui/status-badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
-import { Lead, Task, SiteVisitBriefing, ProjectUnit } from "@/types/crm";
+import { Lead, Task } from "@/types/crm";
 import { SellerOpportunitiesModal } from "@/components/crm/seller-opportunities-modal";
 import { MeetingSummaryModal } from "@/components/crm/meeting-summary-modal";
 import { NegotiationModal } from "@/components/crm/negotiation-modal";
@@ -62,8 +52,6 @@ export function SalespersonHome({
     completeTask,
     activities,
     sellerOpportunities,
-    siteVisitBriefings,
-    getSiteVisitBriefing,
   } = useCRM();
 
   const [activeTab, setActiveTab] = React.useState<"queue" | "buyers" | "tools">("queue");
@@ -76,35 +64,23 @@ export function SalespersonHome({
   const [isCommissionOpen, setIsCommissionOpen] = React.useState(false);
   const [isN8nDrawerOpen, setIsN8nDrawerOpen] = React.useState(false);
   const [selectedActionLead, setSelectedActionLead] = React.useState<Lead | null>(null);
-  const [selectedActionUnit, setSelectedActionUnit] = React.useState<ProjectUnit | null>(null);
-  const [activeBriefing, setActiveBriefing] = React.useState<SiteVisitBriefing | null>(null);
 
   // Active tasks
   const overdueTasks = filteredTasks.filter((t) => t.status === "overdue");
   const dueTodayTasks = filteredTasks.filter((t) => t.status === "due_today");
-  const upcomingTasks = filteredTasks.filter((t) => t.status === "upcoming");
   const completedTasks = filteredTasks.filter((t) => t.status === "completed");
 
   const siteVisitLeads = filteredLeads.filter((l) => l.stage === "site_visit");
-  const hotLeads = filteredLeads.filter((l) => (l.leadScore || 0) >= 75 && l.stage !== "won" && l.stage !== "lost");
+  const activeLeads = React.useMemo(() => filteredLeads.filter((l) => l.stage !== "won" && l.stage !== "lost"), [filteredLeads]);
+  const hotLeads = activeLeads.filter((l) => (l.leadScore || 0) >= 75);
   const hotPipelineValue = hotLeads.reduce((acc, l) => acc + l.budget, 0);
 
   const todayCallsCount = activities.filter((a) => a.userId === currentUser.id && a.type === "call").length;
   const callsTarget = 10;
 
-  // Handler for 30-min pre-site visit briefing
-  const handleOpenBriefing = async (lead: Lead) => {
-    const unitId = lead.unitId || lead.assignedUnitId || "unit-camellias-a1402";
-    const briefing = await getSiteVisitBriefing(lead.id, unitId);
-    if (briefing) {
-      setActiveBriefing(briefing);
-    }
-  };
-
   // Prioritized Next Actions
   const prioritizedNextActions = React.useMemo(() => {
-    return [...filteredLeads]
-      .filter((l) => l.stage !== "won" && l.stage !== "lost")
+    return [...activeLeads]
       .sort((a, b) => {
         let scoreA = 0;
         let scoreB = 0;
@@ -116,13 +92,58 @@ export function SalespersonHome({
         if (b.dealHealth === "at_risk") scoreB += 300;
         return scoreB - scoreA;
       });
-  }, [filteredLeads]);
+  }, [activeLeads]);
 
   const filteredBuyerList = filteredLeads.filter((l) =>
     searchQuery === "" ||
     l.personName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     l.projectName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const toolCards = [
+    {
+      icon: Compass,
+      color: "emerald",
+      title: "Gate 2 Pass & Dispatch",
+      desc: "Generate instant digital security gate passes and 30-min buyer dossier for site visits.",
+      onClick: () => { setSelectedActionLead(filteredLeads[0] || null); setIsDispatchOpen(true); },
+    },
+    {
+      icon: ShieldCheck,
+      color: "purple",
+      title: "Negotiation & Counter-Offers",
+      desc: "Multi-party bidding tracker, developer discount ceilings, and real-time payment schedule planner.",
+      onClick: () => { setSelectedActionLead(filteredLeads[0] || null); setIsNegotiationOpen(true); },
+    },
+    {
+      icon: FileSpreadsheet,
+      color: "amber",
+      title: "Commission & Payout Ledger",
+      desc: "Calculate developer slab payouts, CP splits, and GST TDS deductions on closed deals.",
+      onClick: () => { setSelectedActionLead(filteredLeads[0] || null); setIsCommissionOpen(true); },
+    },
+    {
+      icon: FileText,
+      color: "primary",
+      title: "AI Meeting Notes Structurer",
+      desc: "Convert voice notes and rough call audio into clean structured action items and stage updates.",
+      onClick: () => setIsMeetingModalOpen(true),
+    },
+    {
+      icon: Sparkles,
+      color: "amber",
+      title: `Seller Match Radar (${sellerOpportunities.length})`,
+      desc: "Proactive seller triggers: expiring leases, high ROI investors, and off-market listings.",
+      onClick: () => setIsSellerModalOpen(true),
+    },
+    {
+      icon: Workflow,
+      color: "blue",
+      title: "n8n Event Bus & Webhooks",
+      desc: "Inspect 9 real estate webhooks: 99acres, MagicBricks, Meta Lead Ads, and WhatsApp Cloud.",
+      onClick: () => setIsN8nDrawerOpen(true),
+    },
+  ];
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12 px-1 sm:px-2">
@@ -445,110 +466,38 @@ export function SalespersonHome({
       {/* TAB 3: TOOLS & CLOSING ROOM */}
       {activeTab === "tools" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Tool 1: Site Visit Pass */}
-          <Card
-            onClick={() => {
-              setSelectedActionLead(filteredLeads[0] || null);
-              setIsDispatchOpen(true);
-            }}
-            className="p-5 border-border hover:border-emerald-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
-          >
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-              <Compass className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Gate 2 Pass & Dispatch</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Generate instant digital security gate passes and 30-min buyer dossier for site visits.
-              </p>
-            </div>
-          </Card>
-
-          {/* Tool 2: Negotiation Room */}
-          <Card
-            onClick={() => {
-              setSelectedActionLead(filteredLeads[0] || null);
-              setIsNegotiationOpen(true);
-            }}
-            className="p-5 border-border hover:border-purple-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
-          >
-            <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Negotiation & Counter-Offers</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Multi-party bidding tracker, developer discount ceilings, and real-time payment schedule planner.
-              </p>
-            </div>
-          </Card>
-
-          {/* Tool 3: Commission Ledger */}
-          <Card
-            onClick={() => {
-              setSelectedActionLead(filteredLeads[0] || null);
-              setIsCommissionOpen(true);
-            }}
-            className="p-5 border-border hover:border-amber-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
-          >
-            <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <FileSpreadsheet className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Commission & Payout Ledger</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Calculate developer slab payouts, CP splits, and GST TDS deductions on closed deals.
-              </p>
-            </div>
-          </Card>
-
-          {/* Tool 4: AI Meeting Structurer */}
-          <Card
-            onClick={() => setIsMeetingModalOpen(true)}
-            className="p-5 border-border hover:border-primary/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
-          >
-            <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <FileText className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">AI Meeting Notes Structurer</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Convert voice notes and rough call audio into clean structured action items and stage updates.
-              </p>
-            </div>
-          </Card>
-
-          {/* Tool 5: Seller Signals */}
-          <Card
-            onClick={() => setIsSellerModalOpen(true)}
-            className="p-5 border-border hover:border-amber-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
-          >
-            <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Seller Match Radar ({sellerOpportunities.length})</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Proactive seller triggers: expiring leases, high ROI investors, and off-market listings.
-              </p>
-            </div>
-          </Card>
-
-          {/* Tool 6: n8n Automations */}
-          <Card
-            onClick={() => setIsN8nDrawerOpen(true)}
-            className="p-5 border-border hover:border-blue-500/50 cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all"
-          >
-            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
-              <Workflow className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground">n8n Event Bus & Webhooks</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Inspect 9 real estate webhooks: 99acres, MagicBricks, Meta Lead Ads, and WhatsApp Cloud.
-              </p>
-            </div>
-          </Card>
+          {toolCards.map((tool) => {
+            const Icon = tool.icon;
+            const colorMap: Record<string, string> = {
+              emerald: "bg-emerald-500/10 text-emerald-600",
+              purple: "bg-purple-500/10 text-purple-600",
+              amber: "bg-amber-500/10 text-amber-600",
+              primary: "bg-primary/10 text-primary",
+              blue: "bg-blue-500/10 text-blue-600",
+            };
+            const hoverMap: Record<string, string> = {
+              emerald: "hover:border-emerald-500/50",
+              purple: "hover:border-purple-500/50",
+              amber: "hover:border-amber-500/50",
+              primary: "hover:border-primary/50",
+              blue: "hover:border-blue-500/50",
+            };
+            return (
+              <Card
+                key={tool.title}
+                onClick={tool.onClick}
+                className={`p-5 border-border ${hoverMap[tool.color]} cursor-pointer space-y-3 shadow-subtle hover:shadow-card transition-all`}
+              >
+                <div className={`h-9 w-9 rounded-xl ${colorMap[tool.color]} flex items-center justify-center`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">{tool.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{tool.desc}</p>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -568,14 +517,14 @@ export function SalespersonHome({
         open={isNegotiationOpen}
         onOpenChange={setIsNegotiationOpen}
         lead={selectedActionLead}
-        unit={selectedActionUnit}
+        unit={null}
       />
 
       <SiteVisitDispatchModal
         open={isDispatchOpen}
         onOpenChange={setIsDispatchOpen}
         lead={selectedActionLead}
-        unit={selectedActionUnit}
+        unit={null}
       />
 
       <CommissionModal

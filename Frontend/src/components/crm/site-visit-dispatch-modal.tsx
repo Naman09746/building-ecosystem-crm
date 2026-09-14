@@ -24,7 +24,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrencyINR, formatPhone } from "@/lib/utils";
 import type { Lead, ProjectUnit, SiteVisitDispatch } from "@/types/crm";
+import { VoiceNoteRecorder } from "@/components/crm/voice-note-recorder";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
 
 interface SiteVisitDispatchModalProps {
   open: boolean;
@@ -60,6 +62,7 @@ export function SiteVisitDispatchModal({
   // Post-visit debrief state
   const [debriefSentiment, setDebriefSentiment] = React.useState<string>("interested_needs_family");
   const [debriefNotes, setDebriefNotes] = React.useState<string>("");
+  const [debriefVoiceNotes, setDebriefVoiceNotes] = React.useState<string[]>([]);
 
   const handleCopyPass = () => {
     const text = `CallCRM Site Visit Gate Pass\nProject: ${activeProject?.name}\nUnit: ${activeUnit?.tower} • ${activeUnit?.unitNumber}\nGate: ${gateName}\nVisitor PIN: ${gatePin}\nParking: ${parkingBay}\nCaretaker Phone: ${caretakerPhone}`;
@@ -245,7 +248,15 @@ export function SiteVisitDispatchModal({
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-slate-400">Debrief Notes & Buyer Objections</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-slate-400">Debrief Notes & Buyer Objections</label>
+              <VoiceNoteRecorder
+                buttonLabel="Dictate"
+                onTranscribed={(text) => {
+                  setDebriefNotes((prev) => (prev ? `${prev} ${text}` : text));
+                }}
+              />
+            </div>
             <textarea
               rows={2}
               value={debriefNotes}

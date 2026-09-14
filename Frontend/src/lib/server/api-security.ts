@@ -10,7 +10,7 @@ import { reportError } from "@/lib/observability/reporter";
 export interface ApiAuthContext {
   userId: string;
   orgId: string;
-  role: "admin" | "manager" | "salesperson" | "agent";
+  role: "owner" | "manager" | "salesperson";
   email: string;
 }
 

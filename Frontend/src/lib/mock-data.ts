@@ -101,7 +101,7 @@ export const INITIAL_USERS: User[] = [
     name: "Vikram Malhotra",
     email: "vikram@apexrealty.in",
     phone: "+91 98111 00001",
-    role: "boss",
+    role: "owner",
     followUpCompletionRate: 98,
     avgResponseTimeHours: 0.5,
   },

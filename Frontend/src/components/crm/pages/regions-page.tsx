@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Region } from "@/types/crm";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
 
 export function RegionsPage() {
   const {
@@ -21,7 +22,7 @@ export function RegionsPage() {
     deleteRegion,
   } = useCRM();
 
-  const isManager = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isManager = isManagerRole(currentUser.role);
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [editingRegion, setEditingRegion] = React.useState<Region | null>(null);

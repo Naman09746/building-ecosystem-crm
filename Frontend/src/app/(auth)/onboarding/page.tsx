@@ -1,7 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { AuthCard } from "@/components/ui/auth-card";
 import { 
@@ -19,35 +20,83 @@ import {
   Building2,
   PhoneCall
 } from "lucide-react";
+import { getPipelineStages } from "@/config/pipeline-presets";
 
 type OnboardingStep = "leads" | "team" | "pipeline";
 
-const DEFAULT_STAGES = [
-  { id: "new", name: "New Inbound", desc: "Fresh verified buyer inquiries" },
-  { id: "contacted", name: "Contacted", desc: "First 10s outreach completed" },
-  { id: "qualified", name: "Qualified", desc: "Budget & configuration verified" },
-  { id: "site_visit", name: "Site Visit Scheduled", desc: "Physical or virtual site visit booked" },
-  { id: "negotiation", name: "Unit Negotiation", desc: "Unit shortlisted, pricing discussion" },
-  { id: "won", name: "Booking Won", desc: "Token advance received, deal closed" },
-];
-
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { org, completeOnboardingStep, skipOnboarding, onboardingData } = useAuth();
+  const inviteToken = searchParams.get("invite");
 
+  const [acceptingInvite, setAcceptingInvite] = React.useState(false);
+  const [inviteError, setInviteError] = React.useState<string | null>(null);
   const [currentStep, setCurrentStep] = React.useState<OnboardingStep>("leads");
-
-  // Step 1: Leads
   const [csvUploaded, setCsvUploaded] = React.useState(false);
   const [sampleLeadsAdded, setSampleLeadsAdded] = React.useState(false);
-
-  // Step 2: Team Invites
   const [teamMembers, setTeamMembers] = React.useState<Array<{ email: string; role: string }>>([
     { email: "", role: "salesperson" },
   ]);
+  const [stages, setStages] = React.useState(() =>
+    getPipelineStages(org?.industry || "real_estate", org?.complexityMode || "deep")
+  );
 
-  // Step 3: Pipeline Stages
-  const [stages, setStages] = React.useState(DEFAULT_STAGES);
+  React.useEffect(() => {
+    if (org?.industry || org?.complexityMode) {
+      setStages(getPipelineStages(org?.industry || "real_estate", org?.complexityMode || "deep"));
+    }
+  }, [org?.industry, org?.complexityMode]);
+
+  React.useEffect(() => {
+    if (!inviteToken) return;
+    let cancelled = false;
+
+    async function acceptInvite() {
+      setAcceptingInvite(true);
+      setInviteError(null);
+      try {
+        const res = await fetch("/api/team/invitations/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: inviteToken }),
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          if (!cancelled) setInviteError(json.error?.message || "Failed to accept invitation.");
+          return;
+        }
+        if (!cancelled) {
+          router.replace("/dashboard");
+        }
+      } catch {
+        if (!cancelled) setInviteError("Failed to accept invitation.");
+      } finally {
+        if (!cancelled) setAcceptingInvite(false);
+      }
+    }
+
+    acceptInvite();
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteToken, router]);
+
+  if (inviteToken) {
+    return (
+      <AuthCard
+        currentStep="onboarding"
+        maxWidthClass="max-w-xl"
+        title="Accepting Team Invitation"
+        subtitle="We are securely linking your account to the invited organization."
+      >
+        <div className="space-y-3 text-xs text-muted-foreground">
+          <p>{acceptingInvite ? "Please wait while we validate your invite token." : "Finalizing your access."}</p>
+          {inviteError && <p className="text-red-600">{inviteError}</p>}
+        </div>
+      </AuthCard>
+    );
+  }
 
   const handleFinishAll = () => {
     skipOnboarding();
@@ -68,10 +117,28 @@ export default function OnboardingPage() {
     completeOnboardingStep("leads", { count: 12 });
   };
 
-  const handleTeamSubmit = () => {
-    const validEmails = teamMembers.map((t) => t.email).filter(Boolean);
-    completeOnboardingStep("team", { emails: validEmails });
+  const handleTeamSubmit = async () => {
+    const validRows = teamMembers.filter((t) => t.email.trim());
+    const emails = validRows.map((t) => t.email.trim());
+    completeOnboardingStep("team", { emails });
     setCurrentStep("pipeline");
+
+    // Fire real invitations (manager/salesperson only). Non-blocking — the
+    // owner can re-invite from Settings → Team if any dispatch fails.
+    for (const member of validRows) {
+      try {
+        await fetch("/api/team/invite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: member.email.trim(),
+            role: member.role === "manager" ? "manager" : "salesperson",
+          }),
+        });
+      } catch {
+        // Swallow dispatch errors — invite re-issue is available in the app.
+      }
+    }
   };
 
   return (
@@ -219,7 +286,7 @@ export default function OnboardingPage() {
                 >
                   <option value="salesperson">Sales Closer</option>
                   <option value="manager">Sales Manager</option>
-                  <option value="boss">Executive / VP</option>
+                  <option value="owner">Owner / Founder</option>
                 </select>
                 {teamMembers.length > 1 && (
                   <button
@@ -320,5 +387,14 @@ export default function OnboardingPage() {
         </div>
       )}
     </AuthCard>
+  );
+}
+
+
+export default function OnboardingPage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center p-8" />}>
+      <OnboardingContent />
+    </React.Suspense>
   );
 }

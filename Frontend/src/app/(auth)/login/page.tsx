@@ -33,12 +33,20 @@ function LoginForm() {
   const [googleLoading, setGoogleLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  // If already logged in, navigate to dashboard
+  // If already logged in, navigate to the correct workflow step
   React.useEffect(() => {
     if (user && !loading) {
-      router.replace("/dashboard");
+      const path =
+        workflowStep === "org"
+          ? "/setup-org"
+          : workflowStep === "plan"
+          ? "/choose-plan"
+          : workflowStep === "onboarding"
+          ? "/onboarding"
+          : "/dashboard";
+      router.replace(path);
     }
-  }, [user, loading, router]);
+  }, [user, loading, workflowStep, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,14 +70,14 @@ function LoginForm() {
         if (!res.success) {
           setErrorMessage(res.error || "Sign up failed");
         } else {
-          router.push("/dashboard");
+          router.push(res.nextPath || "/dashboard");
         }
       } else {
         const res = await signIn(email, password);
         if (!res.success) {
           setErrorMessage(res.error || "Invalid email or password");
         } else {
-          router.push("/dashboard");
+          router.push(res.nextPath || "/dashboard");
         }
       }
     } catch (err: any) {
@@ -243,13 +251,10 @@ function LoginForm() {
           <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             ⚡ Instant Demo Login (1-Click, No Password Needed):
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
-              onClick={() => {
-                signInAsDemo("salesperson");
-                router.push("/dashboard");
-              }}
+              onClick={() => signInAsDemo("salesperson")}
               className="p-2 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 text-left transition-all active:scale-[0.98] shadow-xs"
             >
               <div className="font-bold text-xs flex items-center gap-1">
@@ -260,14 +265,22 @@ function LoginForm() {
 
             <button
               type="button"
-              onClick={() => {
-                signInAsDemo("boss");
-                router.push("/dashboard");
-              }}
+              onClick={() => signInAsDemo("manager")}
+              className="p-2 rounded-lg border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-950 text-left transition-all active:scale-[0.98] shadow-xs"
+            >
+              <div className="font-bold text-xs flex items-center gap-1">
+                <span>📋</span> Manager
+              </div>
+              <div className="text-[10px] text-blue-800 font-medium">Priya Kapoor</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => signInAsDemo("owner")}
               className="p-2 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 text-left transition-all active:scale-[0.98] shadow-xs"
             >
               <div className="font-bold text-xs flex items-center gap-1">
-                <span>👑</span> Boss / Founder
+                <span>👑</span> Owner
               </div>
               <div className="text-[10px] text-amber-800 font-medium">Vikram Malhotra</div>
             </button>

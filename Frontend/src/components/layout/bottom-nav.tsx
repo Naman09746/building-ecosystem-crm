@@ -11,10 +11,15 @@ import {
   MoreHorizontal,
   Building2,
   Phone,
+  Boxes,
+  Palette,
+  Compass,
+  HardHat,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { NavMoreSheet } from "@/components/layout/nav-more-sheet";
 import { cn } from "@/lib/utils";
+import { isManagerRole } from "@/lib/rbac";
 
 interface BottomNavProps {
   activeTab: string;
@@ -27,13 +32,24 @@ export function BottomNav({
   onSelectTab,
   onOpenQuickLog,
 }: BottomNavProps) {
-  const { currentUser } = useCRM();
+  const { currentUser, vertical, verticalProfile } = useCRM();
   const [moreOpen, setMoreOpen] = React.useState(false);
 
-  const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isExecutive = isManagerRole(currentUser.role);
 
-  // Field sales reps focus: Priorities Home, Assigned Leads, Quick Log FAB, Follow-up Queue, More
-  // Executive/Boss focus: Executive Overview, Leads, Quick Log FAB, Deal Pipeline, More
+  const inventoryIcon =
+    vertical === "building_materials"
+      ? Boxes
+      : vertical === "interior_furniture"
+      ? Palette
+      : vertical === "architecture_design"
+      ? Compass
+      : vertical === "contractor_builder"
+      ? HardHat
+      : Building2;
+
+  // Sales reps focus: Priorities Home, Assigned Leads, Quick Log FAB, Follow-up Queue, More
+  // Owner/Manager focus: Executive Overview, Leads, Quick Log FAB, Deal Pipeline, More
   const navItems = isExecutive
     ? [
         { id: "overview", label: "Overview", icon: Home },
@@ -45,7 +61,7 @@ export function BottomNav({
         { id: "overview", label: "Today", icon: Home },
         { id: "leads", label: "My Leads", icon: Users },
         { id: "tasks", label: "Follow-ups", icon: ListTodo },
-        { id: "projects", label: "Inventory", icon: Building2 },
+        { id: "projects", label: verticalProfile?.inventoryNav.label || "Inventory", icon: inventoryIcon },
       ];
 
   return (

@@ -4,6 +4,8 @@ import * as React from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import { UserRole } from "@/types/crm";
+import { mapCanonicalRole } from "@/lib/server/rbac";
+import type { EcosystemVertical, ComplexityMode } from "@/types/ecosystem";
 
 export type WorkflowStep = "auth" | "org" | "plan" | "onboarding" | "app";
 
@@ -15,7 +17,11 @@ export interface AuthOrg {
   primaryRegion: string;
   plan?: "starter" | "growth" | "enterprise";
   billingCycle?: "monthly" | "yearly";
+  industry?: EcosystemVertical;
+  complexityMode?: ComplexityMode;
   trialActive?: boolean;
+  setupCompletedAt?: string | null;
+  needsSetup?: boolean;
 }
 
 export interface AuthUser {
@@ -41,13 +47,20 @@ interface AuthContextType {
   onboardingData: OnboardingData;
 
   // Actions
-  signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string; nextPath?: string }>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string; nextPath?: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  signInAsDemo: (role?: "boss" | "salesperson" | "manager") => void;
+  signInAsDemo: (role?: "owner" | "manager" | "salesperson") => void;
   signOut: () => Promise<void>;
 
-  saveOrgSetup: (orgData: { name: string; teamSize: string; primaryRegion: string; role?: UserRole }) => void;
+  saveOrgSetup: (orgData: { 
+    name: string; 
+    teamSize: string; 
+    primaryRegion: string;
+    industry?: EcosystemVertical;
+    complexityMode?: ComplexityMode;
+  }) => void;
+  updateEcosystemSettings: (industry: EcosystemVertical, complexityMode: ComplexityMode) => void;
   selectPlan: (plan: "starter" | "growth" | "enterprise", billingCycle: "monthly" | "yearly") => void;
   completeOnboardingStep: (step: "leads" | "team" | "pipeline", payload?: any) => void;
   skipOnboarding: () => void;
@@ -62,15 +75,21 @@ const STORAGE_KEYS = {
   ORG: "callcrm_auth_org",
   STEP: "callcrm_workflow_step",
   ONBOARDING: "callcrm_onboarding_data",
+  DEMO_ROLE: "callcrm_demo_role",
 } as const;
 
 // Map server-side profile roles to the three client-facing perspectives.
 // Authorization is still enforced by RLS + API routes; this is display-only.
 function mapDbRole(dbRole: string | null | undefined): UserRole {
-  if (!dbRole) return "salesperson";
-  if (["owner", "admin", "boss"].includes(dbRole)) return "boss";
-  if (["manager", "closer"].includes(dbRole)) return "manager";
-  return "salesperson";
+  return mapCanonicalRole(dbRole) as UserRole;
+}
+
+function deriveWorkflowStep(authOrg: AuthOrg | null): WorkflowStep {
+  if (!authOrg) return "org";
+  if (!authOrg.teamSize || !authOrg.primaryRegion) return "org";
+  if (!authOrg.plan || !authOrg.billingCycle) return "plan";
+  if (!authOrg.setupCompletedAt) return "onboarding";
+  return "app";
 }
 
 async function loadProfileUserAndOrg(
@@ -94,14 +113,17 @@ async function loadProfileUserAndOrg(
       role = mapDbRole(profile.role);
       const orgData = Array.isArray(profile.org) ? profile.org[0] : profile.org;
       if (orgData) {
+        const setupCompletedAt = orgData.setup_completed_at || null;
         authOrg = {
           id: orgData.id,
           name: orgData.name || "Apex Realty",
           slug: orgData.name ? orgData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "apex-realty",
           plan: orgData.plan || "growth",
           billingCycle: orgData.billing_cycle || "monthly",
-          primaryRegion: "Gurgaon",
-          teamSize: "1-10",
+          primaryRegion: orgData.primary_region || "",
+          teamSize: orgData.team_size || "",
+          setupCompletedAt,
+          needsSetup: !setupCompletedAt,
         };
       }
     }
@@ -142,16 +164,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function initAuth() {
       setIsLoading(true);
       const supabase = getSupabaseClient();
+      let hasAuthenticatedSession = false;
 
       if (supabase && isSupabaseConfigured) {
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user && !cancelled) {
+            hasAuthenticatedSession = true;
             const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, session.user);
             if (!cancelled) {
               setUser(authUser);
               if (authOrg) setOrg(authOrg);
-              setWorkflowStepState("app");
+              setWorkflowStepState(deriveWorkflowStep(authOrg));
               lastActiveRef.current = Date.now();
             }
           }
@@ -166,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (!cancelled) {
               setUser(authUser);
               if (authOrg) setOrg(authOrg);
-              setWorkflowStepState("app");
+              setWorkflowStepState(deriveWorkflowStep(authOrg));
               lastActiveRef.current = Date.now();
             }
           } else {
@@ -190,6 +214,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (savedOrgStr && !cancelled) setOrg((prev) => prev || JSON.parse(savedOrgStr));
         if (savedStep && !cancelled) setWorkflowStepState((prev) => (prev === "app" ? "app" : savedStep || "auth"));
         if (savedOnboardingStr && !cancelled) setOnboardingData(JSON.parse(savedOnboardingStr));
+
+        if (!hasAuthenticatedSession) {
+          const demoRole = localStorage.getItem(STORAGE_KEYS.DEMO_ROLE) as "owner" | "salesperson" | null;
+          if (demoRole) {
+            signInAsDemo(demoRole);
+          }
+        }
       } catch (e) {
         console.warn("Could not read UI state from localStorage", e);
       } finally {
@@ -223,7 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("keydown", updateActivity);
       window.removeEventListener("touchstart", updateActivity);
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setWorkflowStep = (step: WorkflowStep) => {
     setWorkflowStepState(step);
@@ -268,8 +299,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, data.user);
         setUser(authUser);
         if (authOrg) setOrg(authOrg);
-        setWorkflowStep("app");
-        return { success: true };
+        const nextStep = deriveWorkflowStep(authOrg);
+        setWorkflowStep(nextStep);
+        return {
+          success: true,
+          nextPath: nextStep === "org" ? "/setup-org" : nextStep === "plan" ? "/choose-plan" : nextStep === "onboarding" ? "/onboarding" : "/dashboard",
+        };
       }
 
       return { success: false, error: "Sign up did not return a user." };
@@ -301,8 +336,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { authUser, authOrg } = await loadProfileUserAndOrg(supabase, data.user);
         setUser(authUser);
         if (authOrg) setOrg(authOrg);
-        setWorkflowStep("app");
-        return { success: true };
+        const nextStep = deriveWorkflowStep(authOrg);
+        setWorkflowStep(nextStep);
+        return {
+          success: true,
+          nextPath: nextStep === "org" ? "/setup-org" : nextStep === "plan" ? "/choose-plan" : nextStep === "onboarding" ? "/onboarding" : "/dashboard",
+        };
       }
       return { success: false, error: "Invalid credentials." };
     } catch (err: any) {
@@ -337,10 +376,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInAsDemo = (role: "boss" | "salesperson" | "manager" = "salesperson") => {
-    const demoUser: AuthUser = role === "salesperson"
-      ? { id: "usr-rahul", name: "Rahul Sharma", email: "rahul@apexrealty.in", role: "salesperson" }
-      : { id: "usr-vikram", name: "Vikram Malhotra", email: "vikram@apexrealty.in", role: "boss" };
+  const signInAsDemo = (role: "owner" | "manager" | "salesperson" = "salesperson") => {
+    const demoUsers: Record<string, AuthUser> = {
+      owner: { id: "usr-vikram", name: "Vikram Malhotra", email: "vikram@apexrealty.in", role: "owner" },
+      manager: { id: "usr-priya", name: "Priya Kapoor", email: "priya@apexrealty.in", role: "manager" },
+      salesperson: { id: "usr-rahul", name: "Rahul Sharma", email: "rahul@apexrealty.in", role: "salesperson" },
+    };
+    const demoUser = demoUsers[role];
 
     const demoOrg: AuthOrg = {
       id: "org-dlf-partners",
@@ -350,6 +392,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       billingCycle: "monthly",
       primaryRegion: "Gurgaon",
       teamSize: "6-20",
+      industry: "real_estate",
+      complexityMode: "deep",
+      setupCompletedAt: new Date().toISOString(),
+      needsSetup: false,
     };
 
     setUser(demoUser);
@@ -358,6 +404,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEYS.ORG, JSON.stringify(demoOrg));
       localStorage.setItem(STORAGE_KEYS.STEP, "app");
+      localStorage.setItem(STORAGE_KEYS.DEMO_ROLE, role);
+      document.cookie = `callcrm_demo_session=1; path=/; max-age=86400; SameSite=Lax`;
     } catch {}
   };
 
@@ -373,11 +421,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(STORAGE_KEYS.ORG);
       localStorage.removeItem(STORAGE_KEYS.STEP);
       localStorage.removeItem(STORAGE_KEYS.ONBOARDING);
+      localStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
+      document.cookie = "callcrm_demo_session=; path=/; max-age=0";
     } catch {}
   };
 
-  const saveOrgSetup = async (orgData: { name: string; teamSize: string; primaryRegion: string; role?: UserRole }) => {
-    // Persist the organization name chosen during setup to the real tenant row.
+  const saveOrgSetup = async (orgData: { 
+    name: string; 
+    teamSize: string; 
+    primaryRegion: string;
+    industry?: EcosystemVertical;
+    complexityMode?: ComplexityMode;
+  }) => {
     let realOrgId = org?.id && !String(org.id).startsWith("local") ? org.id : undefined;
 
     const supabase = getSupabaseClient();
@@ -392,19 +447,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .maybeSingle();
           if (profile?.org_id) {
             realOrgId = profile.org_id;
-            await supabase.from("orgs").update({ name: orgData.name }).eq("id", profile.org_id);
-          }
-          if (orgData.role) {
-            await supabase.from("profiles").update({ role: orgData.role }).eq("user_id", currentAuthUser.id);
+            await fetch("/api/orgs/settings", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: orgData.name,
+                teamSize: orgData.teamSize,
+                primaryRegion: orgData.primaryRegion,
+                industry: orgData.industry || "real_estate",
+                complexityMode: orgData.complexityMode || "deep",
+              }),
+            });
           }
         }
       } catch (e) {
         console.warn("[AUTH] Could not persist organization setup:", e);
       }
-    }
-
-    if (orgData.role) {
-      setUser((prev) => (prev ? { ...prev, role: orgData.role! } : null));
     }
 
     const newOrg: AuthOrg = {
@@ -413,12 +471,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       slug: orgData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       teamSize: orgData.teamSize,
       primaryRegion: orgData.primaryRegion,
+      industry: orgData.industry || "real_estate",
+      complexityMode: orgData.complexityMode || "deep",
+      plan: org?.plan,
+      billingCycle: org?.billingCycle,
+      setupCompletedAt: null,
+      needsSetup: true,
     };
     setOrg(newOrg);
     try {
       localStorage.setItem(STORAGE_KEYS.ORG, JSON.stringify(newOrg));
     } catch {}
     setWorkflowStep("plan");
+  };
+
+  const updateEcosystemSettings = (industry: EcosystemVertical, complexityMode: ComplexityMode) => {
+    if (!org) return;
+    const updated: AuthOrg = {
+      ...org,
+      industry,
+      complexityMode,
+    };
+    setOrg(updated);
+    try {
+      localStorage.setItem(STORAGE_KEYS.ORG, JSON.stringify(updated));
+    } catch {}
   };
 
   const selectPlan = async (
@@ -431,10 +508,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = getSupabaseClient();
     if (supabase && isSupabaseConfigured && org.id && !String(org.id).startsWith("local")) {
       try {
-        await supabase
-          .from("orgs")
-          .update({ plan })
-          .eq("id", org.id);
+        await fetch("/api/orgs/plan", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan, billingCycle, trialActive: true }),
+        });
       } catch (e) {
         console.warn("[AUTH] Could not persist plan selection:", e);
       }
@@ -446,6 +524,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       plan,
       billingCycle,
       trialActive: true,
+      setupCompletedAt: null,
+      needsSetup: true,
     };
     setOrg(updatedOrg);
     try {
@@ -482,14 +562,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const skipOnboarding = () => {
+    const setupCompletedAt = new Date().toISOString();
+    setOrg((prev) => (prev ? { ...prev, setupCompletedAt, needsSetup: false } : prev));
     setWorkflowStep("app");
     fetch("/api/orgs/settings", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customSettings: {
-          onboardingCompleted: true,
-        },
+        setupCompletedAt,
       }),
     }).catch(() => {});
   };
@@ -508,6 +588,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(STORAGE_KEYS.ORG);
       localStorage.removeItem(STORAGE_KEYS.STEP);
       localStorage.removeItem(STORAGE_KEYS.ONBOARDING);
+      localStorage.removeItem(STORAGE_KEYS.DEMO_ROLE);
     } catch {}
   };
 
@@ -526,6 +607,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInAsDemo,
         signOut,
         saveOrgSetup,
+        updateEcosystemSettings,
         selectPlan,
         completeOnboardingStep,
         skipOnboarding,

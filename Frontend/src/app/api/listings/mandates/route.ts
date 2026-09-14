@@ -56,8 +56,8 @@ export async function GET(req: NextRequest) {
     return apiSuccess([]);
   }
 
-  // SENSITIVE SECURITY FILTER: Mask minimum_acceptable_price if user is a standard closer
-  const isManagerial = MANAGER_ROLES.includes(auth.role as any);
+  // SENSITIVE SECURITY FILTER: Mask minimum_acceptable_price for salespeople
+  const isManagerial = MANAGER_ROLES.includes(auth.role);
 
   const sanitized = (data || []).map((item: any) => {
     if (!isManagerial) {

@@ -8,6 +8,9 @@ import {
   Building2,
   Clock,
   Sparkles,
+  Users,
+  FileText,
+  Timer,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { Button } from "@/components/ui/button";
@@ -30,7 +33,32 @@ export type StructuredOutcome =
   | "Interested"
   | "Negotiating"
   | "Site Visit Booked"
+  | "Call Back"
+  | "Wrong Number"
   | "Not Interested";
+
+const FOLLOW_UP_PRESETS: { label: string; value: string }[] = [
+  { label: "Today 6 PM", value: "Today 6:00 PM" },
+  { label: "Tomorrow 10 AM", value: "Tomorrow 10:00 AM" },
+  { label: "In 3 Days", value: "In 3 Days, 10:00 AM" },
+  { label: "Next Week", value: "Next Week, Monday 10:00 AM" },
+];
+
+function getTodayTime(hour: number, minute: number = 0): string {
+  const now = new Date();
+  now.setHours(hour, minute, 0, 0);
+  return now.toISOString();
+}
+
+function getNextWeekMonday(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (7 - day + 1) % 7 || 7;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diff);
+  monday.setHours(10, 0, 0, 0);
+  return monday.toISOString();
+}
 
 export function QuickActivityModal({
   open,
@@ -40,9 +68,13 @@ export function QuickActivityModal({
   const { leads, logActivity } = useCRM();
   const [selectedLeadId, setSelectedLeadId] = React.useState<string>(defaultLeadId || "");
   const [activityType, setActivityType] = React.useState<ActivityType>("call");
-  const [outcome, setOutcome] = React.useState<StructuredOutcome>("Interested");
+  const [outcome, setOutcome] = React.useState<StructuredOutcome>("Connected");
   const [notes, setNotes] = React.useState("");
-  const [nextActionOption, setNextActionOption] = React.useState("Tomorrow 10:00 AM");
+  const [followUpPreset, setFollowUpPreset] = React.useState<string>("Tomorrow 10:00 AM");
+  const [customDateTime, setCustomDateTime] = React.useState<string>("");
+  const [useCustom, setUseCustom] = React.useState(false);
+  const [callDurationSeconds, setCallDurationSeconds] = React.useState(0);
+  const [callTimerStarted, setCallTimerStarted] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
@@ -53,6 +85,25 @@ export function QuickActivityModal({
     }
   }, [defaultLeadId, leads, selectedLeadId]);
 
+  React.useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (callTimerStarted && activityType === "call") {
+      timer = setInterval(() => {
+        setCallDurationSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [callTimerStarted, activityType]);
+
+  React.useEffect(() => {
+    if (!callTimerStarted && activityType !== "call") {
+      setCallDurationSeconds(0);
+      setCallTimerStarted(false);
+    }
+  }, [activityType, callTimerStarted]);
+
   const activeLead = leads.find((l) => l.id === selectedLeadId) || leads[0];
 
   const structuredOutcomes: { id: StructuredOutcome; label: string }[] = [
@@ -61,8 +112,22 @@ export function QuickActivityModal({
     { id: "Interested", label: "Interested" },
     { id: "Negotiating", label: "Negotiating" },
     { id: "Site Visit Booked", label: "Site Visit" },
+    { id: "Call Back", label: "Call Back" },
+    { id: "Wrong Number", label: "Wrong Number" },
     { id: "Not Interested", label: "Not Interested" },
   ];
+
+  const formatDuration = (totalSeconds: number): string => {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const getFollowUpValue = (): string | undefined => {
+    if (outcome === "Not Interested" || outcome === "Wrong Number") return undefined;
+    if (useCustom && customDateTime) return customDateTime;
+    return followUpPreset;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,26 +142,43 @@ export function QuickActivityModal({
         ? "site_visit_booked"
         : outcome === "Not Interested"
         ? "not_interested"
+        : outcome === "Wrong Number"
+        ? "wrong_number"
         : outcome === "No Answer"
         ? "ringing_no_response"
-        : outcome === "Negotiating"
-        ? "interested"
+        : outcome === "Connected" || outcome === "Call Back" || outcome === "Negotiating"
+        ? "call_back"
         : "interested",
-      outcomeLabel: outcome === "Site Visit Booked" ? "Site Visit Booked" : outcome,
+      outcomeLabel: outcome,
       notes: notes || `${outcome} recorded during ${activityType} touchpoint.`,
-      nextFollowUp: outcome === "Not Interested" || nextActionOption === "None" ? undefined : nextActionOption,
+      nextFollowUp: getFollowUpValue(),
+      durationSeconds: activityType === "call" ? callDurationSeconds : undefined,
     });
 
     setIsSubmitting(false);
     onOpenChange(false);
     setNotes("");
+    setCallDurationSeconds(0);
+    setCallTimerStarted(false);
+    setUseCustom(false);
+    setCustomDateTime("");
   };
+
+  React.useEffect(() => {
+    if (outcome === "Site Visit Booked") {
+      setFollowUpPreset("Site Visit · Tomorrow 11:00 AM");
+    } else if (outcome === "Not Interested" || outcome === "Wrong Number") {
+      // No follow-up needed
+    } else if (!useCustom) {
+      setFollowUpPreset("Tomorrow 10:00 AM");
+    }
+  }, [outcome, useCustom]);
 
   return (
     <ResponsiveModal
       open={open}
       onOpenChange={onOpenChange}
-      className="sm:max-w-[480px] p-5"
+      className="sm:max-w-[520px] p-5"
     >
       <div className="space-y-4">
         {/* Header with Buyer & Deal Info */}
@@ -124,6 +206,8 @@ export function QuickActivityModal({
               { type: "call" as ActivityType, icon: Phone, title: "Call" },
               { type: "whatsapp" as ActivityType, icon: MessageSquare, title: "WhatsApp" },
               { type: "site_visit" as ActivityType, icon: Building2, title: "Visit" },
+              { type: "meeting" as ActivityType, icon: Users, title: "Meeting" },
+              { type: "note" as ActivityType, icon: FileText, title: "Note" },
             ].map((item) => {
               const Icon = item.icon;
               const isSelected = activityType === item.type;
@@ -131,7 +215,11 @@ export function QuickActivityModal({
                 <button
                   key={item.type}
                   type="button"
-                  onClick={() => setActivityType(item.type)}
+                  onClick={() => {
+                    setActivityType(item.type);
+                    setCallTimerStarted(false);
+                    setCallDurationSeconds(0);
+                  }}
                   title={item.title}
                   className={`p-2 sm:p-1.5 rounded-md transition-all min-h-[36px] min-w-[36px] flex items-center justify-center ${
                     isSelected ? "bg-card text-foreground shadow-subtle" : "text-muted-foreground hover:text-foreground"
@@ -144,11 +232,33 @@ export function QuickActivityModal({
           </div>
         </div>
 
+        {/* Call Duration Timer */}
+        {activityType === "call" && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <Timer className="h-4 w-4 text-amber-400" />
+            <span className={`font-mono text-xs font-bold ${callTimerStarted ? "text-amber-400" : "text-amber-300/70"}`}>
+              {formatDuration(callDurationSeconds)}
+            </span>
+            {!callTimerStarted && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCallTimerStarted(true);
+                  setCallDurationSeconds(0);
+                }}
+                className="text-[10px] text-amber-400 underline ml-auto"
+              >
+                Start timer
+              </button>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-3.5">
-          {/* What happened? 6-Pill Outcome Grid */}
+          {/* What happened? 8-Pill Outcome Grid — 4 columns mobile */}
           <div className="space-y-1.5">
             <Label className="text-xs font-bold text-foreground">What happened?</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-1.5">
               {structuredOutcomes.map((item) => {
                 const isSelected = outcome === item.id;
                 return (
@@ -158,19 +268,22 @@ export function QuickActivityModal({
                     onClick={() => {
                       setOutcome(item.id);
                       if (item.id === "Site Visit Booked") {
-                        setNextActionOption("Site Visit · Tomorrow 11:00 AM");
-                      } else if (item.id === "Not Interested") {
-                        setNextActionOption("None");
+                        setFollowUpPreset("Site Visit · Tomorrow 11:00 AM");
+                        setUseCustom(false);
+                      } else if (item.id === "Not Interested" || item.id === "Wrong Number") {
+                        setUseCustom(false);
+                      } else if (!useCustom) {
+                        setFollowUpPreset("Tomorrow 10:00 AM");
                       }
                     }}
-                    className={`h-10 sm:h-8 px-2.5 rounded-lg text-xs font-semibold border transition-all text-center flex items-center justify-center gap-1.5 min-h-[40px] sm:min-h-[32px] ${
+                    className={`h-9 sm:h-8 px-2 rounded-lg text-[10px] sm:text-xs font-semibold border transition-all text-center flex items-center justify-center min-h-[36px] ${
                       isSelected
                         ? "border-primary bg-primary text-primary-foreground shadow-subtle font-bold"
                         : "border-border bg-card text-foreground hover:bg-secondary hover:border-border/80"
                     }`}
                   >
-                    <span>{item.label}</span>
-                    {isSelected && <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />}
+                    <span className="leading-tight">{item.label}</span>
+                    {isSelected && <CheckCircle2 className="h-3 w-3 shrink-0 ml-1" />}
                   </button>
                 );
               })}
@@ -198,25 +311,60 @@ export function QuickActivityModal({
             />
           </div>
 
-          {/* Next Action Selector */}
-          <div className="space-y-1">
-            <Label htmlFor="next-action-select" className="text-xs font-bold text-foreground flex items-center gap-1.5">
+          {/* Next Action Selector — Presets + Custom */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-primary" />
               Next follow-up action
             </Label>
-            <select
-              id="next-action-select"
-              value={nextActionOption}
-              onChange={(e) => setNextActionOption(e.target.value)}
-              className="w-full h-10 sm:h-8 px-3 rounded-lg border border-border bg-secondary/30 text-xs font-medium text-foreground focus:outline-none focus:bg-card"
-            >
-              <option value="Tomorrow 10:00 AM">Tomorrow 10:00 AM</option>
-              <option value="Tomorrow 02:30 PM">Tomorrow 02:30 PM</option>
-              <option value="Site Visit · Tomorrow 11:00 AM">Site Visit · Tomorrow 11:00 AM</option>
-              <option value="In 3 days, 11:30 AM">In 3 days (11:30 AM)</option>
-              <option value="In 1 week, 12:00 PM">In 1 week (12:00 PM)</option>
-              <option value="None">No Follow-up Scheduled</option>
-            </select>
+            {(outcome !== "Not Interested" && outcome !== "Wrong Number") && (
+              <>
+                <div className="flex flex-wrap gap-1.5">
+                  {FOLLOW_UP_PRESETS.map((preset) => (
+                    <button
+                      key={preset.value}
+                      type="button"
+                      onClick={() => {
+                        setFollowUpPreset(preset.value);
+                        setUseCustom(false);
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-semibold border transition-all ${
+                        followUpPreset === preset.value && !useCustom
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-foreground hover:bg-secondary hover:border-border/80"
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setUseCustom(true)}
+                    className={`px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-semibold border transition-all ${
+                      useCustom
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card text-foreground hover:bg-secondary hover:border-border/80"
+                    }`}
+                  >
+                    Custom
+                  </button>
+                </div>
+                {useCustom && (
+                  <Input
+                    type="datetime-local"
+                    value={customDateTime}
+                    onChange={(e) => setCustomDateTime(e.target.value)}
+                    className="h-10 sm:h-8 text-xs bg-secondary/30 focus:bg-card rounded-lg"
+                  />
+                )}
+              </>
+            )}
+            {outcome === "Not Interested" && (
+              <span className="text-xs text-muted-foreground">No follow-up scheduled</span>
+            )}
+            {outcome === "Wrong Number" && (
+              <span className="text-xs text-muted-foreground">No follow-up — invalid number</span>
+            )}
           </div>
 
           {/* Action Button */}
@@ -225,7 +373,13 @@ export function QuickActivityModal({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+                setCallDurationSeconds(0);
+                setCallTimerStarted(false);
+                setUseCustom(false);
+                setCustomDateTime("");
+              }}
               className="h-10 sm:h-8 text-xs font-semibold flex-1 sm:flex-none"
             >
               Cancel

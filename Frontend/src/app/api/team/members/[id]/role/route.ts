@@ -9,22 +9,23 @@ import {
   getApiAuthContext,
   getServiceRoleClient,
   isLiveSupabaseAvailable,
+  MANAGER_ROLES,
 } from "@/lib/server/supabase-server";
+import { isOwnerRole } from "@/lib/server/rbac";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// PATCH /api/team/members/[id]/role - Modify user role and region (Owner/Admin only)
+// PATCH /api/team/members/[id]/role - Modify user role and region
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
   const auth = await getApiAuthContext();
   if (!auth) {
     return apiError("Authentication required", 401, "UNAUTHORIZED");
   }
 
-  // Only owners and admins can modify member roles
-  if (auth.role !== "owner" && auth.role !== "admin" && auth.role !== "boss") {
-    return apiError("Only organization owners and administrators can modify roles", 403, "FORBIDDEN");
+  if (!MANAGER_ROLES.includes(auth.role)) {
+    return apiError("Only owners and managers can modify roles", 403, "FORBIDDEN");
   }
 
   const { id: targetUserId } = await params;
@@ -37,6 +38,15 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const rawBody = await req.json();
     const validated = updateUserRoleSchema.parse(rawBody);
 
+    if (targetUserId === auth.userId) {
+      return apiError("You cannot change your own role", 400, "SELF_ROLE_CHANGE_FORBIDDEN");
+    }
+
+    // Owner transfers are strictly owner-only.
+    if (validated.role === "owner" && !isOwnerRole(auth.role)) {
+      return apiError("Only the current owner can transfer ownership", 403, "FORBIDDEN");
+    }
+
     // Target must belong to caller's org
     const { data: targetProfile, error: profileFetchErr } = await serviceClient
       .from("profiles")
@@ -47,6 +57,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     if (profileFetchErr || !targetProfile) {
       return apiError("Team member not found in your organization", 404, "NOT_FOUND");
+    }
+
+    if (targetProfile.role === "owner" && !isOwnerRole(auth.role)) {
+      return apiError("Only the owner can edit another owner profile", 403, "FORBIDDEN");
     }
 
     // Check if target is last owner and being demoted

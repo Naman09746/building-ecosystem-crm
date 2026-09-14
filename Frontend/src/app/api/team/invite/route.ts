@@ -7,6 +7,7 @@ import {
   checkRateLimit,
 } from "@/lib/server/api-security";
 import { createInvitationSchema } from "@/lib/server/validations";
+import { isOwnerRole } from "@/lib/server/rbac";
 import {
   getApiAuthContext,
   getAuthenticatedServerClient,
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!MANAGER_ROLES.includes(auth.role)) {
-    return apiError("Only managers and admins can invite team members", 403, "FORBIDDEN");
+    return apiError("Only owners and managers can invite team members", 403, "FORBIDDEN");
   }
 
   const rateCheck = checkRateLimit(`invite_${auth.userId}`, 20, 60000);
@@ -39,8 +40,8 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.json();
     const validated = createInvitationSchema.parse(rawBody);
 
-    // Non-owners cannot invite owners/admins
-    if ((validated.role === "owner" || validated.role === "admin") && auth.role !== "owner" && auth.role !== "admin") {
+    // Non-owners cannot invite owners
+    if (validated.role === "owner" && !isOwnerRole(auth.role)) {
       return apiError("You cannot invite members with higher privileges than your own role", 403, "FORBIDDEN");
     }
 
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
         createdAt: invite.created_at,
         // Provided only once at creation time so managers can dispatch directly
         inviteToken: rawToken,
-        inviteUrl: `/onboarding?invite=${rawToken}`,
+        inviteUrl: `/invite?token=${rawToken}`,
       },
       201
     );

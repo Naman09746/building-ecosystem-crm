@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
 import { cn } from "@/lib/utils";
+import { isManagerRole } from "@/lib/rbac";
 
 interface NavItem {
   id: string;
@@ -54,7 +55,7 @@ export function NavMoreSheet({
   onSelectTab,
 }: NavMoreSheetProps) {
   const { currentUser } = useCRM();
-  const isExecutive = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isExecutive = isManagerRole(currentUser.role);
 
   const sections: NavSection[] = [
     {

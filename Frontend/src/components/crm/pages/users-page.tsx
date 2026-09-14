@@ -25,6 +25,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, TeamInvitation } from "@/types/crm";
 import { toast } from "sonner";
+import { isManagerRole } from "@/lib/rbac";
 
 export function UsersPage() {
   const {
@@ -37,7 +38,7 @@ export function UsersPage() {
     updateUserRole,
   } = useCRM();
 
-  const isManager = ["owner", "admin", "boss", "manager"].includes(currentUser.role);
+  const isManager = isManagerRole(currentUser.role);
 
   // Invite Modal
   const [isInviteOpen, setIsInviteOpen] = React.useState(false);
@@ -154,7 +155,7 @@ export function UsersPage() {
 
                 <Badge
                   variant={
-                    u.role === "boss" || u.role === "owner"
+                    u.role === "owner"
                       ? "default"
                       : u.role === "manager"
                       ? "secondary"
@@ -220,7 +221,7 @@ export function UsersPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        u.role === "boss" || u.role === "owner"
+                        u.role === "owner"
                           ? "default"
                           : u.role === "manager"
                           ? "secondary"
@@ -391,9 +392,7 @@ export function UsersPage() {
                         className="w-full h-8 px-2.5 rounded border border-border bg-secondary/50 text-foreground font-medium"
                       >
                         <option value="salesperson">Salesperson</option>
-                        <option value="closer">Senior Closer</option>
                         <option value="manager">Sales Manager</option>
-                        {currentUser.role === "owner" && <option value="admin">Administrator</option>}
                       </select>
                     </div>
 
@@ -456,9 +455,7 @@ export function UsersPage() {
                     className="w-full h-8 px-2.5 rounded border border-border bg-secondary/50 text-foreground font-medium"
                   >
                     <option value="salesperson">Salesperson</option>
-                    <option value="closer">Senior Closer</option>
                     <option value="manager">Sales Manager</option>
-                    {currentUser.role === "owner" && <option value="admin">Administrator</option>}
                     {currentUser.role === "owner" && <option value="owner">Transfer Owner</option>}
                   </select>
                 </div>

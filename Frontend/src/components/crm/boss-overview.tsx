@@ -6,22 +6,15 @@ import {
   Building2,
   Users,
   CheckCircle2,
-  Calendar,
   Clock,
-  Filter,
   RefreshCw,
   Phone,
   MessageSquare,
   ChevronRight,
   Target,
   Flame,
-  AlertTriangle,
-  ShieldAlert,
-  ArrowUpRight,
   Sparkles,
-  ExternalLink,
   Search,
-  Check,
   Zap,
 } from "lucide-react";
 import { useCRM } from "@/context/crm-context";
@@ -110,32 +103,102 @@ export function BossOverview({
     };
   }, [dateRange, selectedRegionId, selectedSalespersonId, selectedProjectId]);
 
-  // Aggregate Metrics
+  // Aggregate Metrics — all computed from the same rangedLeads population/period
   const totalLeads = serverAnalytics?.summary?.totalLeads ?? rangedLeads.length;
   const totalPipelineValue = serverAnalytics?.summary?.pipelineValue ?? rangedLeads.reduce((acc, l) => acc + (l.budget || 0), 0);
   const openLeads = serverAnalytics?.summary?.openLeads ?? rangedLeads.filter((l) => l.stage !== "won" && l.stage !== "lost").length;
-  const wonDeals = serverAnalytics?.summary?.wonDeals ?? rangedLeads.filter((l) => l.stage === "won").length;
-  const wonValue = serverAnalytics?.summary?.wonRevenue ?? rangedLeads.filter((l) => l.stage === "won").reduce((acc, l) => acc + (l.budget || 0), 0);
-  const overdueCount = serverAnalytics?.summary?.overdueFollowups ?? rangedLeads.filter((l) => l.followUpStatus === "overdue").length;
+  const wonLeads = React.useMemo(() => rangedLeads.filter((l) => l.stage === "won"), [rangedLeads]);
+  const wonDeals = serverAnalytics?.summary?.wonDeals ?? wonLeads.length;
+  const wonValue = serverAnalytics?.summary?.wonRevenue ?? wonLeads.reduce((acc, l) => acc + (l.budget || 0), 0);
+  const overdueLeads = React.useMemo(() => rangedLeads.filter((l) => l.followUpStatus === "overdue"), [rangedLeads]);
+  const overdueCount = serverAnalytics?.summary?.overdueFollowups ?? overdueLeads.length;
   const siteVisits = serverAnalytics?.summary?.siteVisitsCount ?? rangedLeads.filter((l) => l.stage === "site_visit").length;
+
+  // Speed-to-Lead SLA — same lead population as used everywhere
+  const slaPercent = totalLeads > 0 ? Math.round(((totalLeads - overdueCount) / totalLeads) * 100) : 100;
+
+  // Today's Activity metrics (within current dateRange)
+  const callsToday = activities.filter(
+    (a) => a.type === "call" && new Date(a.createdAt).toDateString() === new Date().toDateString()
+  ).length;
+  const visitsThisWeek = rangedLeads.filter(
+    (l) => l.stage === "site_visit" && l.lastActivityAt
+      ? new Date(l.lastActivityAt).getTime() >= Date.now() - 7 * 864e5
+      : false
+  ).length;
+  const bookingsThisMonth = rangedLeads.filter(
+    (l) => l.stage === "won" && l.lastActivityAt
+      ? new Date(l.lastActivityAt).getMonth() === new Date().getMonth() && new Date(l.lastActivityAt).getFullYear() === new Date().getFullYear()
+      : false
+  ).length;
+
+  const rangeStart = React.useMemo(() => {
+    if (dateRange === "all") return new Date(0);
+    if (dateRange === "last_30_days") return new Date(Date.now() - 30 * 864e5);
+    if (dateRange === "this_quarter") return new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3, 1);
+    return new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  }, [dateRange]);
+
+  const getFollowupsDone = (repId: string) =>
+    activities.filter(
+      (a) =>
+        (a.type === "call" || a.type === "whatsapp") &&
+        a.userId === repId &&
+        a.createdAt &&
+        new Date(a.createdAt) >= rangeStart
+    ).length;
+
+  const getAvgResponseTime = (repLeads: Lead[]): string | null => {
+    const times: number[] = [];
+    repLeads.forEach((l) => {
+      const firstAct = activities.find(
+        (a) => a.leadId === l.id && a.createdAt
+      );
+      if (firstAct && l.createdAt) {
+        const diff = new Date(firstAct.createdAt).getTime() - new Date(l.createdAt).getTime();
+        if (diff > 0) times.push(diff / 3600000);
+      }
+    });
+    if (times.length === 0) return null;
+    const avg = times.reduce((a, b) => a + b, 0) / times.length;
+    return avg < 1 ? `${Math.round(avg * 60)}m` : `${avg.toFixed(1)}h`;
+  };
+
+  const getConversionRate = (repLeads: Lead[]): string => {
+    const won = repLeads.filter((l) => l.stage === "won").length;
+    const lost = repLeads.filter((l) => l.stage === "lost").length;
+    if (won + lost === 0) return "N/A";
+    return `${Math.round((won / (won + lost)) * 100)}%`;
+  };
 
   const salespeople = users.filter((u) => u.role === "salesperson");
 
   // Priority Attention Items
-  const overdueLeads = rangedLeads.filter((l) => l.followUpStatus === "overdue");
   const atRiskDeals = rangedLeads.filter((l) => l.dealHealth === "at_risk");
-  const upcomingSiteVisits = rangedLeads.filter((l) => l.stage === "site_visit");
   const stagnantNegotiations = rangedLeads.filter((l) => l.stage === "negotiation" && l.daysInStage >= 3);
 
   // Stage breakdown
+  const stageAggregates = React.useMemo(() => {
+    const empty: Record<string, { count: number; value: number }> = {};
+    const stageKeys: PipelineStage[] = ["new", "contacted", "qualified", "site_visit", "negotiation", "won", "lost"];
+    for (const key of stageKeys) empty[key] = { count: 0, value: 0 };
+    for (const l of rangedLeads) {
+      if (empty[l.stage]) {
+        empty[l.stage].count++;
+        empty[l.stage].value += l.budget || 0;
+      }
+    }
+    return empty;
+  }, [rangedLeads]);
+
   const stages: { key: PipelineStage; label: string; count: number; value: number; color: string }[] = [
-    { key: "new", label: "New Inflow", count: rangedLeads.filter((l) => l.stage === "new").length, value: rangedLeads.filter((l) => l.stage === "new").reduce((a, c) => a + c.budget, 0), color: "bg-slate-500" },
-    { key: "contacted", label: "Contacted", count: rangedLeads.filter((l) => l.stage === "contacted").length, value: rangedLeads.filter((l) => l.stage === "contacted").reduce((a, c) => a + c.budget, 0), color: "bg-blue-600" },
-    { key: "qualified", label: "Qualified", count: rangedLeads.filter((l) => l.stage === "qualified").length, value: rangedLeads.filter((l) => l.stage === "qualified").reduce((a, c) => a + c.budget, 0), color: "bg-indigo-600" },
-    { key: "site_visit", label: "Site Visit", count: rangedLeads.filter((l) => l.stage === "site_visit").length, value: rangedLeads.filter((l) => l.stage === "site_visit").reduce((a, c) => a + c.budget, 0), color: "bg-amber-600" },
-    { key: "negotiation", label: "Negotiation", count: rangedLeads.filter((l) => l.stage === "negotiation").length, value: rangedLeads.filter((l) => l.stage === "negotiation").reduce((a, c) => a + c.budget, 0), color: "bg-purple-600" },
-    { key: "won", label: "Won", count: rangedLeads.filter((l) => l.stage === "won").length, value: rangedLeads.filter((l) => l.stage === "won").reduce((a, c) => a + c.budget, 0), color: "bg-emerald-600" },
-    { key: "lost", label: "Lost", count: rangedLeads.filter((l) => l.stage === "lost").length, value: rangedLeads.filter((l) => l.stage === "lost").reduce((a, c) => a + c.budget, 0), color: "bg-rose-500" },
+    { key: "new", label: "New Inflow", count: stageAggregates.new.count, value: stageAggregates.new.value, color: "bg-slate-500" },
+    { key: "contacted", label: "Contacted", count: stageAggregates.contacted.count, value: stageAggregates.contacted.value, color: "bg-blue-600" },
+    { key: "qualified", label: "Qualified", count: stageAggregates.qualified.count, value: stageAggregates.qualified.value, color: "bg-indigo-600" },
+    { key: "site_visit", label: "Site Visit", count: stageAggregates.site_visit.count, value: stageAggregates.site_visit.value, color: "bg-amber-600" },
+    { key: "negotiation", label: "Negotiation", count: stageAggregates.negotiation.count, value: stageAggregates.negotiation.value, color: "bg-purple-600" },
+    { key: "won", label: "Won", count: stageAggregates.won.count, value: stageAggregates.won.value, color: "bg-emerald-600" },
+    { key: "lost", label: "Lost", count: stageAggregates.lost.count, value: stageAggregates.lost.value, color: "bg-rose-500" },
   ];
 
   const displayedOpportunities = (activeStageFilter === "all" ? filteredLeads : filteredLeads.filter((l) => l.stage === activeStageFilter))
@@ -239,12 +302,12 @@ export function BossOverview({
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-              {overdueCount === 0 ? "100%" : `${Math.max(60, 100 - overdueCount * 5)}%`}
+              {slaPercent}%
             </span>
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">On-Time</span>
           </div>
           <div className="mt-2 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Response target: &lt; 5 mins</span>
+            <span className="text-muted-foreground">{overdueCount > 0 ? overdueCount + ' overdue' : 'All on track'}</span>
             {overdueCount > 0 && (
               <Badge variant="destructive" className="text-[10px] px-1.5 py-0 font-mono">
                 {overdueCount} Breached
@@ -263,7 +326,7 @@ export function BossOverview({
             {siteVisits}
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-            <span>Physical Walkthroughs</span>
+            <span>Site Visits Scheduled</span>
             <span className="font-semibold text-primary">{stagnantNegotiations.length} in final closure</span>
           </div>
         </Card>
@@ -281,6 +344,26 @@ export function BossOverview({
             <span className="font-bold text-foreground">{wonDeals}</span> booked units this period
           </div>
         </Card>
+      </div>
+
+      {/* 2.5 Today's Activity Summary Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: "Calls Today", value: callsToday.toString(), icon: Phone, color: "text-blue-500" },
+          { label: "Visits This Week", value: visitsThisWeek.toString(), icon: Target, color: "text-indigo-500" },
+          { label: "Bookings This Month", value: bookingsThisMonth.toString(), icon: CheckCircle2, color: "text-emerald-500" },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card/60 border border-border/60">
+              <Icon className={`h-5 w-5 ${item.color}`} />
+              <div>
+                <div className="text-lg font-black font-mono text-foreground">{item.value}</div>
+                <div className="text-[10px] text-muted-foreground font-medium">{item.label}</div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* 3. Segmented Navigation Tabs (Progressive Disclosure) */}
@@ -366,7 +449,7 @@ export function BossOverview({
                       !
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-foreground">Action Center · Urgent Interventions</h2>
+                      <h2 className="text-sm font-bold text-foreground">Urgent Interventions</h2>
                       <p className="text-xs text-muted-foreground">High-ticket deals stalling or exceeding SLA response limits</p>
                     </div>
                   </div>
@@ -428,6 +511,39 @@ export function BossOverview({
                       </div>
                     </div>
                   ))}
+
+                  {overdueLeads.length > 0 && (
+                    <>
+                      <div className="pt-2 border-t border-rose-200/30">
+                        <span className="text-[11px] font-bold text-rose-500 uppercase tracking-wider">
+                          Overdue Follow-ups ({overdueLeads.length})
+                        </span>
+                      </div>
+                      {overdueLeads.map((lead) => (
+                        <div
+                          key={lead.id}
+                          className="p-2.5 rounded-lg bg-rose-500/5 border border-rose-200/20 text-xs flex items-center justify-between"
+                        >
+                          <div className="min-w-0">
+                            <span className="font-bold text-foreground">{lead.personName}</span>
+                            <span className="text-muted-foreground ml-2">
+                              Last: {lead.lastActivityAt ? new Date(lead.lastActivityAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" }) : "—"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <a
+                              href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center h-6 px-2 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20"
+                            >
+                              <MessageSquare className="h-3 w-3 mr-0.5" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </Card>
             )}
@@ -480,6 +596,58 @@ export function BossOverview({
                 ))}
               </div>
             </Card>
+
+            {/* Inactive Leads — No Activity in 7+ Days */}
+            {(() => {
+              const sevenDaysAgo = new Date(Date.now() - 7 * 864e5);
+              const inactiveLeads = rangedLeads.filter(
+                (l) =>
+                  l.stage !== "won" &&
+                  l.stage !== "lost" &&
+                  l.lastActivityAt &&
+                  new Date(l.lastActivityAt).getTime() < sevenDaysAgo.getTime()
+              );
+              return inactiveLeads.length > 0 ? (
+                <Card className="p-5 space-y-3 shadow-subtle border-border/80">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">Inactive Leads</h3>
+                      <p className="text-xs text-muted-foreground">
+                        No activity in 7+ days — {inactiveLeads.length} need re-engagement
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {inactiveLeads.slice(0, 5).map((lead) => (
+                      <div
+                        key={lead.id}
+                        className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/20 border border-border/40 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <span className="font-bold text-foreground">{lead.personName}</span>
+                          <span className="text-muted-foreground ml-2">{lead.projectName}</span>
+                          <span className="text-muted-foreground ml-1">
+                            • Last: {new Date(lead.lastActivityAt!).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <a
+                            href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center h-6 px-2 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20"
+                          >
+                            <MessageSquare className="h-3 w-3 mr-0.5" />
+                            WhatsApp
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              ) : null;
+            })()}
+
           </div>
 
           {/* Right Rail (5-cols): Live Touchpoint Activity & Quick Actions */}
@@ -667,12 +835,18 @@ export function BossOverview({
       )}
 
       {/* TAB 3: SALES TEAM PERFORMANCE LEADERBOARD */}
-      {activeTab === "team" && (
+      {activeTab === "team" && (() => {
+        const repLeadsMap = new Map<string, Lead[]>();
+        for (const rep of salespeople) {
+          repLeadsMap.set(rep.id, rangedLeads.filter((l) => l.salespersonId === rep.id));
+        }
+
+        return (
         <Card className="p-5 space-y-4 shadow-subtle border-border/80">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Sales Rep Productivity & Conversion Rates</h3>
-              <p className="text-xs text-muted-foreground">Individual closer performance, SLA compliance, and pipeline velocity</p>
+              <h3 className="text-sm font-bold text-foreground">Sales Team Performance</h3>
+              <p className="text-xs text-muted-foreground">Individual productivity, follow-up activity, and conversion rates</p>
             </div>
           </div>
 
@@ -682,19 +856,25 @@ export function BossOverview({
                 <tr>
                   <th className="py-2.5 px-3">Salesperson</th>
                   <th className="py-2.5 px-3">Region</th>
-                  <th className="py-2.5 px-3">Active Deals</th>
-                  <th className="py-2.5 px-3">Site Visits Done</th>
-                  <th className="py-2.5 px-3">Revenue Closed</th>
-                  <th className="py-2.5 px-3">SLA Compliance</th>
+                  <th className="py-2.5 px-3">Deals</th>
+                  <th className="py-2.5 px-3">Visits</th>
+                  <th className="py-2.5 px-3">Follow-ups</th>
+                  <th className="py-2.5 px-3">Revenue</th>
+                  <th className="py-2.5 px-3">Conv. Rate</th>
+                  <th className="py-2.5 px-3">Avg Response</th>
+                  <th className="py-2.5 px-3">SLA</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
                 {salespeople.map((rep) => {
-                  const repLeads = rangedLeads.filter((l) => l.salespersonId === rep.id);
+                  const repLeads = repLeadsMap.get(rep.id) || [];
                   const repWonValue = repLeads.filter((l) => l.stage === "won").reduce((a, c) => a + c.budget, 0);
                   const repVisits = repLeads.filter((l) => l.stage === "site_visit").length;
                   const repOverdue = repLeads.filter((l) => l.followUpStatus === "overdue").length;
                   const complianceScore = repLeads.length > 0 ? Math.max(70, Math.round(100 - (repOverdue / repLeads.length) * 100)) : 100;
+                  const repFollowups = getFollowupsDone(rep.id);
+                  const convRate = getConversionRate(repLeads);
+                  const avgResponse = getAvgResponseTime(repLeads);
 
                   return (
                     <tr key={rep.id} className="hover:bg-secondary/20 transition-colors">
@@ -707,8 +887,19 @@ export function BossOverview({
                       <td className="py-3 px-3 text-muted-foreground">{rep.regionName || "NCR"}</td>
                       <td className="py-3 px-3 font-mono font-semibold text-foreground">{repLeads.length}</td>
                       <td className="py-3 px-3 font-mono text-foreground">{repVisits}</td>
+                      <td className="py-3 px-3 font-mono font-semibold text-foreground">{repFollowups}</td>
                       <td className="py-3 px-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">
                         {formatCurrencyINR(repWonValue)}
+                      </td>
+                      <td className="py-3 px-3 font-mono font-semibold text-foreground">
+                        {convRate === "N/A" ? (
+                          <span className="text-muted-foreground">N/A</span>
+                        ) : (
+                          convRate
+                        )}
+                      </td>
+                      <td className="py-3 px-3 font-mono text-foreground">
+                        {avgResponse === null ? <span className="text-muted-foreground">—</span> : avgResponse}
                       </td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded-full font-mono text-[11px] font-bold ${
@@ -728,7 +919,8 @@ export function BossOverview({
             </table>
           </div>
         </Card>
-      )}
+        );
+      })()}
 
       {/* TAB 4: AI LEAD REVIVAL & DORMANT RECOVERY */}
       {activeTab === "revival" && (

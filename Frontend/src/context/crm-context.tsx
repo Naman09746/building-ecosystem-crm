@@ -79,9 +79,15 @@ import { reportError } from "@/lib/observability/reporter";
 import { scheduleRetry, onWriteAbandoned } from "@/lib/persistence/retry-queue";
 import { useAuth } from "@/context/auth-context";
 import { toast } from "sonner";
+import type { EcosystemVertical, ComplexityMode, VerticalProfile, VerticalTerms } from "@/types/ecosystem";
+import { getVerticalProfile } from "@/config/ecosystem";
 
 interface CRMContextType {
   currentUser: User;
+  vertical: EcosystemVertical;
+  complexityMode: ComplexityMode;
+  verticalProfile: VerticalProfile;
+  getTerm: (term: keyof VerticalTerms) => string;
   regions: Region[];
   areas: PropertyArea[];
   users: User[];
@@ -122,6 +128,7 @@ interface CRMContextType {
     outcomeLabel?: string;
     notes?: string;
     nextFollowUp?: string;
+    durationSeconds?: number;
   }) => Promise<boolean>;
 
   updateLeadStage: (leadId: string, stage: PipelineStage) => Promise<boolean>;
@@ -196,7 +203,15 @@ interface CRMContextType {
 const CRMContext = React.createContext<CRMContextType | undefined>(undefined);
 
 export function CRMProvider({ children }: { children: React.ReactNode }) {
-  const { user: authUser, isLoading: authLoading } = useAuth();
+  const { user: authUser, org: authOrg, isLoading: authLoading } = useAuth();
+
+  const vertical: EcosystemVertical = authOrg?.industry || "real_estate";
+  const complexityMode: ComplexityMode = authOrg?.complexityMode || "deep";
+  const verticalProfile = React.useMemo(() => getVerticalProfile(vertical), [vertical]);
+  const getTerm = React.useCallback(
+    (term: keyof VerticalTerms) => verticalProfile.terms[term] || "",
+    [verticalProfile]
+  );
 
   const [regions, setRegions] = React.useState<Region[]>(INITIAL_REGIONS);
   const [areas, setAreas] = React.useState<PropertyArea[]>(INITIAL_AREAS);
@@ -219,12 +234,13 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
 
   const [currentOrgId, setCurrentOrgId] = React.useState<string>("");
 
-  const [activeUserId, setActiveUserId] = React.useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("callcrm_active_user_id");
-    }
-    return null;
-  });
+  const [activeUserId, setActiveUserId] = React.useState<string | null>(null);
+
+  // Hydrate activeUserId from localStorage after mount (avoids SSR hydration mismatch)
+  React.useEffect(() => {
+    const saved = localStorage.getItem("callcrm_active_user_id");
+    if (saved) setActiveUserId(saved);
+  }, []);
 
   const switchActiveUser = React.useCallback((userId: string) => {
     if (userId === "auth" || !userId) {
@@ -386,6 +402,7 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
       outcomeLabel,
       notes,
       nextFollowUp,
+      durationSeconds,
     }: {
       leadId: string;
       unitId?: string;
@@ -394,6 +411,7 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
       outcomeLabel?: string;
       notes?: string;
       nextFollowUp?: string;
+      durationSeconds?: number;
     }) => {
       const lead = leads.find((l) => l.id === leadId);
       if (!lead) return false;
@@ -412,6 +430,7 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
         outcomeLabel: outcomeLabel || (outcome ? outcome.replace(/_/g, " ") : undefined),
         notes,
         scheduledFollowUpAt: nextFollowUp,
+        durationSeconds,
         createdAt: new Date().toISOString(),
       };
 
@@ -1358,6 +1377,10 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
   const contextValue = React.useMemo(
     () => ({
       currentUser,
+      vertical,
+      complexityMode,
+      verticalProfile,
+      getTerm,
       regions,
       areas,
       users,
@@ -1510,6 +1533,10 @@ export function CRMProvider({ children }: { children: React.ReactNode }) {
       revokeInvitation,
       updateUserRole,
       switchActiveUser,
+      vertical,
+      complexityMode,
+      verticalProfile,
+      getTerm,
     ]
   );
 

@@ -372,19 +372,34 @@ export const updateRegionSchema = createRegionSchema.partial();
 // 11. Team Invitations & Roles Schemas
 export const createInvitationSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["owner", "manager", "salesperson", "closer", "boss", "admin"]).default("salesperson"),
+  role: z.enum(["owner", "manager", "salesperson"]).default("salesperson"),
   regionId: idSchema.optional().nullable(),
 });
 
 export const updateUserRoleSchema = z.object({
-  role: z.enum(["owner", "manager", "salesperson", "closer", "boss", "admin"]),
+  role: z.enum(["owner", "manager", "salesperson"]),
   regionId: idSchema.optional().nullable(),
+});
+
+export const orgSetupSchema = z.object({
+  name: z.string().min(2).max(150),
+  teamSize: z.string().min(1).max(40),
+  primaryRegion: z.string().min(2).max(150),
+});
+
+export const planSchema = z.object({
+  plan: z.enum(["starter", "growth", "enterprise"]),
+  billingCycle: z.enum(["monthly", "yearly"]),
+  trialActive: z.boolean().default(true),
 });
 
 // 12. Organization Settings Schema
 export const updateOrgSettingsSchema = z.object({
   name: z.string().min(2).max(150).optional(),
   reactivationDays: z.number().int().min(1).max(365).optional(),
+  teamSize: z.string().min(1).max(40).optional(),
+  primaryRegion: z.string().min(2).max(150).optional(),
+  setupCompletedAt: z.string().datetime().optional().nullable(),
   customSettings: z.record(z.string(), z.any()).optional(),
 });
 

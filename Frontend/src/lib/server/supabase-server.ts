@@ -1,6 +1,7 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
+import { MANAGER_ROLES as CORE_MANAGER_ROLES, OWNER_ROLES as CORE_OWNER_ROLES, mapCanonicalRole } from "@/lib/server/rbac";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -23,8 +24,10 @@ export interface ApiAuthContext {
   plan: string | null;
 }
 
-// Roles allowed to perform manager-level actions (scans, org-wide reads)
-export const MANAGER_ROLES = ["owner", "admin", "boss", "manager"];
+// Widened to `ReadonlyArray<string>` so route guards can call
+// `MANAGER_ROLES.includes(auth.role)` where `auth.role` is a plain string.
+export const MANAGER_ROLES: ReadonlyArray<string> = [...CORE_MANAGER_ROLES];
+export const OWNER_ROLES: ReadonlyArray<string> = [...CORE_OWNER_ROLES];
 
 function hasSupabaseEnv(): boolean {
   return Boolean(
@@ -109,7 +112,7 @@ export async function getApiAuthContext(): Promise<ApiAuthContext | null> {
     return {
       userId: user.id,
       orgId: profile.org_id,
-      role: profile.role,
+      role: mapCanonicalRole(profile.role),
       email: user.email ?? "",
       fullName: profile.full_name,
       plan: orgPlan ?? null,
