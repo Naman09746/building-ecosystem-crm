@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0022: Auth + RBAC Consolidation
+-- Ecosystem Realty — Migration 0022: Auth + RBAC Consolidation
 -- Canonical roles: owner | manager | salesperson
 -- Legacy remap: closer->salesperson, admin->manager, boss->owner
 -- ============================================================================

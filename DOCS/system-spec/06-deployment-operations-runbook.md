@@ -1,4 +1,4 @@
-# 06. Deployment & Operations Runbook — Apex Realty CallCRM
+# 06. Deployment & Operations Runbook — Apex Realty EcosystemRealty
 
 **Document Version:** 2.0.0 (Enterprise Release)  
 **Hosting Platforms:** Vercel (Edge & Serverless Compute) + Supabase (Managed PostgreSQL 16)  

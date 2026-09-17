@@ -1,22 +1,22 @@
-# CLAUDE.md — CallCRM 2.0 Developer & AI Agent Guidelines
+# CLAUDE.md — EcosystemRealty 2.0 Developer & AI Agent Guidelines
 
-This document outlines architectural principles, development commands, design rules, and domain standards for **CallCRM 2.0 (Apex Realty)**. It reflects the hardened multi-tenant Supabase backend, PostgreSQL RLS-enforced tenancy, the **CallCRM + n8n Separation of Responsibilities Architecture**, and human-gated AI agents.
+This document outlines architectural principles, development commands, design rules, and domain standards for **EcosystemRealty 2.0 (Apex Realty)**. It reflects the hardened multi-tenant Supabase backend, PostgreSQL RLS-enforced tenancy, the **EcosystemRealty + n8n Separation of Responsibilities Architecture**, and human-gated AI agents.
 
 ---
 
 ## 1. Project Overview & Role
 
-- **Project**: CallCRM 2.0 for Indian Real Estate Organizations
+- **Project**: EcosystemRealty 2.0 for Indian Real Estate Organizations
 - **Domain**: High-ticket Indian luxury real estate sales operating system & daily salesperson cockpit with human-gated AI Agents and external n8n automation bus.
-- **Application Directory**: `Frontend/` (Next.js 15 App Router)
+- **Application Directory**: `apps/real-estate` + `apps/materials` (Turborepo) — see `turbo.json`
 - **Tech Stack**: Next.js 15, React 19, TypeScript, Tailwind CSS, Radix UI Primitives, Lucide React, Vercel AI SDK (`ai`, `@ai-sdk/react`), Google Gemini 2.5 Flash (`@ai-sdk/google`), Supabase (Postgres + Auth + RLS + Realtime), Vitest.
-- **Deployment**: Docker standalone image (see `Frontend/Dockerfile`) or Vercel; CI via GitHub Actions (`.github/workflows/ci.yml`: lint → test → build).
+- **Deployment**: Docker standalone image (see `apps/real-estate/Dockerfile`) or Vercel; CI via GitHub Actions (`.github/workflows/ci.yml`: lint → test → build).
 
 ---
 
 ## 2. Essential Commands
 
-All development commands must be run from within the `Frontend/` directory — or use the root **Makefile** (`make help`):
+All development commands must be run via Turborepo from repo root (`make help` or `yarn dev/build/test`):
 
 ```bash
 # ── Makefile targets (from repo root) ─────────────────────────────
@@ -38,15 +38,15 @@ npm run lint
 npm test                 # unit · security · state-machine · property intelligence · n8n architecture (239 tests)
 ```
 
-**Database**: apply `supabase/migrations/*.sql` in numeric order (`0001` → `0021`). Migrations are validated against real PostgreSQL and include RLS policies, quota triggers, org bootstrap logic, Property Intelligence, the Enterprise Domain Model, and n8n Outbox Event Bus. Never edit applied migrations — add a new numbered file.
+**Database**: apply `supabase/migrations/*.sql` in numeric order (`0001` → `0030`). Migrations are validated against real PostgreSQL and include RLS policies, quota triggers, org bootstrap logic, Property Intelligence, the Enterprise Domain Model, and n8n Outbox Event Bus. Never edit applied migrations — add a new numbered file.
 
 ---
 
 ## 3. Strict Operating Rules & Architectural Invariants
 
-1. **CallCRM + n8n Separation of Responsibilities Axiom**:
-   - **CallCRM Owns the Truth**: Core operations (*People, Leads, Buyer Requirements, Listings, Mandates, Units, Negotiations, Deals, Brokerage, and Audit Logs*) run natively inside CallCRM with PostgreSQL RLS.
-   - **Zero Dependency**: CallCRM functions 100% uninterrupted even if n8n is offline.
+1. **EcosystemRealty + n8n Separation of Responsibilities Axiom**:
+   - **EcosystemRealty Owns the Truth**: Core operations (*People, Leads, Buyer Requirements, Listings, Mandates, Units, Negotiations, Deals, Brokerage, and Audit Logs*) run natively inside EcosystemRealty with PostgreSQL RLS.
+   - **Zero Dependency**: EcosystemRealty functions 100% uninterrupted even if n8n is offline.
    - **Transactional Outbox (`crm_domain_events`)**: Emits HMAC-SHA256 signed business events asynchronously with 3s timeouts and circuit breakers tripping after 5 consecutive failures.
    - **Inbound Idempotency (`inbound_integration_events`)**: Webhooks from Meta, WhatsApp, or n8n are checked against unique `external_event_id` to prevent duplicate contacts or deals.
 2. **People Registry Decoupled from Leads**:
@@ -66,7 +66,7 @@ npm test                 # unit · security · state-machine · property intelli
 ```
 Real-estate/
 ├── supabase/
-│   └── migrations/                # Canonical DB (apply in order 0001→0021):
+│   └── migrations/                # Canonical DB (apply in order 0001→0030):
 │       ├── 0001_init.sql          #   multi-tenant schema + RLS + org bootstrap trigger
 │       ├── 0002_sample_seed.sql   #   first-run sample data RPC (per-org, idempotent)
 │       ├── ...                    #   phases 3-11 migrations

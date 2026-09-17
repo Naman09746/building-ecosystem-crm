@@ -1,4 +1,4 @@
-# 03. API Documentation — Apex Realty CallCRM
+# 03. API Documentation — Apex Realty EcosystemRealty
 
 **Base URL:** `https://your-domain.com/api` (or `http://localhost:3000/api` in local dev)  
 **Protocol:** HTTPS / JSON  

@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.github
+.env*
+!.env.local.example
+*.md
+!README.md
+coverage
+__tests__
+vitest.config.ts
+.eslintrc.json
+Dockerfile
+.dockerignore

@@ -1,6 +1,6 @@
-# CallCRM — Marketing Website Before & After Transformation Map
+# EcosystemRealty — Marketing Website Before & After Transformation Map
 
-> **Purpose**: Detailed section-by-section comparison demonstrating how CallCRM transitions from a generic "AI SaaS template" to an authoritative, high-ticket **Real Estate Technology & Advisory Operating System**.
+> **Purpose**: Detailed section-by-section comparison demonstrating how EcosystemRealty transitions from a generic "AI SaaS template" to an authoritative, high-ticket **Real Estate Technology & Advisory Operating System**.
 
 ---
 
@@ -97,7 +97,7 @@ PROPOSED REDESIGN (Atomic Flat 360° Property Dossier)
 | The Flat is the Atomic Asset. Not the Society.                                                       |
 |                                                                                                      |
 | In Indian real estate, every flat has a different owner, different tenant, and different price.     |
-| CallCRM models the true 6-tier hierarchy: Region -> Area -> Society -> Tower -> Floor -> Unit.       |
+| EcosystemRealty models the true 6-tier hierarchy: Region -> Area -> Society -> Tower -> Floor -> Unit.       |
 |                                                                                                      |
 | +--------------------------------------------------------------------------------------------------+ |
 | | 🏠 UNIT A-1402 DOSSIER (DLF The Camellias · Tower A · 14th Floor)                                | |
@@ -110,7 +110,7 @@ PROPOSED REDESIGN (Atomic Flat 360° Property Dossier)
 +------------------------------------------------------------------------------------------------------+
 
 BUSINESS BENEFIT:
-- Differentiates CallCRM from every generic SaaS CRM on the market.
+- Differentiates EcosystemRealty from every generic SaaS CRM on the market.
 - Solves the multi-owner reality of post-possession Indian societies.
 ```
 
@@ -125,7 +125,7 @@ CURRENT IMPLEMENTATION
 [ Static single-line note buried inside the Salesperson Home tab ]
 
 PROBLEMS:
-- Visitors do not realize CallCRM solves the #1 operational bottleneck in Indian sales: security gate friction.
+- Visitors do not realize EcosystemRealty solves the #1 operational bottleneck in Indian sales: security gate friction.
 
 ========================================================================================================
 PROPOSED REDESIGN (On-Site Operational Briefing Cockpit)
@@ -134,7 +134,7 @@ PROPOSED REDESIGN (On-Site Operational Briefing Cockpit)
 | 04 / ON-SITE EXCELLENCE                                                                              |
 | Arrive at the Society Completely Briefed.                                                            |
 |                                                                                                      |
-| 30 minutes before your client arrives, CallCRM delivers a synthesized briefing straight to the rep: |
+| 30 minutes before your client arrives, EcosystemRealty delivers a synthesized briefing straight to the rep: |
 |                                                                                                      |
 | +--------------------------------------------------------------------------------------------------+ |
 | | 🚗 PRE-SITE BRIEFING · DLF THE CAMELLIAS GATE 2                                                  | |
@@ -148,6 +148,6 @@ PROPOSED REDESIGN (On-Site Operational Briefing Cockpit)
 +------------------------------------------------------------------------------------------------------+
 
 BUSINESS BENEFIT:
-- Immediately proves to brokerage founders that CallCRM understands real-world sales operations.
+- Immediately proves to brokerage founders that EcosystemRealty understands real-world sales operations.
 - Eliminates embarrassing delays at security gates during VIP client visits.
 ```

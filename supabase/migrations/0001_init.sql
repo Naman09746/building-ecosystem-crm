@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Canonical Initial Migration (consolidated)
+-- Ecosystem Realty — Canonical Initial Migration (consolidated)
 -- Base: tenant_isolation_rls schema (orgs/profiles bound to auth.users)
 -- Ported from deprecated enterprise schema: normalize_phone, webhook_events,
 --   ai_agent_executions, updated_at triggers.

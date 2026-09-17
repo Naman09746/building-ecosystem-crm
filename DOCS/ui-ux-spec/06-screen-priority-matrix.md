@@ -1,4 +1,4 @@
-# CallCRM 2.0 — Screen Priority & Impact Matrix
+# EcosystemRealty 2.0 — Screen Priority & Impact Matrix
 
 > **Prioritization Framework**: Screens are ranked across **P0 (Critical)**, **P1 (Important)**, **P2 (Enhancement)**, and **P3 (Future)** based on daily sales velocity impact, revenue generation leverage, and user friction reduction.
 

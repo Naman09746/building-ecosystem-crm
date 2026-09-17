@@ -1,6 +1,6 @@
-# CallCRM — Marketing Information Architecture & Narrative Storytelling
+# EcosystemRealty — Marketing Information Architecture & Narrative Storytelling
 
-> **Document Objective**: Map the editorial narrative arc, section sequence, navigation taxonomy, and psychological conversion progression for the public marketing website of CallCRM.
+> **Document Objective**: Map the editorial narrative arc, section sequence, navigation taxonomy, and psychological conversion progression for the public marketing website of EcosystemRealty.
 
 ---
 
@@ -135,7 +135,7 @@ flowchart TD
 ## 3. Global Navigation Taxonomy
 
 ```
-[ Navbar: Logo / Apex CallCRM ]
+[ Navbar: Logo / Ecosystem Realty ]
 ├── Product
 │   ├── Flat 360° Property Dossier
 │   ├── 100-Point Buyer Matcher

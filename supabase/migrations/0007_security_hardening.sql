@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0007: Security & Authorization Hardening
+-- Ecosystem Realty — Migration 0007: Security & Authorization Hardening
 -- Hardens database-level authorization against unauthorized salesperson mutations
 -- while preserving legitimate multi-tenant CRM workflows:
 --   1. Lead reassignment protection on UPDATE (salesperson cannot reassign lead ownership)

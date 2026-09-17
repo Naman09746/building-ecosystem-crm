@@ -1,6 +1,6 @@
-# CallCRM 2.0 — Architecture & Documentation Hub
+# EcosystemRealty 2.0 — Architecture & Documentation Hub
 
-Welcome to the official documentation and technical specifications library for **CallCRM 2.0 (Apex Realty)**.
+Welcome to the official documentation and technical specifications library for **EcosystemRealty 2.0 (Apex Realty)**.
 
 ---
 
@@ -101,8 +101,8 @@ Master consolidated documents, pitch playbooks, and audits:
 
 | # | Playbook Document | Description |
 | :---: | :--- | :--- |
-| 01 | [01-callcrm-complete-blueprint.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/01-callcrm-complete-blueprint.md) | Master Consolidated Product Audit, Selling Playbook & UI/UX Redesign Blueprint. |
-| 02 | [02-callcrm-master-frontend-and-system-encyclopedia.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/02-callcrm-master-frontend-and-system-encyclopedia.md) | Single-file definitive encyclopedia of all frontend and system architecture. |
+| 01 | [01-ecosystemrealty-complete-blueprint.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/01-ecosystemrealty-complete-blueprint.md) | Master Consolidated Product Audit, Selling Playbook & UI/UX Redesign Blueprint. |
+| 02 | [02-ecosystemrealty-master-frontend-and-system-encyclopedia.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/02-ecosystemrealty-master-frontend-and-system-encyclopedia.md) | Single-file definitive encyclopedia of all frontend and system architecture. |
 | 03 | [03-project-audit.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/03-project-audit.md) | Executive pitch, selling scripts, and verified production audit scorecard. |
 | 04 | [04-implementation-audit.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/04-implementation-audit.md) | Technical implementation audit verifying all 14 engineering phases. |
-| 05 | [05-callcrm-master-feature-and-screen-encyclopedia.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/05-callcrm-master-feature-and-screen-encyclopedia.md) | Master Screen & Feature Encyclopedia: Technical mechanics, SQL origins, and non-repetition matrix. |
+| 05 | [05-ecosystemrealty-master-feature-and-screen-encyclopedia.md](file:///Users/namanjoshi/SAAS/Real-estate/DOCS/playbooks/05-ecosystemrealty-master-feature-and-screen-encyclopedia.md) | Master Screen & Feature Encyclopedia: Technical mechanics, SQL origins, and non-repetition matrix. |

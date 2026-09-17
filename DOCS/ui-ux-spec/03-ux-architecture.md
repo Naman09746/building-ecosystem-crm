@@ -1,6 +1,6 @@
-# CallCRM 2.0 — UX Information Architecture & Interaction Design
+# EcosystemRealty 2.0 — UX Information Architecture & Interaction Design
 
-> **Document Objective**: Define the comprehensive Information Architecture (IA), role-specific mental models, navigation taxonomy, and user interaction journeys for CallCRM 2.0 to eliminate cognitive clutter, reduce modal fragmentation, and accelerate high-ticket sales workflows.
+> **Document Objective**: Define the comprehensive Information Architecture (IA), role-specific mental models, navigation taxonomy, and user interaction journeys for EcosystemRealty 2.0 to eliminate cognitive clutter, reduce modal fragmentation, and accelerate high-ticket sales workflows.
 
 ---
 
@@ -20,7 +20,7 @@ Rather than exposing a flat list of 13 menu items, the sidebar is organized into
 
 ```mermaid
 graph TD
-    ROOT[CallCRM Global Shell]
+    ROOT[EcosystemRealty Global Shell]
     
     ROOT --> WORKSPACE[1. Sales Workspace]
     ROOT --> ASSETS[2. Property Intelligence]
@@ -103,7 +103,7 @@ sequenceDiagram
     participant Matcher as 100-Point Matcher
     participant DB as Supabase DB
     
-    Rep->>Home: Opens CallCRM at 9:00 AM
+    Rep->>Home: Opens EcosystemRealty at 9:00 AM
     Home-->>Rep: Displays "Top 3 Priorities for Today"
     Note over Home,Rep: Priority 1: High-Intent Buyer (Rahul Sharma - ₹4.5 Cr)
     Rep->>Home: Presses hotkey "L" or clicks "Call Rahul"
@@ -210,7 +210,7 @@ To avoid "Modal Inception" and lost state:
 
 ## 7. Global Command Palette (`⌘K` / `/`) Architecture
 
-The Command Palette is the universal nerve center of CallCRM. It indexes all entities in <10ms:
+The Command Palette is the universal nerve center of EcosystemRealty. It indexes all entities in <10ms:
 
 ```
 [ ⌘K ] Universal Search & Action Bar

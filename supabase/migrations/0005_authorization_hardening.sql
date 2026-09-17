@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0005: Authorization Hardening
+-- Ecosystem Realty — Migration 0005: Authorization Hardening
 -- Fixes found in the Pass 6 security re-audit:
 --   H2: manager->owner self-elevation via unrestricted profiles.role UPDATE
 --   M3: permissive tasks FOR ALL policy defeated rep-scoping

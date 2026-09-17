@@ -1,4 +1,4 @@
-# CallCRM 2.0 — Final Frontend Implementation Specification
+# EcosystemRealty 2.0 — Final Frontend Implementation Specification
 ## Source of Truth Architecture & Redesign Contract
 
 > **Document Status**: Final Implementation Specification (Post-Consistency Pass)  
@@ -155,7 +155,7 @@ Primary Interaction      Storytelling scroll & private demo request   Hotkey exe
 
 # 6. Flat 360° Master Property Dossier
 
-The **Flat/Unit** is the atomic transactional asset in CallCRM. The redesigned dossier replaces the cramped dialog with a dedicated slide-over sheet (`UnitDossierSheet.tsx`) using progressive disclosure:
+The **Flat/Unit** is the atomic transactional asset in EcosystemRealty. The redesigned dossier replaces the cramped dialog with a dedicated slide-over sheet (`UnitDossierSheet.tsx`) using progressive disclosure:
 
 ```
 +------------------------------------------------------------------------------------------------------+

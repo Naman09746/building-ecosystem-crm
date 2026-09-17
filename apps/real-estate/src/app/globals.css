@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Architectural Ledger Palette */
+    --background: #f4f6f8;
+    --foreground: #13161c;
+
+    /* Surfaces / Cards */
+    --card: #ffffff;
+    --card-foreground: #13161c;
+
+    /* Popover / Menus / Drawers */
+    --popover: #ffffff;
+    --popover-foreground: #13161c;
+
+    /* Primary Accent (Charcoal) */
+    --primary: #13161c;
+    --primary-hover: #1e242c;
+    --primary-foreground: #ffffff;
+
+    /* Secondary / Subtle Surfaces */
+    --secondary: #e6e9ec;
+    --secondary-hover: #d8dcdf;
+    --secondary-foreground: #13161c;
+
+    /* Muted Text & Backgrounds */
+    --muted: #e6e9ec;
+    --muted-foreground: #64748b;
+
+    /* Accent / Brass */
+    --accent: #a9812e;
+    --accent-foreground: #ffffff;
+
+    /* Semantic */
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --destructive-subtle: #fef2f2;
+    --success: #2d5a4c;
+    --success-foreground: #ffffff;
+    --success-subtle: #ecfdf5;
+    --warning: #d97706;
+    --warning-foreground: #ffffff;
+    --warning-subtle: #fffbeb;
+    --info: #64748b;
+    --info-foreground: #ffffff;
+    --info-subtle: #f1f5f9;
+
+    /* Borders & Inputs */
+    --border: #dce0e5;
+    --border-subtle: #e6e9ec;
+    --input: #dce0e5;
+    --ring: #a9812e;
+
+    /* Border Radius Tokens: Sharp, architectural */
+    --radius-sm: 0px;
+    --radius-md: 2px;
+    --radius-lg: 4px;
+    --radius-xl: 6px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom Scrollbar for Dense Tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Landing Page Architectural Ledger Flourishes */
+.hero-gradient {
+  background: radial-gradient(circle at 50% 0%, rgba(19, 22, 28, 0.04) 0%, transparent 70%);
+}
+
+.blueprint-grid {
+  background-image: 
+    linear-gradient(to right, rgba(216, 220, 221, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(216, 220, 221, 0.45) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.blueprint-dots {
+  background-image: radial-gradient(rgba(19, 22, 28, 0.12) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.glow-card {
+  box-shadow: 0 4px 20px -10px rgba(19, 22, 28, 0.06), 0 2px 6px -1px rgba(19, 22, 28, 0.02);
+}
+
+.glow-brass {
+  box-shadow: 0 8px 24px -6px rgba(169, 129, 46, 0.15);
+}

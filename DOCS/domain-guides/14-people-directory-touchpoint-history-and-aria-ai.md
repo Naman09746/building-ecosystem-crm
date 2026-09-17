@@ -46,7 +46,7 @@ graph TD
 #### Engineering Architecture:
 1. **Entity Separation (`people` vs `leads` vs `deals`):**
    * Traditional CRMs conflate the *human being* with the *transaction*.
-   * CallCRM separates the **Person Entity** (Master KYC, Phone, Net Worth, City, Family Profile) from individual **Lead Opportunities** (Inquiry for *DLF Camellias 4BHK* vs *Lodha Altamount Sea-Facing*).
+   * EcosystemRealty separates the **Person Entity** (Master KYC, Phone, Net Worth, City, Family Profile) from individual **Lead Opportunities** (Inquiry for *DLF Camellias 4BHK* vs *Lodha Altamount Sea-Facing*).
 2. **Deterministic Deduplication Engine:**
    * Uses normalized E.164 phone hashing (`+91XXXXXXXXXX`) and lowercase email indexing:
      ```sql
@@ -84,7 +84,7 @@ graph TD
    * Every interaction is recorded as an immutable append-only record in the `activities` table. Reps cannot tamper with or delete past call records, providing 100% compliance for broker commissions and RERA dispute resolution.
 2. **Automated "Next Step Missing" SLA Watchdog:**
    * **The Problem:** In sales, when a rep ends a call with *"buyer was interested"* but forgets to schedule a specific follow-up date, the deal dies $80\%$ of the time.
-   * **The Solution:** CallCRM's trigger inspects every logged activity:
+   * **The Solution:** EcosystemRealty's trigger inspects every logged activity:
      $$\text{If } \texttt{activity.type} \in \{\text{'call'}, \text{'whatsapp'}, \text{'site\_visit'}\} \text{ AND } \texttt{lead.next\_follow\_up\_at IS NULL} \implies \text{Flag ⚠️ Next step missing}$$
    * The UI highlights these in amber alerts and surfaces them directly on the manager's Action Center.
 
@@ -120,7 +120,7 @@ graph TD
      * **Architectural / Cultural:** *Vastu compliance (North-East facing, Pooja room), Carpet Area vs Super Built-up Area, High-Floor Penthouse.*
 3. **The "Grounded Triad" & Approval-Gated Sync:**
    * **Why it matters to investors:** Autonomous AI bots that write directly to production CRMs cause data corruption and hallucinated promises.
-   * **The CallCRM Boundary:** Aria qualifies the buyer, formats a structured JSON proposal, and holds it in an **Approval-Gated Staging Queue (`[🛡️ Approval-Gated Sync]`)**. 
+   * **The EcosystemRealty Boundary:** Aria qualifies the buyer, formats a structured JSON proposal, and holds it in an **Approval-Gated Staging Queue (`[🛡️ Approval-Gated Sync]`)**. 
    * A human sales manager clicks **"Inspect & Approve"** before the lead is formally admitted to the live deal pipeline.
 
 ---

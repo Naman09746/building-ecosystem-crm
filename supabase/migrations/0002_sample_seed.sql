@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0002: First-Run Sample Data Seeder
+-- Ecosystem Realty — Migration 0002: First-Run Sample Data Seeder
 -- Callable by any authenticated user; seeds ONLY the caller's organization
 -- (resolved via profiles -> current_org_id()). No-ops if already seeded.
 -- ============================================================================

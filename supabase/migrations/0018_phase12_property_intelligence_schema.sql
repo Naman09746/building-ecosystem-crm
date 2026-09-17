@@ -646,85 +646,87 @@ begin
   end if;
 
   return query
-  -- 1. Units / Flats (Matched on unit_number, tower, configuration)
-  select
-    u.id,
-    'unit'::text as entity_type,
-    (p.name || ' • ' || u.tower || ' - ' || u.unit_number)::text as title,
-    (u.configuration || ' • ' || u.super_area_sq_ft || ' sqft • ₹' || round(u.price / 10000000.0, 2) || ' Cr')::text as subtitle,
-    u.status::text as badge,
-    jsonb_build_object(
-      'unitNumber', u.unit_number,
-      'tower', u.tower,
-      'projectId', u.project_id,
-      'projectName', p.name,
-      'price', u.price,
-      'status', u.status,
-      'sellerIntent', u.seller_intent,
-      'floor', u.floor
-    ) as metadata
-  from public.project_units u
-  join public.projects p on p.id = u.project_id and p.org_id = p_org_id
-  where u.org_id = p_org_id
-    and (
-      u.unit_number ilike '%' || v_q || '%'
-      or u.tower ilike '%' || v_q || '%'
-      or (u.tower || ' ' || u.unit_number) ilike '%' || v_q || '%'
-      or (u.tower || '-' || u.unit_number) ilike '%' || v_q || '%'
-      or p.name ilike '%' || v_q || '%'
-      or u.configuration ilike '%' || v_q || '%'
-    )
-  limit (p_limit / 2)
-
+  (
+    -- 1. Units / Flats (Matched on unit_number, tower, configuration)
+    select
+      u.id,
+      'unit'::text as entity_type,
+      (p.name || ' • ' || u.tower || ' - ' || u.unit_number)::text as title,
+      (u.configuration || ' • ' || u.super_area_sq_ft || ' sqft • ₹' || round(u.price / 10000000.0, 2) || ' Cr')::text as subtitle,
+      u.status::text as badge,
+      jsonb_build_object(
+        'unitNumber', u.unit_number,
+        'tower', u.tower,
+        'projectId', u.project_id,
+        'projectName', p.name,
+        'price', u.price,
+        'status', u.status,
+        'sellerIntent', u.seller_intent,
+        'floor', u.floor
+      ) as metadata
+    from public.project_units u
+    join public.projects p on p.id = u.project_id and p.org_id = p_org_id
+    where u.org_id = p_org_id
+      and (
+        u.unit_number ilike '%' || v_q || '%'
+        or u.tower ilike '%' || v_q || '%'
+        or (u.tower || ' ' || u.unit_number) ilike '%' || v_q || '%'
+        or (u.tower || '-' || u.unit_number) ilike '%' || v_q || '%'
+        or p.name ilike '%' || v_q || '%'
+        or u.configuration ilike '%' || v_q || '%'
+      )
+    limit (p_limit / 2)
+  )
   union all
-
-  -- 2. Projects / Societies
-  select
-    pr.id,
-    'project'::text as entity_type,
-    pr.name::text as title,
-    (pr.developer || ' • ' || pr.location)::text as subtitle,
-    pr.status::text as badge,
-    jsonb_build_object(
-      'developer', pr.developer,
-      'location', pr.location,
-      'societyType', pr.society_type,
-      'totalTowers', pr.total_towers
-    ) as metadata
-  from public.projects pr
-  where pr.org_id = p_org_id
-    and (
-      pr.name ilike '%' || v_q || '%'
-      or pr.developer ilike '%' || v_q || '%'
-      or pr.location ilike '%' || v_q || '%'
-    )
-  limit (p_limit / 3)
-
+  (
+    -- 2. Projects / Societies
+    select
+      pr.id,
+      'project'::text as entity_type,
+      pr.name::text as title,
+      (pr.developer || ' • ' || pr.location)::text as subtitle,
+      pr.status::text as badge,
+      jsonb_build_object(
+        'developer', pr.developer,
+        'location', pr.location,
+        'societyType', pr.society_type,
+        'totalTowers', pr.total_towers
+      ) as metadata
+    from public.projects pr
+    where pr.org_id = p_org_id
+      and (
+        pr.name ilike '%' || v_q || '%'
+        or pr.developer ilike '%' || v_q || '%'
+        or pr.location ilike '%' || v_q || '%'
+      )
+    limit (p_limit / 3)
+  )
   union all
-
-  -- 3. People (Owners, Buyers, Stakeholders, Phone Dedup)
-  select
-    pe.id,
-    'person'::text as entity_type,
-    pe.name::text as title,
-    (pe.phone || coalesce(' • ' || pe.city, ''))::text as subtitle,
-    coalesce(pe.vip_tier, 'Contact')::text as badge,
-    jsonb_build_object(
-      'phone', pe.phone,
-      'email', pe.email,
-      'city', pe.city,
-      'budget', pe.budget,
-      'vipTier', pe.vip_tier
-    ) as metadata
-  from public.people pe
-  where pe.org_id = p_org_id
-    and (
-      pe.name ilike '%' || v_q || '%'
-      or pe.phone ilike '%' || v_q || '%'
-      or coalesce(pe.phone_normalized, '') ilike '%' || v_q || '%'
-      or coalesce(pe.email, '') ilike '%' || v_q || '%'
-    )
-  limit (p_limit / 3);
+  (
+    -- 3. People (Owners, Buyers, Stakeholders, Phone Dedup)
+    select
+      pe.id,
+      'person'::text as entity_type,
+      pe.name::text as title,
+      (pe.phone || coalesce(' • ' || pe.city, ''))::text as subtitle,
+      coalesce(pe.vip_tier, 'Contact')::text as badge,
+      jsonb_build_object(
+        'phone', pe.phone,
+        'email', pe.email,
+        'city', pe.city,
+        'budget', pe.budget,
+        'vipTier', pe.vip_tier
+      ) as metadata
+    from public.people pe
+    where pe.org_id = p_org_id
+      and (
+        pe.name ilike '%' || v_q || '%'
+        or pe.phone ilike '%' || v_q || '%'
+        or coalesce(pe.phone_normalized, '') ilike '%' || v_q || '%'
+        or coalesce(pe.email, '') ilike '%' || v_q || '%'
+      )
+    limit (p_limit / 3)
+  );
 
 end;
 $$;

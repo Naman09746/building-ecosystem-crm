@@ -1,6 +1,6 @@
-# PROJECT_AUDIT.md — CallCRM 2.0 (Real Estate Intelligence & Automation)
+# PROJECT_AUDIT.md — EcosystemRealty 2.0 (Real Estate Intelligence & Automation)
 
-> **Purpose of this document**: You have zero prior knowledge of this project. By reading this single file you will be able to **understand, pitch, sell, demonstrate, defend, and scale** CallCRM 2.0. Every important claim is backed by exact file references and verified code implementations.
+> **Purpose of this document**: You have zero prior knowledge of this project. By reading this single file you will be able to **understand, pitch, sell, demonstrate, defend, and scale** EcosystemRealty 2.0. Every important claim is backed by exact file references and verified code implementations.
 >
 > **Verification performed at audit time** (all run successfully inside `Frontend/`):
 > - `npm run lint` → ✅ "No ESLint warnings or errors"
@@ -8,7 +8,7 @@
 > - `npm run build` → ✅ production standalone build succeeds (**75 routes compiled, 0 errors**)
 > - `graphify update .` → ✅ Synchronized AST code graph
 >
-> **Audit date**: 2026-08-31 · HEAD: CallCRM 2.0 Real Estate Intelligence & Automation Engine Complete
+> **Audit date**: 2026-08-31 · HEAD: EcosystemRealty 2.0 Real Estate Intelligence & Automation Engine Complete
 
 ---
 
@@ -18,7 +18,7 @@
 
 | Question | Answer |
 |---|---|
-| Project name | **CallCRM 2.0** (Luxury Indian Real Estate Sales & Intelligence Operating System) |
+| Project name | **EcosystemRealty 2.0** (Luxury Indian Real Estate Sales & Intelligence Operating System) |
 | One-sentence description | An enterprise Real Estate Intelligence Operating System engineered specifically for Indian luxury property brokerage houses and developer sales teams — modeling the **Flat/Unit as the atomic asset**, detecting proactive seller signals, executing 100-point bi-directional buyer matching, and providing human-gated AI meeting summarization. |
 | The Core Problem It Solves | Generic CRMs treat real estate like generic SaaS leads. In reality, high-ticket Indian real estate transactions (₹5 Cr to ₹50 Cr+ in DLF Golf Course Road, Worli, Bandra, Whitefield) fail due to **lost property/gate memory**, **inability to capture resale mandates before open-market portals**, **slow speed-to-lead**, and **missing 30-minute pre-site-visit intelligence**. |
 | Who uses it | Real-estate sales directors, closing specialists, site visit consultants, and brokerage agency founders ("the Boss"). |
@@ -31,7 +31,7 @@
 
 ## 30-Second Elevator Pitch (Say this to any Real Estate Founder or Sales Director)
 
-> *"Most real estate CRMs fail because they treat property like generic software leads and lose all institutional memory when an agent leaves. CallCRM 2.0 is an operating system built specifically for how Indian luxury real estate actually works: the **Flat/Unit is the atomic asset**. It monitors expiring tenancies and vacant units to generate exclusive seller mandates before properties reach 99acres or MagicBricks, computes 100-point bi-directional buyer-unit matches, and delivers a 30-minute pre-site-visit briefing with Gate 2 visitor pass codes and owner price floors straight to the rep's phone. Most importantly, AI assists reps but can never mutate data autonomously — every deal transition requires human approval."*
+> *"Most real estate CRMs fail because they treat property like generic software leads and lose all institutional memory when an agent leaves. EcosystemRealty 2.0 is an operating system built specifically for how Indian luxury real estate actually works: the **Flat/Unit is the atomic asset**. It monitors expiring tenancies and vacant units to generate exclusive seller mandates before properties reach 99acres or MagicBricks, computes 100-point bi-directional buyer-unit matches, and delivers a 30-minute pre-site-visit briefing with Gate 2 visitor pass codes and owner price floors straight to the rep's phone. Most importantly, AI assists reps but can never mutate data autonomously — every deal transition requires human approval."*
 
 ---
 
@@ -46,7 +46,7 @@
 >
 > Generic CRMs like Salesforce or HubSpot don't understand that the **Flat/Unit is the asset**, not the society.
 >
-> **CallCRM 2.0 solves this with four unfair advantages:**
+> **EcosystemRealty 2.0 solves this with four unfair advantages:**
 >
 > 1. **Proactive Seller Opportunity Engine**: We scan client tenancies expiring within 60 days, vacant units incurring holding costs, and 3-year investor exit windows. Agents convert these signals into exclusive resale listings with 1 click.
 > 2. **100-Point Bi-Directional Matcher**: When a new luxury unit comes in, our multi-factor algorithm instantly scores and ranks every active buyer in the pipeline across location, budget, configuration, floor band, and facing.
@@ -59,7 +59,7 @@
 
 ## Competitive Differentiation Matrix
 
-| Capability | Generic CRMs (Salesforce / HubSpot) | Indian Property Portals (99acres / MagicBricks) | **CallCRM 2.0 (Apex Realty)** |
+| Capability | Generic CRMs (Salesforce / HubSpot) | Indian Property Portals (99acres / MagicBricks) | **EcosystemRealty 2.0 (Apex Realty)** |
 | :--- | :--- | :--- | :--- |
 | **Real Estate Data Hierarchy** | ❌ Generic accounts/contacts | ❌ Flat list of public ads | ✅ **6-tier normalized hierarchy** (Region $\rightarrow$ Area $\rightarrow$ Society $\rightarrow$ Tower $\rightarrow$ Floor $\rightarrow$ Unit) |
 | **Unit-Level Atomic Asset** | ❌ No concept of flats | ❌ Ad-centric, duplicate listings | ✅ **Flat 360° Dossier** with temporal ownership chains & price history |

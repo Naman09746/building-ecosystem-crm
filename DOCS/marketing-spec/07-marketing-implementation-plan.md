@@ -1,4 +1,4 @@
-# CallCRM — Marketing Website Implementation Plan
+# EcosystemRealty — Marketing Website Implementation Plan
 
 > **Plan Objective**: Provide an exact, step-by-step technical implementation plan for redesigning the public marketing website (`Frontend/src/app/page.tsx` and `Frontend/src/components/marketing/*`) into an authoritative, editorial, high-ticket Real Estate Technology Operating System.
 
@@ -37,7 +37,7 @@ flowchart TD
 
 ### 1. Architectural Navbar
 - Sticky top header (`bg-[#f8f7f4]/90 backdrop-blur-md border-b border-[#e2ded6]`).
-- Brand logo: `Apex CallCRM` with `[ REAL ESTATE OS ]` badge.
+- Brand logo: `Ecosystem Realty` with `[ REAL ESTATE OS ]` badge.
 - Navigation links: `Product`, `Property Intelligence`, `Matching`, `Solutions`, `Pricing`, `FAQ`.
 - CTA: `Sign In` + `[Start 14-Day Free Trial]`.
 

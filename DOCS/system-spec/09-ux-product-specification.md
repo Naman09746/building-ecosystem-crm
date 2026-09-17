@@ -1,4 +1,4 @@
-# 09. UX & Product Specification — Apex Realty CallCRM
+# 09. UX & Product Specification — Apex Realty EcosystemRealty
 
 **Design Philosophy:** "10-Second Sales Interaction & Grounded Property Intelligence"  
 **Aesthetic Style:** Architectural Ledger — Off-White Paper Canvas & Precision Obsidian Typography  

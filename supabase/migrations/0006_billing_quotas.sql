@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0006: Billing Infrastructure & Quota Enforcement
+-- Ecosystem Realty — Migration 0006: Billing Infrastructure & Quota Enforcement
 -- Supports the subscription engine with REAL schema columns (the canonical
 -- table is `orgs`, not `organizations`), fixes the webhook_events provider
 -- CHECK, and enforces lead quotas at the DATABASE layer so both write paths

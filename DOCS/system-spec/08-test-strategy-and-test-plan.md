@@ -1,4 +1,4 @@
-# 08. Test Strategy & Test Plan — Apex Realty CallCRM
+# 08. Test Strategy & Test Plan — Apex Realty EcosystemRealty
 
 **Test Runner:** Vitest (`vitest run`)  
 **Assertion Library:** Vitest Chai Assertions + React Testing Library  

@@ -1,6 +1,6 @@
-# CallCRM 2.0 — Screen-by-Screen UI/UX Redesign Plan
+# EcosystemRealty 2.0 — Screen-by-Screen UI/UX Redesign Plan
 
-> **Plan Objective**: Provide an exhaustive, implementation-ready architectural roadmap for executing the CallCRM 2.0 redesign across all 11 phases without breaking existing business logic, database migrations, or test suites.
+> **Plan Objective**: Provide an exhaustive, implementation-ready architectural roadmap for executing the EcosystemRealty 2.0 redesign across all 11 phases without breaking existing business logic, database migrations, or test suites.
 
 ---
 

@@ -1,8 +1,8 @@
-# Building Ecosystem CRM — Unified Operating System for Construction, Materials & Real Estate
+# Ecosystem Realty — Unified Operating System for Construction, Materials & Real Estate
 
-**Building Ecosystem CRM** is an extensible, enterprise-grade Sales Operating System and AI platform engineered for the entire lifecycle of the built environment. 
+**Ecosystem Realty** is an extensible, enterprise-grade Sales Operating System and AI platform engineered for the entire lifecycle of the built environment. 
 
-Rather than isolating real estate transactions from the supply chain, Building Ecosystem CRM connects **Real Estate Developers, Building Material Suppliers (Bricks, Cement, Marble, Tiles, Sanitaryware, Hardware), Interior & Furniture Studios, Architecture Firms, and Civil Contractors** into a unified, collaborative commercial ecosystem.
+Rather than isolating real estate transactions from the supply chain, Ecosystem Realty connects **Real Estate Developers, Building Material Suppliers (Bricks, Cement, Marble, Tiles, Sanitaryware, Hardware), Interior & Furniture Studios, Architecture Firms, and Civil Contractors** into a unified, collaborative commercial ecosystem.
 
 Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind CSS**, **Vercel AI SDK**, **Google Gemini**, **Supabase** (Postgres + Auth + RLS + Realtime), and an **n8n Event Bus**.
 
@@ -10,7 +10,7 @@ Built with **Next.js 15 App Router**, **React 19**, **TypeScript**, **Tailwind C
 
 ## 🌐 The Big Picture: One Platform, Five Interconnected Verticals
 
-Every building project involves a linked chain of commerce. Building Ecosystem CRM provides a **common public website and shared core engine**, with **personalized post-login experiences** tailored to each industry's workflow, vocabulary, and operational depth.
+Every building project involves a linked chain of commerce. Ecosystem Realty provides a **common public website and shared core engine**, with **personalized post-login experiences** tailored to each industry's workflow, vocabulary, and operational depth.
 
 ```mermaid
 graph TD
@@ -71,7 +71,7 @@ Different businesses operate at different speeds. The CRM adapts its complexity 
 
 ## 🏛️ Shared Architecture & Technical Foundation
 
-### 1. CallCRM Core + n8n Separation-of-Responsibilities
+### 1. EcosystemRealty Core + n8n Separation-of-Responsibilities
 - **Core Platform Owns the Truth**: All core business logic (*People, Leads, Accounts, Catalogs, Pipeline, Deals, and Audit Logs*) executes inside Next.js and Supabase. The system works 100% uninterrupted even if external automations are unreachable.
 - **Transactional Outbox & Domain Event Bus (`crm_domain_events`)**: Dispatches HMAC-SHA256 signed events (`LeadCreated`, `QuoteGenerated`, `DispatchScheduled`, `DealWon`, `CommissionCreated`) with retries, exponential backoff, and circuit breakers.
 - **Inbound Idempotency (`inbound_integration_events`)**: Protects against duplicate leads or orders from WhatsApp, IndiaMART, Justdial, or Meta webhook replays.

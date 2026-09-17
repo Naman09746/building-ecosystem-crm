@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0009: Phase 3 Production Billing & Subscription Lifecycle
+-- Ecosystem Realty — Migration 0009: Phase 3 Production Billing & Subscription Lifecycle
 -- Implements complete multi-tenant subscription domain model, billing customers,
 -- invoices, refunds, GST fields, automated quota sync, and strict RLS policies.
 -- ============================================================================

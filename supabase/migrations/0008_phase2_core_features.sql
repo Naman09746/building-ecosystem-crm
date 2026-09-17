@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0008: Phase 2 Core Features Schema
+-- Ecosystem Realty — Migration 0008: Phase 2 Core Features Schema
 -- Core CRUD Foundations, Team Invitations, Immutable Audit Triggers,
 -- Storage Bucket Provisioning, and Tenant Safety Controls.
 -- ============================================================================

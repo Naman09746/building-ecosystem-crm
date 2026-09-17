@@ -1,7 +1,7 @@
-# CallCRM — Phase 9: Server-Side Analytics & Reporting Architecture
+# EcosystemRealty — Phase 9: Server-Side Analytics & Reporting Architecture
 
 ## 1. Overview
-In Phase 9, CallCRM transitioned from client-side array aggregations (`leads.reduce`, `leads.filter`, `leads.length`) to authoritative, tenant-isolated PostgreSQL aggregation stored procedures and dedicated Next.js API endpoints.
+In Phase 9, EcosystemRealty transitioned from client-side array aggregations (`leads.reduce`, `leads.filter`, `leads.length`) to authoritative, tenant-isolated PostgreSQL aggregation stored procedures and dedicated Next.js API endpoints.
 
 ---
 

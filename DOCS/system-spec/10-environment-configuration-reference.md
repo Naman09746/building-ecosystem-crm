@@ -1,4 +1,4 @@
-# 10. Environment & Configuration Reference — Apex Realty CallCRM
+# 10. Environment & Configuration Reference — Apex Realty EcosystemRealty
 
 **Config File:** `Frontend/.env.local`  
 **Template File:** `Frontend/.env.local.example`

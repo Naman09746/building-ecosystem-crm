@@ -1,5 +1,5 @@
 -- ============================================================================
--- Apex CallCRM — Migration 0003: Durable Rate Limiting
+-- Ecosystem Realty — Migration 0003: Durable Rate Limiting
 -- Postgres-backed fixed-window limiter for cost-critical endpoints.
 -- Service-role only: no client-facing policies.
 -- ============================================================================

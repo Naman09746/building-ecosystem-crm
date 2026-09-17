@@ -1,6 +1,6 @@
-# 11. Architecture Decision Records (ADRs) — Apex Realty CallCRM
+# 11. Architecture Decision Records (ADRs) — Apex Realty EcosystemRealty
 
-This document records the critical architectural decisions made during the design and hardening of Apex Realty CallCRM.
+This document records the critical architectural decisions made during the design and hardening of Apex Realty EcosystemRealty.
 
 ---
 
@@ -59,11 +59,11 @@ This document records the critical architectural decisions made during the desig
 
 ---
 
-## ADR 006: CallCRM + n8n Separation of Responsibilities & Transactional Domain Event Outbox
+## ADR 006: EcosystemRealty + n8n Separation of Responsibilities & Transactional Domain Event Outbox
 
 - **Status:** Accepted
 - **Context:** Coupling third-party communication channels (telephony, WhatsApp Cloud API, external marketing automation) directly into synchronous Next.js API route handlers creates vulnerability to external provider outages, rate limits, and latency spikes.
-- **Decision:** Establish CallCRM as the single source of truth and security boundary, and delegate external orchestration and multi-channel drip campaigns to n8n via a transactional Domain Event Outbox (`integration_outbox`).
+- **Decision:** Establish EcosystemRealty as the single source of truth and security boundary, and delegate external orchestration and multi-channel drip campaigns to n8n via a transactional Domain Event Outbox (`integration_outbox`).
 - **Consequences:**
   - *Positive:* 100% decoupling; zero request blocking; reliable at-least-once event delivery; circuit breaker protection prevents system cascading failures.
   - *Trade-off:* Requires background cron processor (`/api/integrations/outbox/process`) and idempotency key checking.

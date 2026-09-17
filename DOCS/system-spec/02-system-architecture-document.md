@@ -1,4 +1,4 @@
-# 02. System Architecture Document — CallCRM 2.0
+# 02. System Architecture Document — EcosystemRealty 2.0
 
 **Document Version:** 2.0.0 (Production Release)  
 **Architecture Style:** Modular Monolith with Asynchronous Integration Event Bus (Next.js 15 App Router + React 19 + Supabase PostgreSQL + n8n Orchestrator)  
@@ -57,7 +57,7 @@
 - **Strict Multi-Tenant Verification:** Every filtered selector (`filteredLeads`, `filteredTasks`, `reactivationLeads`) strictly enforces `record.orgId === currentUser.orgId`.
 - **Sub-10ms UI Feedback:** State updates optimistically in React before resolving over the network.
 
-### 2.3 CallCRM + n8n Integration Layer (`Frontend/src/lib/server/domain-event-bus.ts`)
+### 2.3 EcosystemRealty + n8n Integration Layer (`Frontend/src/lib/server/domain-event-bus.ts`)
 - **Transactional Outbox:** Dispatches domain events (`LeadCreated`, `SiteVisitScheduled`, `NegotiationAgreed`, `MandateExpiring`, `CommissionCreated`) with HMAC signatures.
 - **Inbound Idempotency:** Webhook ingestion routes verify external event IDs against `inbound_integration_events` to drop repeated deliveries.
 - **AI Safety Gate:** AI extracted drafts require explicit human approval before mutating CRM state.

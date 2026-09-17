@@ -1,6 +1,6 @@
-# CallCRM — Marketing Component Strategy & Architecture
+# EcosystemRealty — Marketing Component Strategy & Architecture
 
-> **Objective**: Define the reusable component hierarchy, editorial layout primitives, and visual asset consolidation strategy for the public marketing website of CallCRM.
+> **Objective**: Define the reusable component hierarchy, editorial layout primitives, and visual asset consolidation strategy for the public marketing website of EcosystemRealty.
 
 ---
 

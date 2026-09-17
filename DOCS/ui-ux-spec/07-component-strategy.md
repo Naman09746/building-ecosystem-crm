@@ -1,4 +1,4 @@
-# CallCRM 2.0 — Component Strategy & Architecture
+# EcosystemRealty 2.0 — Component Strategy & Architecture
 
 > **Objective**: Establish a modular, reusable component hierarchy that consolidates fragmented modals, eliminates duplication, and enforces consistent architectural ledger styling across all surfaces.
 

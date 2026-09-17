@@ -1,4 +1,4 @@
-# CallCRM 2.0 — Architectural Ledger Design System Specification
+# EcosystemRealty 2.0 — Architectural Ledger Design System Specification
 
 > **System Name**: *Architectural Ledger*
 > **Core Visual Philosophy**: Tailored for high-ticket Indian real estate sales organizations. Combines the timeless precision of high-end architectural blueprints and property deeds with the lightning-fast responsiveness of modern financial trading terminals.
@@ -48,7 +48,7 @@ The palette moves away from cold, generic SaaS blues/purples and adopts an **Arc
 
 ## 2. Typography Hierarchy & Number Formatting
 
-CallCRM relies on **high-legibility typography with tabular numerals** for rapid financial calculations and deal evaluations.
+EcosystemRealty relies on **high-legibility typography with tabular numerals** for rapid financial calculations and deal evaluations.
 
 ```
 Font Stack:

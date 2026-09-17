@@ -1,5 +1,5 @@
 -- ====================================================================
--- MIGRATION 0020: CallCRM 2.0 — Enterprise Real Estate Domain Model
+-- MIGRATION 0020: EcosystemRealty 2.0 — Enterprise Real Estate Domain Model
 -- 1. People Entity (Decoupled from Leads) & Multi-Contact Registry
 -- 2. Structured Buyer Requirements (Multi-Requirement Profile Engine)
 -- 3. Property Listings & Seller Mandates (Exclusive / Open Mandate Lifecycle)
@@ -12,52 +12,75 @@
 -- 1. PEOPLE REGISTRY (First-Class Identity decoupled from Leads)
 -- ====================================================================
 
+-- Ensure public.people exists and has all enterprise columns
 create table if not exists public.people (
   id uuid primary key default gen_random_uuid(),
   org_id uuid not null references public.orgs(id) on delete cascade,
-  
-  -- Core Identity
-  full_name text not null,
-  primary_phone text not null,
-  secondary_phone text,
-  whatsapp_number text,
-  email text,
-  secondary_email text,
-  
-  -- Profile & Classification
-  avatar_url text,
-  preferred_language text default 'en',
-  nationality text default 'Indian',
-  is_nri boolean default false,
-  resident_city text,
-  resident_address text,
-  
-  -- KYC & Legal Identification (Sensitive)
-  pan_number text,
-  aadhaar_last4 text,
-  kyc_status text default 'pending' check (kyc_status in ('verified', 'pending', 'exempt', 'rejected')),
-  kyc_verified_at timestamptz,
-  
-  -- Business & Wealth Categorization
-  wealth_tier text default 'hni' check (wealth_tier in ('uhni', 'hni', 'mass_affluent', 'retail', 'institutional')),
-  primary_profession text,
-  company_name text,
-  designation text,
-  
-  -- Relationship Context
-  primary_tags text[] default array[]::text[],
-  notes text,
-  is_vip boolean default false,
-  do_not_contact boolean default false,
-  
-  -- Provenance & Metadata
-  created_by uuid references public.profiles(user_id) on delete set null,
+  name text,
+  phone text,
+  phone_normalized text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
-create unique index if not exists idx_people_org_phone on public.people(org_id, primary_phone);
-create index if not exists idx_people_org_name_trgm on public.people using gin(full_name gin_trgm_ops);
+alter table public.people
+  add column if not exists full_name text,
+  add column if not exists primary_phone text,
+  add column if not exists secondary_phone text,
+  add column if not exists whatsapp_number text,
+  add column if not exists email text,
+  add column if not exists secondary_email text,
+  add column if not exists avatar_url text,
+  add column if not exists preferred_language text default 'en',
+  add column if not exists nationality text default 'Indian',
+  add column if not exists is_nri boolean default false,
+  add column if not exists resident_city text,
+  add column if not exists resident_address text,
+  add column if not exists pan_number text,
+  add column if not exists aadhaar_last4 text,
+  add column if not exists kyc_status text default 'pending' check (kyc_status in ('verified', 'pending', 'exempt', 'rejected')),
+  add column if not exists kyc_verified_at timestamptz,
+  add column if not exists wealth_tier text default 'hni' check (wealth_tier in ('uhni', 'hni', 'mass_affluent', 'retail', 'institutional')),
+  add column if not exists primary_profession text,
+  add column if not exists company_name text,
+  add column if not exists designation text,
+  add column if not exists primary_tags text[] default array[]::text[],
+  add column if not exists notes text,
+  add column if not exists is_vip boolean default false,
+  add column if not exists do_not_contact boolean default false,
+  add column if not exists created_by uuid references public.profiles(user_id) on delete set null;
+
+-- Sync existing rows
+update public.people set full_name = name where full_name is null and name is not null;
+update public.people set primary_phone = coalesce(phone_normalized, phone) where primary_phone is null and phone is not null;
+
+-- Bi-directional sync trigger for legacy name/phone vs full_name/primary_phone
+create or replace function public.trg_sync_people_names_phones()
+returns trigger language plpgsql as $$
+begin
+  if new.full_name is null and new.name is not null then
+    new.full_name := new.name;
+  elsif new.name is null and new.full_name is not null then
+    new.name := new.full_name;
+  end if;
+
+  if new.primary_phone is null and new.phone is not null then
+    new.primary_phone := coalesce(new.phone_normalized, new.phone);
+  elsif new.phone is null and new.primary_phone is not null then
+    new.phone := new.primary_phone;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_sync_people_columns on public.people;
+create trigger trg_sync_people_columns
+  before insert or update on public.people
+  for each row execute function public.trg_sync_people_names_phones();
+
+create unique index if not exists idx_people_org_phone on public.people(org_id, coalesce(primary_phone, phone));
+create index if not exists idx_people_org_name_trgm on public.people using gin(coalesce(full_name, name) gin_trgm_ops);
 create index if not exists idx_people_org_email on public.people(org_id, email) where email is not null;
 create index if not exists idx_people_wealth on public.people(org_id, wealth_tier);
 
@@ -198,6 +221,31 @@ drop trigger if exists trg_property_listings_updated_at on public.property_listi
 create trigger trg_property_listings_updated_at
   before update on public.property_listings
   for each row execute function public.trg_set_updated_at();
+
+-- ====================================================================
+-- 3.5 DEALS & TRANSACTION CONTRACTS
+-- ====================================================================
+
+create table if not exists public.deals (
+  id uuid primary key default gen_random_uuid(),
+  org_id uuid not null references public.orgs(id) on delete cascade,
+  lead_id uuid references public.leads(id) on delete cascade,
+  unit_id uuid references public.project_units(id) on delete set null,
+  deal_title text not null default 'Property Deal',
+  status text not null default 'negotiation' check (status in ('active', 'negotiation', 'under_contract', 'won', 'lost')),
+  deal_value numeric(15, 2) default 0,
+  created_by uuid references public.profiles(user_id) on delete set null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_deals_org_lead on public.deals(org_id, lead_id);
+create index if not exists idx_deals_org_unit on public.deals(org_id, unit_id);
+
+alter table public.deals enable row level security;
+drop policy if exists "Tenant isolation for deals" on public.deals;
+create policy "Tenant isolation for deals" on public.deals
+  for all using (org_id = (select org_id from public.profiles where user_id = auth.uid()));
 
 -- ====================================================================
 -- 4. CHRONOLOGICAL NEGOTIATION LEDGER & BID ROUNDS

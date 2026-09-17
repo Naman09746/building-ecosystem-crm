@@ -1,6 +1,6 @@
-# Building Ecosystem CRM — Multi-Vertical Architecture & Extensibility Guide
+# Ecosystem Realty — Multi-Vertical Architecture & Extensibility Guide
 
-This document serves as the canonical architectural guide for extending the **Building Ecosystem CRM** to new trades, supply chain sectors, and operational depths.
+This document serves as the canonical architectural guide for extending the **Ecosystem Realty** to new trades, supply chain sectors, and operational depths.
 
 ---
 
@@ -13,7 +13,7 @@ The building industry is a collaborative chain of commerce:
 4. **Contractors & Civil Builders** execute on-site construction milestones and manage labor.
 5. **Interior & Furniture Studios** perform turnkey fit-outs, room staging, and space styling.
 
-Rather than fragmenting this lifecycle into 5 disparate CRMs, **Building Ecosystem CRM** utilizes a **Unified Core Engine** with **Pluggable Vertical Packs**.
+Rather than fragmenting this lifecycle into 5 disparate CRMs, **Ecosystem Realty** utilizes a **Unified Core Engine** with **Pluggable Vertical Packs**.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

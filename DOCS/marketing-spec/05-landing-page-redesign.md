@@ -1,6 +1,6 @@
-# CallCRM — Screen-by-Screen Landing Page Redesign Specification
+# EcosystemRealty — Screen-by-Screen Landing Page Redesign Specification
 
-> **Specification Purpose**: Complete visual, structural, copy, and interactive blueprint for the new CallCRM marketing landing page (`Frontend/src/app/page.tsx`).
+> **Specification Purpose**: Complete visual, structural, copy, and interactive blueprint for the new EcosystemRealty marketing landing page (`Frontend/src/app/page.tsx`).
 
 ---
 
@@ -8,14 +8,14 @@
 
 ```
 +------------------------------------------------------------------------------------------------------+
-| [🏢 Apex CallCRM]   Product ▾   Solutions ▾   Intelligence ▾   Pricing   FAQ        Sign In   [ Free Trial ] |
+| [🏢 Ecosystem Realty]   Product ▾   Solutions ▾   Intelligence ▾   Pricing   FAQ        Sign In   [ Free Trial ] |
 +------------------------------------------------------------------------------------------------------+
 ```
 
 - **Container**: `sticky top-0 z-40 w-full border-b border-[#e2ded6] bg-[#f8f7f4]/90 backdrop-blur-md px-6 lg:px-12 py-4 flex items-center justify-between`.
 - **Brand Identity**:
   - Logo Mark: Charcoal square with Heritage Brass building icon.
-  - Brand Text: **Apex CallCRM** (`font-bold text-sm tracking-tight text-[#181a19]`) with subtle badge: `[ REAL ESTATE OS ]`.
+  - Brand Text: **Ecosystem Realty** (`font-bold text-sm tracking-tight text-[#181a19]`) with subtle badge: `[ REAL ESTATE OS ]`.
 - **Navigation Links**: Editorial sans-serif (`text-xs font-medium text-[#4a4d4b] hover:text-[#181a19] transition-colors`).
 - **Right Action Dock**:
   - `Sign In`: Minimal text link (`text-xs font-semibold text-[#181a19] hover:underline px-3 py-2`).

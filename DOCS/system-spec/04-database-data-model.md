@@ -1,4 +1,4 @@
-# 04. Database & Data Model Specification — Apex Realty CallCRM
+# 04. Database & Data Model Specification — Apex Realty EcosystemRealty
 
 **Engine:** PostgreSQL 15+ (Supabase)  
 **Migration File:** `supabase/migrations/20260821_enterprise_schema.sql`  

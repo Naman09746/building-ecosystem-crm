@@ -1,16 +1,16 @@
-# 12. Changelog & Release Notes — Apex Realty CallCRM
+# 12. Changelog & Release Notes — Apex Realty EcosystemRealty
 
-All notable changes to the Apex Realty CallCRM platform are documented in this file.
+All notable changes to the Apex Realty EcosystemRealty platform are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [2.0.0] - 2026-08-31 — CallCRM 2.0 & n8n Separation of Responsibilities Architecture
+## [2.0.0] - 2026-08-31 — EcosystemRealty 2.0 & n8n Separation of Responsibilities Architecture
 
 ### 🚀 Added
-- **CallCRM + n8n Separation of Responsibilities Architecture:**
-  - CallCRM is established as the self-contained, authoritative source of truth (PostgreSQL + RLS).
+- **EcosystemRealty + n8n Separation of Responsibilities Architecture:**
+  - EcosystemRealty is established as the self-contained, authoritative source of truth (PostgreSQL + RLS).
   - Transactional Outbox table `crm_domain_events` with non-blocking asynchronous dispatcher (`lib/server/domain-event-bus.ts`) using HMAC-SHA256 signatures, 3-second timeouts, and automatic circuit breakers.
   - Inbound idempotency audit log (`inbound_integration_events`) preventing duplicate lead or contact creation on repeated Meta/WhatsApp webhook deliveries.
   - Interactive `N8nIntegrationDrawer` UI showing live outbox depth, manual retry queue flush, and channel health.

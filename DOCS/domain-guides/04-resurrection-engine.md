@@ -1,4 +1,4 @@
-# CallCRM — Phase 10: Multi-Factor Resurrection Engine
+# EcosystemRealty — Phase 10: Multi-Factor Resurrection Engine
 
 ## 1. Overview
 The **Multi-Factor Resurrection Engine** replaces legacy $\pm20\%$ budget heuristics with a production-grade, explainable, tenant-isolated 100-point deterministic matching system. It identifies dormant, stale, and lost buyers and matches them against currently available, newly released inventory.

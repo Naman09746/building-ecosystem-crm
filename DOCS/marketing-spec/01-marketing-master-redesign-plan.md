@@ -1,6 +1,6 @@
-# CallCRM — Complete Marketing Website Redesign Master Blueprint
+# EcosystemRealty — Complete Marketing Website Redesign Master Blueprint
 
-> **Master Marketing Document**: This single document compiles all 7 marketing audit, design system, narrative architecture, section specifications, and implementation deliverables into one cohesive, authoritative reference for the public website of CallCRM.
+> **Master Marketing Document**: This single document compiles all 7 marketing audit, design system, narrative architecture, section specifications, and implementation deliverables into one cohesive, authoritative reference for the public website of EcosystemRealty.
 >
 > **Brand Persona**: Luxury Real Estate Technology & Sales Operating System  
 > **Target Audience**: Indian Real Estate Advisory Founders, Brokerage Managing Directors, Luxury Property Closers  
@@ -121,7 +121,7 @@ flowchart TD
 
 ### 1. Architectural Navbar
 - Sticky top header (`bg-[#f8f7f4]/90 backdrop-blur-md border-b border-[#e2ded6]`).
-- Brand logo: `Apex CallCRM` with `[ REAL ESTATE OS ]` badge.
+- Brand logo: `Ecosystem Realty` with `[ REAL ESTATE OS ]` badge.
 - Navigation links: `Product`, `Property Intelligence`, `Matching`, `Solutions`, `Pricing`, `FAQ`.
 - CTA: `Sign In` + `[Start 14-Day Free Trial]`.
 

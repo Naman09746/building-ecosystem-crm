@@ -1,4 +1,4 @@
-# CallCRM — Phase 7: Lead Ingestion Automation
+# EcosystemRealty — Phase 7: Lead Ingestion Automation
 ## Meta Lead Ads & WhatsApp Pipeline Technical Documentation
 
 ---

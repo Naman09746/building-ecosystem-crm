@@ -1,6 +1,6 @@
 # API Keys & Environment Setup Guide
 
-Every external service CallCRM uses, what it powers, where to get it, and what breaks without it.
+Every external service EcosystemRealty uses, what it powers, where to get it, and what breaks without it.
 
 **Rule of thumb:** variables starting with `NEXT_PUBLIC_` are safe for the browser. Everything else is **server-only** — never put them in a `NEXT_PUBLIC_*` variable, never commit them.
 
@@ -137,7 +137,7 @@ Webhook endpoint: `https://<your-domain>/api/billing/webhook`
 (Events: `payment.captured`, `subscription.charged`, `subscription.cancelled`, `subscription.pending`, `refund.processed`)
 
 ### Local Sandbox Mode
-When provider secret keys are absent, CallCRM automatically uses **Secure Sandbox Mode**, generating cryptographically signed test checkout tokens and executing full server-side database lifecycle state transitions, invoice creations, and quota triggers without faking UI state.
+When provider secret keys are absent, EcosystemRealty automatically uses **Secure Sandbox Mode**, generating cryptographically signed test checkout tokens and executing full server-side database lifecycle state transitions, invoice creations, and quota triggers without faking UI state.
 
 ---
 

@@ -7,7 +7,7 @@
 
 ## 1. Overview & Architecture
 
-CallCRM Phase 5 implements an organization-grade, centralized, real-time alert center and in-app notification infrastructure. It provides real-time notifications for lead assignments, task deadlines, speed-to-lead SLA breaches, stalled/at-risk deal alerts, team invitations, and billing receipts.
+EcosystemRealty Phase 5 implements an organization-grade, centralized, real-time alert center and in-app notification infrastructure. It provides real-time notifications for lead assignments, task deadlines, speed-to-lead SLA breaches, stalled/at-risk deal alerts, team invitations, and billing receipts.
 
 ```
                   ┌──────────────────────────────────────────────────────────┐

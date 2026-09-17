@@ -2,7 +2,7 @@
 
 ## 1. Overview & Architecture
 
-CallCRM Phase 4 introduces a deterministic, server-side background engine that continuously monitors CRM health, SLA compliance, and pipeline velocity across all active tenant organizations.
+EcosystemRealty Phase 4 introduces a deterministic, server-side background engine that continuously monitors CRM health, SLA compliance, and pipeline velocity across all active tenant organizations.
 
 The background engine runs without any dependency on an active browser session, executing bulk recalculations directly inside PostgreSQL for maximum efficiency and scale.
 

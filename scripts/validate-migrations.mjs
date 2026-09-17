@@ -12,7 +12,7 @@
  *
  * Environment (all optional — defaults suit a local Postgres):
  *   PGHOST, PGPORT, PGUSER, PGPASSWORD  — connection for the admin connection
- *   TEST_DB_NAME                        — scratch DB name (default callcrm_mig_test_<ts>)
+ *   TEST_DB_NAME                        — scratch DB name (default ecosystemrealty_mig_test_<ts>)
  */
 
 import { execSync } from "node:child_process";
@@ -23,7 +23,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = join(__dirname, "..", "supabase", "migrations");
 
-const DB_NAME = process.env.TEST_DB_NAME || `callcrm_mig_test_${Date.now()}`;
+const DB_NAME = process.env.TEST_DB_NAME || `ecosystemrealty_mig_test_${Date.now()}`;
 const PG = {
   host: process.env.PGHOST || "/tmp",
   port: process.env.PGPORT || "5432",

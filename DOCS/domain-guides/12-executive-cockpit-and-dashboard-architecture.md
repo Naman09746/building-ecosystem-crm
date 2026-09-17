@@ -1,4 +1,4 @@
-# 🏛️ CallCRM Executive Cockpit: Technical & Architectural Deep Dive
+# 🏛️ EcosystemRealty Executive Cockpit: Technical & Architectural Deep Dive
 
 > **Document Version:** 2.4.0  
 > **Audience:** Engineering Teams, Technical Founders, SaaS Investors, Solution Architects  
@@ -15,7 +15,7 @@ Traditional CRMs (Salesforce, HubSpot) fail in this vertical because:
 2. **They lack real-estate primitives:** No native understanding of Towers, Floors, Stacking Matrices, Developer-Broker Commission splits, RERA cost sheets, or Indian Crores/Lakhs (`₹ Cr/Lakh`).
 3. **Dead Pipeline Waste:** Over ₹500 Cr in dormant inquiries die in stagnant spreadsheets every year without automated re-engagement.
 
-**CallCRM's Executive Cockpit** solves this by acting as an **event-driven, real-time operating system** for real estate developers and top brokerage firms.
+**EcosystemRealty's Executive Cockpit** solves this by acting as an **event-driven, real-time operating system** for real estate developers and top brokerage firms.
 
 ---
 
@@ -121,7 +121,7 @@ graph TD
 ```
 
 #### The 100-Point Algorithmic Deal Health Engine
-Rather than relying on subjective salesperson optimism, CallCRM computes deal health dynamically:
+Rather than relying on subjective salesperson optimism, EcosystemRealty computes deal health dynamically:
 
 $$\text{Health Score} = \text{Base Score (100)} - (\text{Days Inactive} \times 15) - (\text{Missed Follow-Ups} \times 25) + (\text{Buyer Engagement} \times 10)$$
 

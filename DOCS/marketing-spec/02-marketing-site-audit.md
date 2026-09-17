@@ -1,4 +1,4 @@
-# CallCRM — Marketing Website Visual & Experience Audit
+# EcosystemRealty — Marketing Website Visual & Experience Audit
 
 > **Document Context**: Comprehensive brand, design, visual hierarchy, and user-experience audit of the existing public marketing website (`Frontend/src/app/page.tsx` and `Frontend/src/components/marketing/*`).
 > **Audit Focus**: Transition from a generic "AI SaaS template" aesthetic to an authoritative, editorial, high-ticket **Real Estate Technology & Advisory Operating System** tailored for Indian residential property brokerages, sales directors, and agency founders.

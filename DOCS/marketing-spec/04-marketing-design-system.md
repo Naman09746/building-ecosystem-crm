@@ -1,4 +1,4 @@
-# CallCRM — Marketing Design System Specification
+# EcosystemRealty — Marketing Design System Specification
 
 > **Brand Aesthetic Philosophy**: *Architectural Editorial*
 > Inspired by premier architectural monographs, high-end property advisory journals, and understated enterprise technology. The marketing visual system establishes immediate credibility, quiet luxury, and uncompromising precision.

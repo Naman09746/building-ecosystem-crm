@@ -2,7 +2,7 @@
 
 ## Overview
 
-The CallCRM Deterministic Deal Health Engine replaces subjective/static deal statuses with an automated, reproducible, activity-driven scoring framework. Every lead in the pipeline is continuously evaluated on a 0–100 numerical scale with full explainability, factor attribution, and deterministic next-best-action guidance.
+The EcosystemRealty Deterministic Deal Health Engine replaces subjective/static deal statuses with an automated, reproducible, activity-driven scoring framework. Every lead in the pipeline is continuously evaluated on a 0–100 numerical scale with full explainability, factor attribution, and deterministic next-best-action guidance.
 
 ---
 

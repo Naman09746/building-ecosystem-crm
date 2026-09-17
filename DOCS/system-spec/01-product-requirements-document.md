@@ -1,6 +1,6 @@
-# 01. Product Requirements Document (PRD) — Apex Realty CallCRM
+# 01. Product Requirements Document (PRD) — Apex Realty EcosystemRealty
 
-**Product Name:** Apex Realty CallCRM  
+**Product Name:** Apex Realty EcosystemRealty  
 **Document Version:** 1.0.0 (Production Release)  
 **Target Market:** Luxury Indian High-Ticket Real Estate (Developers, Tier-1 Brokerages, Wealth Advisory Desks)  
 **Classification:** Proprietary Multi-Tenant SaaS Platform
@@ -16,8 +16,8 @@ High-ticket real estate sales in India (ticket sizes ₹2.5 Cr to ₹50 Cr+) suf
 3. **Contact Duplication:** A single buyer often inquires across multiple projects and marketing channels using slightly different phone formats (`9810123456`, `+91 98101-23456`, `09810123456`), fragmenting history.
 4. **Dormant / Lost Lead Waste:** Brokerages accumulate thousands of "Lost / Stale" leads without systematic re-engagement when new towers, inventory, or payment schemes launch.
 
-### 1.2 The CallCRM Solution
-Apex Realty CallCRM is a **high-velocity, AI-agentic sales cockpit** designed specifically for real estate closers and managing directors. It combines:
+### 1.2 The EcosystemRealty Solution
+Apex Realty EcosystemRealty is a **high-velocity, AI-agentic sales cockpit** designed specifically for real estate closers and managing directors. It combines:
 - **Sub-10-Second Quick Activity Logging** with one-click WhatsApp sales outreach.
 - **Autonomous AI Lead Qualification (Aria)** with natural language multi-turn dialogue and a Human-in-the-Loop approval gate.
 - **Autonomous Lost-Lead Resurrection Engine** that cross-matches dormant buyers against newly released project units.

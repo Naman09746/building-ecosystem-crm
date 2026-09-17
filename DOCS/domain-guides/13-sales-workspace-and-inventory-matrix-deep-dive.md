@@ -17,7 +17,7 @@ Traditional real estate brokerages and developers operate with fragmented toolin
 * Unit inventory and floor stacking are kept in offline PDF brochures or Excel files.
 * Sales managers have zero visibility into whether a rep called an inquiry in 5 minutes or 5 days.
 
-**CallCRM unifies the entire sales-to-closing lifecycle into an event-driven operating system:**
+**EcosystemRealty unifies the entire sales-to-closing lifecycle into an event-driven operating system:**
 
 ```mermaid
 graph LR

@@ -1,7 +1,7 @@
 -- ====================================================================
--- MIGRATION 0021: CallCRM + n8n Event Bus, Transactional Outbox & Integration Health
+-- MIGRATION 0021: EcosystemRealty + n8n Event Bus, Transactional Outbox & Integration Health
 -- Separation of Responsibilities Architecture:
--- 1. CallCRM is the Self-Contained Source of Truth.
+-- 1. EcosystemRealty is the Self-Contained Source of Truth.
 -- 2. n8n is the External Automation & Integration Orchestration Layer.
 -- 3. Asynchronous Outbox with Idempotency, Retry Backoff & Circuit Breaker.
 -- ====================================================================
@@ -74,7 +74,7 @@ create table if not exists public.integration_endpoints (
   endpoint_url text not null,
   
   -- Security Credentials (Encrypted / Secret Token)
-  auth_header_name text default 'X-CallCRM-HMAC-SHA256',
+  auth_header_name text default 'X-EcosystemRealty-HMAC-SHA256',
   secret_token text not null,
   
   -- Subscriptions & Filters

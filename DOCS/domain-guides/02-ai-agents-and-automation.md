@@ -1,6 +1,6 @@
-# AI Agents & Automation Architecture — Apex CallCRM
+# AI Agents & Automation Architecture — Ecosystem Realty
 
-This document outlines the **AI Agent Layer** and **Automated Workflow Engines** powering **Apex CallCRM**, as actually implemented. It reflects the hardened architecture: every agent is **human-gated** — proposals are staged, and only explicit human approval writes to the database.
+This document outlines the **AI Agent Layer** and **Automated Workflow Engines** powering **Ecosystem Realty**, as actually implemented. It reflects the hardened architecture: every agent is **human-gated** — proposals are staged, and only explicit human approval writes to the database.
 
 ---
 
@@ -8,7 +8,7 @@ This document outlines the **AI Agent Layer** and **Automated Workflow Engines**
 
 Traditional real estate CRMs are passive databases that demand heavy manual data entry from busy field agents.
 
-Apex CallCRM shifts data entry work to AI assistants — with a strict trust boundary:
+Ecosystem Realty shifts data entry work to AI assistants — with a strict trust boundary:
 
 $$\text{AI proposes} \quad \Longrightarrow \quad \text{Human approves} \quad \Longrightarrow \quad \text{System writes (audited)}$$
 
@@ -189,7 +189,7 @@ Triggered automatically 30 minutes before client arrival or on-demand from the s
 
 The following are **design targets**, not measured guarantees — instrument your own deployment before quoting numbers externally:
 
-| Operational Metric | Traditional CRM Workflow | CallCRM Design Target |
+| Operational Metric | Traditional CRM Workflow | EcosystemRealty Design Target |
 | :--- | :--- | :--- |
 | Inbound speed-to-lead | Hours (often missed overnight) | Instant conversational intake, 24/7 |
 | Qualification consistency | Rep-dependent | Structured schema on every proposal |

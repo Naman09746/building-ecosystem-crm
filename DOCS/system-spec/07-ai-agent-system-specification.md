@@ -1,4 +1,4 @@
-# 07. AI Agent & Automation System Specification — Apex Realty CallCRM
+# 07. AI Agent & Automation System Specification — Apex Realty EcosystemRealty
 
 **Document Version:** 1.0.0 (Production Release)  
 **AI Framework:** Vercel AI SDK 5 (`streamText`, `tool`, `inputSchema`)  
@@ -9,7 +9,7 @@
 
 ## 1. Agent Architecture & Role Definitions
 
-Apex Realty CallCRM utilizes a two-tier agentic architecture:
+Apex Realty EcosystemRealty utilizes a two-tier agentic architecture:
 1. **Aria (Inbound Qualification & Intake Agent):** Front-facing conversational intelligence for high-ticket real estate buyer intake.
 2. **Resurrection Engine (Autonomous Lost-Lead Cross-Matcher):** Background intelligence scanning dormant buyer opportunities and matching them against available high-ticket inventory.
 

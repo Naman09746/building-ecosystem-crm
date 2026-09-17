@@ -1,4 +1,4 @@
-# 05. Security & Threat Model — Apex Realty CallCRM
+# 05. Security & Threat Model — Apex Realty EcosystemRealty
 
 **Classification:** Proprietary Security Specification  
 **Compliance Target:** OWASP Top 10, OWASP API Security Top 10, SOC2 Type II Baseline
@@ -7,7 +7,7 @@
 
 ## 1. Threat Modeling Overview (STRIDE Matrix)
 
-| Threat Category | Potential Vector | CallCRM Countermeasure & Architectural Defense |
+| Threat Category | Potential Vector | EcosystemRealty Countermeasure & Architectural Defense |
 | :--- | :--- | :--- |
 | **Spoofing** | Forged user identity or forged webhook call | Supabase JWT validation; HMAC-SHA256 signature verification for Meta/WhatsApp webhooks; Bearer token authentication on internal cron/outbox APIs. |
 | **Tampering** | Modifying `budget`, `org_id`, unit pricing, or `lead_score` | Strict Zod payload validation; PostgreSQL trigger guards (`enforce_lead_reassignment_guard`, `enforce_salesperson_unit_update_guard`, `chk_leads_budget_non_negative`, `chk_units_price_positive`); RLS tenant validation. |

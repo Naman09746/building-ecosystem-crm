@@ -1,6 +1,6 @@
-# CallCRM 2.0 — Complete UX/UI Master Redesign Blueprint
+# EcosystemRealty 2.0 — Complete UX/UI Master Redesign Blueprint
 
-> **Master UI Document**: This single document consolidates all 7 UI/UX design deliverables created for the CallCRM 2.0 redesign into one cohesive, comprehensive, and implementation-ready specification.
+> **Master UI Document**: This single document consolidates all 7 UI/UX design deliverables created for the EcosystemRealty 2.0 redesign into one cohesive, comprehensive, and implementation-ready specification.
 >x
 > **Included Deliverables**:
 > 1. [Section 1: Complete Surface Inventory & Friction Audit (`UI_AUDIT.md`)](#section-1-complete-surface-inventory--friction-audit)
@@ -10,7 +10,7 @@
 > 5. [Section 5: Screen Priority & Impact Matrix P0–P3 (`SCREEN_PRIORITY_MATRIX.md`)](#section-5-screen-priority--impact-matrix-p0p3)
 > 6. [Section 6: Component Strategy & Consolidation Architecture (`COMPONENT_STRATEGY.md`)](#section-6-component-strategy--consolidation-architecture)
 > 7. [Section 7: Screen-by-Screen Before & After Map (`BEFORE_AFTER_MAP.md`)](#section-7-screen-by-screen-before--after-map)
-> 8. [Section 8: CallCRM UX Scorecard & Phased Execution Roadmap](#section-8-callcrm-ux-scorecard--phased-execution-roadmap)
+> 8. [Section 8: EcosystemRealty UX Scorecard & Phased Execution Roadmap](#section-8-ecosystemrealty-ux-scorecard--phased-execution-roadmap)
 
 ---
 
@@ -20,12 +20,12 @@
 
 ## 1. Executive Summary & Core UX Diagnosis
 
-CallCRM is technically robust with **239 passing tests across 28 test suites, 21 database migrations, and 63+ API routes**. It accurately models the **Flat/Unit as the atomic asset**, supports bi-directional 100-point matching, proactive seller signals, multi-party bidding ledger, digital site visit passes, tiered broker commissions, Indian cost sheet calculations, PWA offline caching, and human-in-the-loop AI.
+EcosystemRealty is technically robust with **239 passing tests across 28 test suites, 21 database migrations, and 63+ API routes**. It accurately models the **Flat/Unit as the atomic asset**, supports bi-directional 100-point matching, proactive seller signals, multi-party bidding ledger, digital site visit passes, tiered broker commissions, Indian cost sheet calculations, PWA offline caching, and human-in-the-loop AI.
 
 However, the user experience suffers from **cognitive density, structural fragmentation, and visual uniformity**:
 1. **The "Everything Everywhere" Problem**: The sidebar exposes 9–13 equal-weight navigation items regardless of user focus. Sales reps are forced to context-switch between Tasks, Leads, Pipeline, Activities, and Projects.
 2. **Dense Form & Card Fatigue**: Screens like `boss-overview.tsx` (836 lines) and `projects-page.tsx` (1034 lines) place KPI metric cards, filters, complex tables, and action modals in high-density visual stacks with minimal progressive disclosure.
-3. **Tab vs Route Ambiguity**: Deep links (`/leads`, `/pipeline`, `/projects`) are mounted inside `AppShell` with client tab state (`localStorage.getItem('callcrm_active_tab')`), causing URL/state desynchronization and broken browser back-button behavior.
+3. **Tab vs Route Ambiguity**: Deep links (`/leads`, `/pipeline`, `/projects`) are mounted inside `AppShell` with client tab state (`localStorage.getItem('ecosystemrealty_active_tab')`), causing URL/state desynchronization and broken browser back-button behavior.
 4. **Contextual AI Isolation**: AI capabilities (Aria chat, meeting structuring, pre-site briefings, resurrection) are housed in separate floating bots or dedicated pages rather than being organically embedded directly into the daily workflow where decisions happen.
 5. **Real Estate Emotional Aesthetics**: While functional, the visual styling (generic Slate/Navy and standard Tailwind cards) does not evoke the high-ticket, luxury architectural aesthetic demanded by Indian real estate developers and HNI brokerage founders.
 
@@ -101,7 +101,7 @@ Rather than exposing a flat list of 13 menu items, the sidebar is organized into
 
 ```mermaid
 graph TD
-    ROOT[CallCRM Global Shell]
+    ROOT[EcosystemRealty Global Shell]
     
     ROOT --> WORKSPACE[1. Sales Workspace]
     ROOT --> ASSETS[2. Property Intelligence]
@@ -184,7 +184,7 @@ sequenceDiagram
     participant Matcher as 100-Point Matcher
     participant DB as Supabase DB
     
-    Rep->>Home: Opens CallCRM at 9:00 AM
+    Rep->>Home: Opens EcosystemRealty at 9:00 AM
     Home-->>Rep: Displays "Top 3 Priorities for Today"
     Note over Home,Rep: Priority 1: High-Intent Buyer (Rahul Sharma - ₹4.5 Cr)
     Rep->>Home: Presses hotkey "L" or clicks "Call Rahul"
@@ -537,9 +537,9 @@ BUSINESS BENEFIT:
 
 ---
 
-# Section 8: CallCRM UX Scorecard & Phased Execution Roadmap
+# Section 8: EcosystemRealty UX Scorecard & Phased Execution Roadmap
 
-## CallCRM UX Scorecard
+## EcosystemRealty UX Scorecard
 
 | Dimension | Rating (0–10) | Evaluation & Diagnosis |
 | :--- | :---: | :--- |

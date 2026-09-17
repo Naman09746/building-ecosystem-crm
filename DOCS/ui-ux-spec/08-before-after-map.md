@@ -1,6 +1,6 @@
-# CallCRM 2.0 — Screen-by-Screen Before & After Map
+# EcosystemRealty 2.0 — Screen-by-Screen Before & After Map
 
-> **Purpose**: A comprehensive visual and structural comparison mapping every major CallCRM surface from its current state to its redesigned Architectural Ledger format, demonstrating concrete business and usability benefits.
+> **Purpose**: A comprehensive visual and structural comparison mapping every major EcosystemRealty surface from its current state to its redesigned Architectural Ledger format, demonstrating concrete business and usability benefits.
 
 ---
 

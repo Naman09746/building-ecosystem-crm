@@ -1,4 +1,4 @@
-# CallCRM — Technical Implementation Audit & Codebase Verification
+# EcosystemRealty — Technical Implementation Audit & Codebase Verification
 
 > **Date:** August 2026  
 > **Source of Truth:** Workspace codebase (`Frontend/src`, `supabase/migrations`, `DOCS/`)  
@@ -197,7 +197,7 @@ Every finding from the deep product audit was cross-referenced with the actual s
 * **Evidence:**
   - [lead-detail-modal.tsx#L91](file:///Users/namanjoshi/SAAS/Real-estate/Frontend/src/components/crm/lead-detail-modal.tsx#L91):
     ```tsx
-    fileUrl: docUrl.trim() || `https://storage.callcrm.in/vault/${docTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`
+    fileUrl: docUrl.trim() || `https://storage.ecosystemrealty.in/vault/${docTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`
     ```
   - No Supabase Storage bucket (`storage.from('documents')`) is configured or called.
 * **Risk:** High. Users cannot upload actual PDF brochures, unit floor plans, or buyer KYC documents.

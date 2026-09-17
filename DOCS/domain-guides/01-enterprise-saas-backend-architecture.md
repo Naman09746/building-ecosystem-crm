@@ -1,6 +1,6 @@
-# Enterprise Multi-Tenant SaaS Backend Architecture — CallCRM 2.0
+# Enterprise Multi-Tenant SaaS Backend Architecture — EcosystemRealty 2.0
 
-This document details the production backend architecture for **CallCRM 2.0** as implemented — multi-tenant isolation, cryptographic webhook verification, database-enforced quotas, the **CallCRM + n8n Separation of Responsibilities Architecture**, transactional domain event outbox, and human-gated AI agent audit trails (migrations `0001`–`0021`).
+This document details the production backend architecture for **EcosystemRealty 2.0** as implemented — multi-tenant isolation, cryptographic webhook verification, database-enforced quotas, the **EcosystemRealty + n8n Separation of Responsibilities Architecture**, transactional domain event outbox, and human-gated AI agent audit trails (migrations `0001`–`0021`).
 
 ---
 
@@ -40,7 +40,7 @@ This document details the production backend architecture for **CallCRM 2.0** as
 ```
 
 1. **Database-Enforced Multi-Tenancy**: Isolation is guaranteed by PostgreSQL Row-Level Security on all 39 tables. `org_id` is resolved from verified sessions server-side.
-2. **CallCRM as Single Source of Truth**: Core CRM operations (People, Leads, Requirements, Properties, Listings, Mandates, Negotiations, Dispatches, Commissions) function 100% natively inside CallCRM even if external services or n8n are offline.
+2. **EcosystemRealty as Single Source of Truth**: Core CRM operations (People, Leads, Requirements, Properties, Listings, Mandates, Negotiations, Dispatches, Commissions) function 100% natively inside EcosystemRealty even if external services or n8n are offline.
 3. **Transactional Domain Event Outbox (`crm_domain_events`)**: Emits business events (`LeadCreated`, `SiteVisitScheduled`, `NegotiationAgreed`, `MandateExpiring`, `CommissionCreated`) with HMAC signatures and exponential retry backoff.
 4. **Idempotent Inbound Ingestion (`inbound_integration_events`)**: Webhooks from Meta, WhatsApp, or n8n are checked against unique `external_event_id` before processing, preventing duplicate contacts or deals.
 5. **Role-Protected Seller Price Floors**: API routes automatically mask confidential seller price floors (`minimum_acceptable_price`) for junior sales reps while exposing full financial levers to Founders and Managers.
@@ -71,7 +71,7 @@ Canonical schema: `supabase/migrations/0001_init.sql` through `0021_n8n_event_bu
 
 ## 3. Separation of Responsibilities Architecture
 
-| Responsibility | CallCRM Core Application | n8n Automation Engine |
+| Responsibility | EcosystemRealty Core Application | n8n Automation Engine |
 | :--- | :--- | :--- |
 | **Source of Truth** | **Yes** (Authoritative DB) | No (Stateless Bus) |
 | **People & Lead Management** | **Yes** (Native PostgreSQL) | No |
