@@ -1,16 +1,16 @@
 # Graph Report - Real-estate  (2026-09-17)
 
 ## Corpus Check
-- 706 files · ~731,987 words
+- 626 files · ~630,102 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4406 nodes · 14847 edges · 241 communities (221 shown, 20 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
+- 4442 nodes · 15275 edges · 240 communities (223 shown, 17 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `62031e75`
+- Built from commit: `a3355d5c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -232,95 +232,94 @@
 - [[_COMMUNITY_Community 214|Community 214]]
 - [[_COMMUNITY_Community 215|Community 215]]
 - [[_COMMUNITY_Community 216|Community 216]]
+- [[_COMMUNITY_Community 217|Community 217]]
 - [[_COMMUNITY_Community 218|Community 218]]
 - [[_COMMUNITY_Community 219|Community 219]]
 - [[_COMMUNITY_Community 220|Community 220]]
 - [[_COMMUNITY_Community 221|Community 221]]
 - [[_COMMUNITY_Community 222|Community 222]]
-- [[_COMMUNITY_Community 223|Community 223]]
-- [[_COMMUNITY_Community 224|Community 224]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `apiError()` - 337 edges
-2. `apiSuccess()` - 321 edges
-3. `getApiAuthContext()` - 314 edges
-4. `isLiveSupabaseAvailable` - 263 edges
-5. `getAuthenticatedServerClient()` - 215 edges
-6. `getServiceRoleClient()` - 190 edges
-7. `useCRM()` - 170 edges
-8. `checkRateLimit()` - 153 edges
-9. `formatCurrencyINR()` - 130 edges
-10. `handleValidationError()` - 130 edges
+1. `apiError()` - 369 edges
+2. `apiSuccess()` - 353 edges
+3. `getApiAuthContext()` - 346 edges
+4. `isLiveSupabaseAvailable` - 276 edges
+5. `getAuthenticatedServerClient()` - 255 edges
+6. `getServiceRoleClient()` - 200 edges
+7. `useCRM()` - 178 edges
+8. `checkRateLimit()` - 152 edges
+9. `handleValidationError()` - 143 edges
+10. `formatCurrencyINR()` - 130 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ProjectsPage()` --calls--> `formatCurrencyINR()`  [EXTRACTED]
-  Frontend/src/components/crm/pages/projects-page.tsx → apps/real-estate/src/lib/utils.ts
-- `SiteVisitDispatchModal()` --calls--> `useCRM()`  [EXTRACTED]
-  Frontend/src/components/crm/site-visit-dispatch-modal.tsx → apps/real-estate/src/context/crm-context.tsx
-- `CostSheetModal()` --calls--> `useCRM()`  [EXTRACTED]
-  Frontend/src/components/crm/cost-sheet-modal.tsx → apps/real-estate/src/context/crm-context.tsx
-- `UnitDetailModal()` --calls--> `useCRM()`  [EXTRACTED]
-  Frontend/src/components/crm/unit-detail-modal.tsx → apps/real-estate/src/context/crm-context.tsx
-- `SellerOpportunitiesModal()` --calls--> `useCRM()`  [EXTRACTED]
-  Frontend/src/components/crm/seller-opportunities-modal.tsx → apps/real-estate/src/context/crm-context.tsx
+- `POST()` --calls--> `emitDomainEvent()`  [INFERRED]
+  apps/real-estate/src/app/api/site-visits/dispatch/route.ts → packages/core/src/lib/server/domain-event-bus.ts
+- `POST()` --calls--> `createDispatchChallan()`  [INFERRED]
+  apps/real-estate/src/app/api/site-visits/dispatch/route.ts → packages/core/src/lib/server/dispatch-actions.ts
+- `GET()` --calls--> `fetchDispatchChallans()`  [INFERRED]
+  apps/real-estate/src/app/api/site-visits/dispatch/route.ts → packages/core/src/lib/server/dispatch-actions.ts
+- `useTestCRM()` --calls--> `useCRM()`  [EXTRACTED]
+  apps/real-estate/src/__tests__/dom/crm-state-machine.test.tsx → packages/core/src/context/crm-context.tsx
+- `POST()` --calls--> `getApiAuthContext()`  [EXTRACTED]
+  apps/real-estate/src/app/api/activities/meeting-summary/route.ts → packages/core/src/lib/server/supabase-server.ts
 
-## Communities (241 total, 20 thin omitted)
+## Communities (240 total, 17 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (63): BadgeProps, CommissionModal(), CostSheetModal(), CostSheetModalProps, LeadCard(), MeetingSummaryModal(), N8nIntegrationDrawer(), NegotiationModal() (+55 more)
+Cohesion: 0.07
+Nodes (63): BillingCancelContent(), BillingCancelPage(), CollectionsView(), ComplaintsView(), DealersView(), SitesView(), TargetsView(), Badge() (+55 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.06
-Nodes (69): Button, ButtonProps, buttonVariants, Input, InputProps, Label, LabelProps, ResponsiveModal() (+61 more)
+Cohesion: 0.08
+Nodes (61): BadgeProps, AiResurrectionModal(), CostSheetModal(), CostSheetModalProps, LeadCardProps, LeadDetailModalProps, STAGES, QuickActivityModalProps (+53 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.07
-Nodes (87): messageShapeSchema, POST(), validateMessages(), AiLeadBot(), AiLeadBotProps, ChatMessage, GET_QUICK_PROMPTS(), QualifiedLeadCardData (+79 more)
+Cohesion: 0.06
+Nodes (50): GET(), GET(), POST(), POST(), GET(), GET(), POST(), registerEndpointSchema (+42 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.08
-Nodes (32): POST(), POST(), POST(), GET(), POST(), GET(), POST(), PATCH() (+24 more)
+Cohesion: 0.06
+Nodes (78): checkoutSchema, POST(), cancelProviderSubscription(), CheckoutSessionParams, CheckoutSessionResult, createProviderCheckoutSession(), createProviderRefund(), getActiveBillingProvider() (+70 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.07
-Nodes (43): POST(), RouteParams, createDispatchSchema, GET(), n8nInboundPayloadSchema, POST(), GET(), POST() (+35 more)
+Cohesion: 0.09
+Nodes (60): BillingPageRoute(), metadata, SchemesView(), actionCardProps(), DealHealthBadge(), LeadScoreBadge(), PipelineBadge(), PipelineStageType (+52 more)
 
 ### Community 5 - "Community 5"
+Cohesion: 0.05
+Nodes (48): ActivityHeatmap(), DAYS, HEATMAP_DATA, HOURS, AreaTrendChart(), DataPoint, DEFAULT_SERIES, CircularProgress() (+40 more)
+
+### Community 6 - "Community 6"
+Cohesion: 0.08
+Nodes (85): aiAgentQualifySchema, bulkImportUnitsSchema, cancelSubscriptionSchema, confirmMeetingDispositionSchema, createActivitySchema, createDocumentSchema, createEntityRelationshipSchema, createExternalOrgSchema (+77 more)
+
+### Community 7 - "Community 7"
+Cohesion: 0.06
+Nodes (67): normalizePhone(), fetchMetaLeadData(), GET(), isFreshWebhookTime(), parseFieldData(), POST(), ApiAuthContext, ApiErrorResponse (+59 more)
+
+### Community 8 - "Community 8"
 Cohesion: 0.07
 Nodes (51): ChoosePlanPage(), PLANS, PlanTier, AuthCard(), AuthCardProps, StepItem, STEPS, ECOSYSTEM_VERTICALS (+43 more)
 
-### Community 6 - "Community 6"
-Cohesion: 0.09
-Nodes (42): BillingCancelContent(), BillingCancelPage(), actionCardProps(), Badge(), badgeVariants, Card, CardContent, CardDescription (+34 more)
-
-### Community 7 - "Community 7"
-Cohesion: 0.08
-Nodes (57): normalizePhone(), fetchMetaLeadData(), GET(), isFreshWebhookTime(), parseFieldData(), POST(), timingSafeCompare(), verifyHmacSignature() (+49 more)
-
-### Community 8 - "Community 8"
-Cohesion: 0.1
-Nodes (30): GET(), createCommissionSchema, GET(), POST(), GET(), escapeCsvField(), GET(), DELETE() (+22 more)
-
 ### Community 9 - "Community 9"
-Cohesion: 0.13
-Nodes (69): getSupabaseClient(), activityToRow(), AnyRow, completeTaskRemote(), CrmHydration, deleteDocumentRemote(), deleteProjectRemote(), deleteRegionRemote() (+61 more)
+Cohesion: 0.09
+Nodes (65): messageShapeSchema, POST(), validateMessages(), AiLeadBot(), AiLeadBotProps, ChatMessage, GET_QUICK_PROMPTS(), QualifiedLeadCardData (+57 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.1
-Nodes (59): GET(), POST(), GET(), POST(), GET(), parsePagination(), POST(), POST() (+51 more)
+Cohesion: 0.09
+Nodes (53): GET(), POST(), GET(), POST(), AddSkuModal(), AddSkuModalProps, DispatchChallanModal(), DispatchChallanModalProps (+45 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.11
-Nodes (46): DealHealthBadge(), LeadScoreBadge(), PipelineBadge(), PipelineStageType, STAGE_CONFIG, TASK_CONFIG, TaskStatusBadge(), TaskStatusType (+38 more)
+Cohesion: 0.09
+Nodes (15): GET(), escapeCsvField(), GET(), DELETE(), GET(), PATCH(), RouteParams, GET() (+7 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.07
-Nodes (31): ActivityHeatmap(), DAYS, HEATMAP_DATA, HOURS, AreaTrendChart(), DataPoint, DEFAULT_SERIES, CircularProgress() (+23 more)
+Cohesion: 0.13
+Nodes (70): getSupabaseClient(), activityToRow(), AnyRow, completeTaskRemote(), CrmHydration, deleteDocumentRemote(), deleteProjectRemote(), deleteRegionRemote() (+62 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.1
-Nodes (46): GET(), POST(), AddSkuModal(), AddSkuModalProps, DispatchChallanModal(), DispatchChallanModalProps, GET(), POST() (+38 more)
+Cohesion: 0.09
+Nodes (36): acceptInviteSchema, POST(), GET(), POST(), GET(), POST(), POST(), RouteParams (+28 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.03
@@ -328,99 +327,99 @@ Nodes (63): afterNonStageUpdate, afterStageUpdate, assignRepTest, assignStateExi
 
 ### Community 15 - "Community 15"
 Cohesion: 0.1
-Nodes (56): ComputedDealHealth, computeDealHealth(), DealHealthActivityInput, DealHealthFactor, DealHealthLeadInput, DealHealthTaskInput, activities, baseLead (+48 more)
+Nodes (55): ComputedDealHealth, computeDealHealth(), DealHealthActivityInput, DealHealthFactor, DealHealthLeadInput, DealHealthTaskInput, activities, baseLead (+47 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.12
 Nodes (48): DEFAULT_RESURRECTION_WEIGHTS, findTopResurrectionCandidates(), getMatchTier(), MatchingWeights, normalizeConfiguration(), scanResurrectionOpportunitiesInMemory(), scoreUnitForLead(), altProject (+40 more)
 
 ### Community 17 - "Community 17"
+Cohesion: 0.21
+Nodes (45): CRMContext, CRMContextType, INITIAL_ACTIVITIES, INITIAL_AREAS, INITIAL_DOCUMENTS, INITIAL_EXTERNAL_ORGS, INITIAL_LEADS, INITIAL_MATERIALS_ACTIVITIES (+37 more)
+
+### Community 18 - "Community 18"
 Cohesion: 0.05
 Nodes (13): ActivitiesRoute(), AgentLivePage(), DashboardPage(), AppShell(), LeadsRoute(), PeopleRoute(), PipelineRoute(), ProjectsRoute() (+5 more)
 
-### Community 18 - "Community 18"
-Cohesion: 0.15
-Nodes (42): DetectSellerSignalsResult, ActivityType, AuditLog, BuyerRequirement, CallOutcome, CommissionLedger, CommissionPaymentStatus, DealHealthFactor (+34 more)
-
 ### Community 19 - "Community 19"
-Cohesion: 0.13
-Nodes (39): cancelProviderSubscription(), CheckoutSessionParams, CheckoutSessionResult, createProviderCheckoutSession(), createProviderRefund(), getActiveBillingProvider(), reactivateProviderSubscription(), RefundResult (+31 more)
+Cohesion: 0.1
+Nodes (36): CONCLUSION_OPTIONS, FootfallCaptureForm(), FootfallCaptureFormProps, INTENT_OPTIONS, QUICK_FOLLOWUPS, KhataLedgerView(), KhataLedgerViewProps, SEED_LEDGERS (+28 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.1
-Nodes (26): acceptInviteSchema, POST(), GET, POST, RouteParams, POST, GET(), POST() (+18 more)
+Cohesion: 0.15
+Nodes (43): detectSellerSignals(), DetectSellerSignalsResult, ActivityType, AuditLog, BuyerRequirement, CallOutcome, CommissionLedger, CommissionPaymentStatus (+35 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.27
-Nodes (35): CRMContext, CRMContextType, INITIAL_ACTIVITIES, INITIAL_AREAS, INITIAL_DOCUMENTS, INITIAL_EXTERNAL_ORGS, INITIAL_LEADS, INITIAL_ORG (+27 more)
+Cohesion: 0.09
+Nodes (27): createCommissionSchema, GET(), POST(), createComplaintSchema, GET(), POST(), createDealerSchema, GET() (+19 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.14
-Nodes (25): BillingPageRoute(), metadata, Avatar, AvatarFallback, AvatarImage, Table, TableBody, TableCaption (+17 more)
+Cohesion: 0.05
+Nodes (41): 10. Phase-by-Phase Technical Specifications & Risk Analysis, 1. Architectural Consistency Pass & Core Principles, 2. Seller Intelligence & Intent Model, 3. AI Trust & Grounded Triad Architecture, 4-Tier Navigation Taxonomy, 4. Typography & Readability Standard, 5. Marketing vs. CRM Spatial Philosophy, 6. Flat 360° Master Property Dossier (+33 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.14
-Nodes (26): SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay, SheetTitle, sheetVariants (+18 more)
+Cohesion: 0.05
+Nodes (41): 10. Phase-by-Phase Technical Specifications & Risk Analysis, 1. Architectural Consistency Pass & Core Principles, 2. Seller Intelligence & Intent Model, 3. AI Trust & Grounded Triad Architecture, 4-Tier Navigation Taxonomy, 4. Typography & Readability Standard, 5. Marketing vs. CRM Spatial Philosophy, 6. Flat 360° Master Property Dossier (+33 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.05
-Nodes (41): 10. Phase-by-Phase Technical Specifications & Risk Analysis, 1. Architectural Consistency Pass & Core Principles, 2. Seller Intelligence & Intent Model, 3. AI Trust & Grounded Triad Architecture, 4-Tier Navigation Taxonomy, 4. Typography & Readability Standard, 5. Marketing vs. CRM Spatial Philosophy, 6. Flat 360° Master Property Dossier (+33 more)
+Nodes (40): 10. Automation 9: Real-Time Event Sync, 11. Business Impact Model, 180-Day Freshness Guard (`/api/automation/stale-facts`), 1. Executive Summary & Design Philosophy, 2. Agent 1: Aria 2.0 — Real Estate Sales Intelligence Assistant, 2. Agent 1: Aria — Lead Qualification Agent (Human-Gated), 3. Agent 2: Lost-Lead Resurrection Engine, 4. Automation 3: WhatsApp Sales Assistant Engine (+32 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.05
-Nodes (41): 10. Phase-by-Phase Technical Specifications & Risk Analysis, 1. Architectural Consistency Pass & Core Principles, 2. Seller Intelligence & Intent Model, 3. AI Trust & Grounded Triad Architecture, 4-Tier Navigation Taxonomy, 4. Typography & Readability Standard, 5. Marketing vs. CRM Spatial Philosophy, 6. Flat 360° Master Property Dossier (+33 more)
+Nodes (39): 100-Point Bi-Directional Matcher Algorithm, 1. Salesperson Workspace (Action-First), 2-Minute Full Presentation Script (For Investors & Agency Heads), 2. Sales Manager Workspace (Intervention-First), 30-Second Elevator Pitch (For Founders & Sales Directors), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), code:mermaid (flowchart TD), code:mermaid (graph TD) (+31 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.05
-Nodes (40): 10. Automation 9: Real-Time Event Sync, 11. Business Impact Model, 180-Day Freshness Guard (`/api/automation/stale-facts`), 1. Executive Summary & Design Philosophy, 2. Agent 1: Aria 2.0 — Real Estate Sales Intelligence Assistant, 2. Agent 1: Aria — Lead Qualification Agent (Human-Gated), 3. Agent 2: Lost-Lead Resurrection Engine, 4. Automation 3: WhatsApp Sales Assistant Engine (+32 more)
+Nodes (38): Category 1: Tenant Isolation, RBAC & Security, Category 2: Core Organization & Inventory Management, Category 3: Data Ingestion, Export & Storage, Category 4: Billing & Subscription Enforcement, Category 5: AI Agents, Automations & Intelligence, code:tsx (const handleSave = (e: React.FormEvent) => {), code:tsx (const handleExport = () => {), code:tsx (fileUrl: docUrl.trim() || `https://storage.ecosystemrealty.i) (+30 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.05
-Nodes (38): Category 1: Tenant Isolation, RBAC & Security, Category 2: Core Organization & Inventory Management, Category 3: Data Ingestion, Export & Storage, Category 4: Billing & Subscription Enforcement, Category 5: AI Agents, Automations & Intelligence, code:tsx (const handleSave = (e: React.FormEvent) => {), code:tsx (const handleExport = () => {), code:tsx (fileUrl: docUrl.trim() || `https://storage.ecosystemrealty.i) (+30 more)
+Nodes (39): 100-Point Bi-Directional Matcher Algorithm, 1. Salesperson Workspace (Action-First), 2-Minute Full Presentation Script (For Investors & Agency Heads), 2. Sales Manager Workspace (Intervention-First), 30-Second Elevator Pitch (For Founders & Sales Directors), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), code:mermaid (flowchart TD), code:mermaid (graph TD) (+31 more)
 
 ### Community 28 - "Community 28"
 Cohesion: 0.05
-Nodes (39): 100-Point Bi-Directional Matcher Algorithm, 1. Salesperson Workspace (Action-First), 2-Minute Full Presentation Script (For Investors & Agency Heads), 2. Sales Manager Workspace (Intervention-First), 30-Second Elevator Pitch (For Founders & Sales Directors), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), code:mermaid (flowchart TD), code:mermaid (graph TD) (+31 more)
-
-### Community 29 - "Community 29"
-Cohesion: 0.05
-Nodes (39): 100-Point Bi-Directional Matcher Algorithm, 1. Salesperson Workspace (Action-First), 2-Minute Full Presentation Script (For Investors & Agency Heads), 2. Sales Manager Workspace (Intervention-First), 30-Second Elevator Pitch (For Founders & Sales Directors), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), code:mermaid (flowchart TD), code:mermaid (graph TD) (+31 more)
-
-### Community 30 - "Community 30"
-Cohesion: 0.05
 Nodes (38): Category 1: Tenant Isolation, RBAC & Security, Category 2: Core Organization & Inventory Management, Category 3: Data Ingestion, Export & Storage, Category 4: Billing & Subscription Enforcement, Category 5: AI Agents, Automations & Intelligence, code:tsx (const handleSave = (e: React.FormEvent) => {), code:tsx (const handleExport = () => {), code:tsx (fileUrl: docUrl.trim() || `https://storage.ecosystemrealty.in/vault/) (+30 more)
 
-### Community 31 - "Community 31"
-Cohesion: 0.12
-Nodes (18): checkoutSchema, GET(), GET(), POST(), checkRateLimit(), createProjectUnitSchema, GET(), POST() (+10 more)
+### Community 29 - "Community 29"
+Cohesion: 0.17
+Nodes (23): SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay, SheetTitle, sheetVariants (+15 more)
 
-### Community 32 - "Community 32"
-Cohesion: 0.16
-Nodes (20): AggregateType, CrmDomainEventName, dispatchPendingOutboxEvents(), DomainEventRecord, emitDomainEvent(), EmitEventInput, inMemoryOutbox, LogContext (+12 more)
-
-### Community 33 - "Community 33"
+### Community 30 - "Community 30"
 Cohesion: 0.06
 Nodes (33): 1. Executive Summary & Market Mechanics, 1. Gross Pipeline (`₹97.80 Cr`), 2. High-Level System Architecture, 2. Speed-to-Lead SLA (`100% On-Time`), 3. End-to-End Data Pipeline: The Lifecycle of a Lead, 3. High-Intent Visits (`2 Physical Walkthroughs`), 4. Closed Revenue (`₹9.00 Cr`), 4. Deep-Dive: Screen & Tab Technical Breakdown (+25 more)
 
-### Community 34 - "Community 34"
+### Community 31 - "Community 31"
 Cohesion: 0.06
 Nodes (31): 10. Automation 9: Real-Time Event Sync, 11. Business Impact Model, 180-Day Freshness Guard (`/api/automation/stale-facts`), 1. Executive Summary & Design Philosophy, 2. Agent 1: Aria 2.0 — Real Estate Sales Intelligence Assistant, 3. Agent 2: Lost-Lead Resurrection Engine, 4. Automation 3: WhatsApp Sales Assistant Engine, 5. Automation 4: Seller Intelligence & Opportunity Engine (+23 more)
 
-### Community 35 - "Community 35"
+### Community 32 - "Community 32"
+Cohesion: 0.19
+Nodes (16): DialogContent, DialogDescription, DialogHeader(), DialogOverlay, DialogTitle, AiResurrectionModalProps, MeetingSummaryModal(), MeetingSummaryModalProps (+8 more)
+
+### Community 33 - "Community 33"
 Cohesion: 0.19
 Nodes (28): AuthContext, deleteRes, doc1, DocumentRecord, evaluateDocumentMutation(), evaluateLeadUpdate(), evaluatePersonMutation(), evaluateProjectUnitMutation() (+20 more)
 
-### Community 36 - "Community 36"
+### Community 34 - "Community 34"
+Cohesion: 0.2
+Nodes (18): CanonicalRole, isManagerRole(), isOwnerRole(), MANAGER_ROLES, mapCanonicalRole(), OWNER_ROLES, TEAM_ASSIGNABLE_ROLES, ApiAuthContext (+10 more)
+
+### Community 35 - "Community 35"
 Cohesion: 0.07
 Nodes (29): 1. 🔴 Supabase — REQUIRED (database + auth + realtime), 2. 🟠 Google Gemini — for the Aria AI agent, 3. 🟡 WhatsApp Cloud API — inbound message ingestion, 4. 🟡 Meta Lead Ads — instant lead capture from Facebook/Instagram ads, 5. 🟡 Payments & Billing — Stripe and Razorpay (Multi-Gateway + Sandbox), 5. 🟡 Payments — Stripe *or* Razorpay (pick one to start), 6. ⚪ Error Tracking (recommended before launch), API Keys & Environment Setup Guide (+21 more)
 
+### Community 36 - "Community 36"
+Cohesion: 0.07
+Nodes (28): ARCHITECTURE ASSESSMENT, Critical Issues (P0), CALLCRM PRODUCTION-READINESS AUDIT & IMPLEMENTATION ROADMAP, EXECUTIVE SUMMARY, IMMEDIATE ACTION ITEMS (COMPLETED & VERIFIED), Important Issues (P1), Nice-to-Have (P3), PHASE 11-18: RELIABILITY, SCALABILITY, UX AUDIT (+20 more)
+
 ### Community 37 - "Community 37"
-Cohesion: 0.15
-Nodes (16): POST(), GET(), RouteParams, ApiAuthContext, ApiErrorResponse, ApiSuccessResponse, checkIdempotency(), idempotencyKeyMap (+8 more)
+Cohesion: 0.07
+Nodes (27): 1. 🔴 Supabase — REQUIRED (database + auth + realtime), 2. 🟠 Google Gemini — for the Aria AI agent, 3. 🟡 WhatsApp Cloud API — inbound message ingestion, 4. 🟡 Meta Lead Ads — instant lead capture from Facebook/Instagram ads, 5. 🟡 Payments & Billing — Stripe and Razorpay (Multi-Gateway + Sandbox), 6. ⚪ Error Tracking (recommended before launch), API Keys & Environment Setup Guide, Billing API Endpoints (+19 more)
 
 ### Community 38 - "Community 38"
 Cohesion: 0.07
-Nodes (28): ARCHITECTURE ASSESSMENT, Critical Issues (P0), CALLCRM PRODUCTION-READINESS AUDIT & IMPLEMENTATION ROADMAP, EXECUTIVE SUMMARY, IMMEDIATE ACTION ITEMS (COMPLETED & VERIFIED), Important Issues (P1), Nice-to-Have (P3), PHASE 11-18: RELIABILITY, SCALABILITY, UX AUDIT (+20 more)
+Nodes (27): 1. Architectural Navbar, 1. Color Palette & Material Tokens, 1. Executive Summary & Brand Positioning Diagnosis, 2. Complete Section Inventory & Friction Audit, 2. Editorial Hero Section, 2. Typography Scale, 3. Trust & Credibility Bar, 4. The Core Problem (Why Generic CRMs Fail in Real Estate) (+19 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.08
@@ -431,360 +430,360 @@ Cohesion: 0.07
 Nodes (27): 1. Architectural Navbar, 1. Color Palette & Material Tokens, 1. Executive Summary & Brand Positioning Diagnosis, 2. Complete Section Inventory & Friction Audit, 2. Editorial Hero Section, 2. Typography Scale, 3. Trust & Credibility Bar, 4. The Core Problem (Why Generic CRMs Fail in Real Estate) (+19 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.07
-Nodes (27): 1. 🔴 Supabase — REQUIRED (database + auth + realtime), 2. 🟠 Google Gemini — for the Aria AI agent, 3. 🟡 WhatsApp Cloud API — inbound message ingestion, 4. 🟡 Meta Lead Ads — instant lead capture from Facebook/Instagram ads, 5. 🟡 Payments & Billing — Stripe and Razorpay (Multi-Gateway + Sandbox), 6. ⚪ Error Tracking (recommended before launch), API Keys & Environment Setup Guide, Billing API Endpoints (+19 more)
-
-### Community 42 - "Community 42"
-Cohesion: 0.07
-Nodes (27): 1. Architectural Navbar, 1. Color Palette & Material Tokens, 1. Executive Summary & Brand Positioning Diagnosis, 2. Complete Section Inventory & Friction Audit, 2. Editorial Hero Section, 2. Typography Scale, 3. Trust & Credibility Bar, 4. The Core Problem (Why Generic CRMs Fail in Real Estate) (+19 more)
-
-### Community 43 - "Community 43"
-Cohesion: 0.25
-Nodes (17): fraunces, ibmPlexMono, inter, metadata, RootLayout(), viewport, AuthProvider(), CRMProvider() (+9 more)
-
-### Community 44 - "Community 44"
 Cohesion: 0.3
 Nodes (16): fixedNow, mapped, sampleRaw, { startDate, endDate }, testCases, DateRangePreset, DealHealthSummaryAnalytics, ExecutiveDashboardAnalytics (+8 more)
 
-### Community 45 - "Community 45"
+### Community 42 - "Community 42"
 Cohesion: 0.07
 Nodes (26): 10. Database & Data Model, 11. API Audit, 12. Authentication & Authorization, 13. Security Audit, 14. Workflow Analysis, 15. Error Handling & Edge Cases, 16. Testing & Quality, 17. Performance & Scalability (+18 more)
 
-### Community 46 - "Community 46"
+### Community 43 - "Community 43"
 Cohesion: 0.09
 Nodes (25): 1. System Architecture & Component Map, 2. Full Security & Isolation Matrix, 3. Data Integrity & Database Hardening (Migrations 0001–0017), 3. Data Integrity & Database Hardening (Migrations 0001–0021), 4. Concurrency & Race-Condition Controls, 4. Verification & Test Suite Summary, 5. Production Deployment Runbook, 5. Verification & Test Suite Summary (+17 more)
 
-### Community 47 - "Community 47"
-Cohesion: 0.09
-Nodes (24): 06. Deployment & Operations Runbook — Apex Realty EcosystemRealty, 1.1 Pre-Deployment Checklist, 1.2 Step-by-Step Deployment Guide, 1. Production Deployment Workflow, 2.1 Applying Database Migrations (Supabase), 2.2 Migration Rollback Strategy, 2. Database Migration & Rollback Procedures, 3.1 Live Health Check Endpoint (`GET /api/health`) (+16 more)
-
-### Community 48 - "Community 48"
+### Community 44 - "Community 44"
 Cohesion: 0.09
 Nodes (25): 1. Core Architectural Pillars, 1. `GET /api/leads`, 2. `POST /api/leads`, 2. PostgreSQL Row-Level Security Matrix, 2. PostgreSQL Row-Level Security (RLS) Matrix, 3. Endpoints & Security Matrix, 3. `POST /api/activities`, 3. Separation of Responsibilities Architecture (+17 more)
 
-### Community 49 - "Community 49"
+### Community 45 - "Community 45"
 Cohesion: 0.08
 Nodes (24): code:block1 (+-----------------------------------------------------------), code:block10 (+-----------------------------------------------------------), code:block11 (+-----------------------------------------------------------), code:block2 (+-----------------------------------------------------------), code:block3 (+-----------------------------------------------------------), code:block4 (+-----------------------------------------------------------), code:block5 (+-----------------------------------------------------------), code:block6 (+-----------------------------------------------------------) (+16 more)
 
-### Community 50 - "Community 50"
+### Community 46 - "Community 46"
+Cohesion: 0.27
+Nodes (16): fraunces, ibmPlexMono, inter, metadata, RootLayout(), viewport, AuthProvider(), CRMProvider() (+8 more)
+
+### Community 47 - "Community 47"
 Cohesion: 0.08
 Nodes (24): 1. Core Information Architecture Principles, 2. Global Navigation Taxonomy & Structure, 3. Role-Specific Workspaces, 4. End-to-End User Journeys, 5. Navigation Depth & Transition Strategy, 6. Global Command Palette (`⌘K` / `/`) Architecture, 6. Mobile CRM Cockpit & PWA Offline Experience, 7. Global Command Palette (`⌘K` / `/`) Architecture (+16 more)
 
-### Community 51 - "Community 51"
+### Community 48 - "Community 48"
 Cohesion: 0.08
 Nodes (24): code:block1 (+-----------------------------------------------------------), code:block10 (+-----------------------------------------------------------), code:block11 (+-----------------------------------------------------------), code:block2 (+-----------------------------------------------------------), code:block3 (+-----------------------------------------------------------), code:block4 (+-----------------------------------------------------------), code:block5 (+-----------------------------------------------------------), code:block6 (+-----------------------------------------------------------) (+16 more)
 
-### Community 52 - "Community 52"
-Cohesion: 0.09
-Nodes (24): 1. **Aria — Lead Qualification Agent & 100-Point Matcher (Human-Gated)**, 1. **Aria — Lead Qualification Agent (Human-Gated)**, 1. Project Overview & Role, 2. Essential Commands, 2. **Lost-Lead Resurrection Engine**, 2. **Seller Intelligence & Opportunity Engine**, 3. **30-Minute Pre-Site-Visit Briefing Synthesizer**, 3. Strict Operating Rules & Architectural Invariants (+16 more)
-
-### Community 53 - "Community 53"
+### Community 49 - "Community 49"
 Cohesion: 0.08
 Nodes (24): 11. API Audit, 12. Authentication & Authorization, 13. Security Audit, 15. Error Handling & Edge Cases, 16. Testing & Quality, 17. Performance & Scalability, 18. Deployment & Operations, 19. Documentation vs Reality (+16 more)
 
-### Community 54 - "Community 54"
-Cohesion: 0.29
-Nodes (17): calculateCostSheet(), CostSheetBreakdown, CostSheetParameters, generateCostSheetWhatsAppText(), getDefaultCostParameters(), getStandardMilestones(), getStandardStampDutyPct(), IndianState (+9 more)
-
-### Community 55 - "Community 55"
+### Community 50 - "Community 50"
 Cohesion: 0.08
 Nodes (23): 1. Core Information Architecture Principles, 2. Global Navigation Taxonomy & Structure, 3. Role-Specific Workspaces, 4. End-to-End User Journeys, 5. Navigation Depth & Transition Strategy, 6. Mobile CRM Cockpit & PWA Offline Experience, 7. Global Command Palette (`⌘K` / `/`) Architecture, A. Salesperson Workspace (Action-First) (+15 more)
 
-### Community 56 - "Community 56"
+### Community 51 - "Community 51"
+Cohesion: 0.3
+Nodes (17): calculateCostSheet(), CostSheetBreakdown, CostSheetParameters, generateCostSheetWhatsAppText(), getDefaultCostParameters(), getStandardMilestones(), getStandardStampDutyPct(), IndianState (+9 more)
+
+### Community 52 - "Community 52"
+Cohesion: 0.09
+Nodes (21): 06. Deployment & Operations Runbook — Apex Realty EcosystemRealty, 1.1 Pre-Deployment Checklist, 1.2 Step-by-Step Deployment Guide, 1. Production Deployment Workflow, 2.1 Applying Database Migrations (Supabase), 2.2 Migration Rollback Strategy, 2. Database Migration & Rollback Procedures, 3.1 Live Health Check Endpoint (`GET /api/health`) (+13 more)
+
+### Community 53 - "Community 53"
 Cohesion: 0.21
 Nodes (16): LandingPage(), ArchitecturalFloorplanVector(), EcosystemDarkCockpit(), ExecutiveDarkCockpit(), HeroDossierPreview(), HeroEditorialVisual(), IsometricCityscape(), LiveTelemetryTicker() (+8 more)
 
-### Community 57 - "Community 57"
-Cohesion: 0.09
-Nodes (21): 01. Product Requirements Document (PRD) — Apex Realty EcosystemRealty, 1.1 The High-Ticket Real Estate Challenge, 1.2 The EcosystemRealty Solution, 1. Executive Summary & Problem Statement, 2. User Personas & Roles, 3.10 Autonomous AI Agent Suite (Aria & Resurrection Engine), 3.1 Master Contact Identity & Phone Deduplication, 3.2 7-Stage Luxury Sales Pipeline (+13 more)
-
-### Community 58 - "Community 58"
+### Community 54 - "Community 54"
 Cohesion: 0.23
 Nodes (17): aiExtractionFromN8n, AiExtractionPayload, approvedCheck, eventPayload, firstAttempt, InboundEventLog, InboundWebhookIdempotencyManager, isValid (+9 more)
 
-### Community 59 - "Community 59"
-Cohesion: 0.1
-Nodes (20): 1. Executive Pitch & Selling Playbook, 2-Minute Full Presentation Script (For Pitching Investors, Clients, or Partners), 2. Project Architecture & Repository Map, 30-Second Elevator Pitch (Say this to any Real Estate Founder or Sales Director), 3. Technology Stack Breakdown, 4. Normalized Indian Real Estate Hierarchy, 5. Core Entities & Database Schema (34 Public Tables), 6. Complete API Catalog (63 Route Handlers) (+12 more)
-
-### Community 60 - "Community 60"
-Cohesion: 0.1
-Nodes (20): 10. Mobile On-Site Companion, 11. Comprehensive FAQ, 12. Final Call to Action & Architectural Footer, 1. Architectural Navbar, 1. Scope & Implementation Boundaries, 2. Editorial Hero Section, 2. Step-by-Step Implementation Sequence, 3. Section-by-Section Implementation Blueprint for `page.tsx` (+12 more)
-
-### Community 61 - "Community 61"
+### Community 55 - "Community 55"
 Cohesion: 0.1
 Nodes (19): 1. Architectural Overview & Value Proposition, 2. Screen-by-Screen Technical & Mathematical Breakdown, 3. Database Schema for Sales Workspace & Inventory, 4. Summary Table for Investor Presentations, code:mermaid (graph LR), code:block2 (┌───────────────────────────────────────────────────────────), code:block3 (┌───────────────────────────────────────────────────────────), code:block4 (┌───────────────────────────────────────────────────────────) (+11 more)
 
-### Community 62 - "Community 62"
+### Community 56 - "Community 56"
 Cohesion: 0.1
 Nodes (20): 10. Mobile On-Site Companion, 11. Comprehensive FAQ, 12. Final Call to Action & Architectural Footer, 1. Architectural Navbar, 1. Scope & Implementation Boundaries, 2. Editorial Hero Section, 2. Step-by-Step Implementation Sequence, 3. Section-by-Section Implementation Blueprint for `page.tsx` (+12 more)
 
-### Community 63 - "Community 63"
+### Community 57 - "Community 57"
+Cohesion: 0.1
+Nodes (20): 1. Executive Pitch & Selling Playbook, 2-Minute Full Presentation Script (For Pitching Investors, Clients, or Partners), 2. Project Architecture & Repository Map, 30-Second Elevator Pitch (Say this to any Real Estate Founder or Sales Director), 3. Technology Stack Breakdown, 4. Normalized Indian Real Estate Hierarchy, 5. Core Entities & Database Schema (34 Public Tables), 6. Complete API Catalog (63 Route Handlers) (+12 more)
+
+### Community 58 - "Community 58"
+Cohesion: 0.32
+Nodes (13): PWARegistrar(), enqueue(), flush(), flushRetries(), givenUpCallbacks, pendingRetryCount(), queue, QueueEntry (+5 more)
+
+### Community 59 - "Community 59"
+Cohesion: 0.1
+Nodes (20): 10. Mobile On-Site Companion, 11. Comprehensive FAQ, 12. Final Call to Action & Architectural Footer, 1. Architectural Navbar, 1. Scope & Implementation Boundaries, 2. Editorial Hero Section, 2. Step-by-Step Implementation Sequence, 3. Section-by-Section Implementation Blueprint for `page.tsx` (+12 more)
+
+### Community 60 - "Community 60"
 Cohesion: 0.1
 Nodes (20): 1. Overview & Architecture, 2. SLA & Deal Health Rules Engine, 3. In-App Notification System & Idempotency Strategy, 4. Audit Logging Integration, 5. Security & Multi-Tenant Isolation, 6. Manual Testing & Invocation Instructions, A. Stage Velocity (`days_in_stage`), B. Follow-Up Task Automation (+12 more)
 
-### Community 64 - "Community 64"
-Cohesion: 0.35
-Nodes (13): enqueue(), flush(), flushRetries(), givenUpCallbacks, onWriteAbandoned(), pendingRetryCount(), queue, QueueEntry (+5 more)
-
-### Community 65 - "Community 65"
+### Community 61 - "Community 61"
 Cohesion: 0.1
 Nodes (19): 1. Overview & Architecture, 2. SLA & Deal Health Rules Engine, 3. In-App Notification System & Idempotency Strategy, 4. Audit Logging Integration, 5. Security & Multi-Tenant Isolation, 6. Manual Testing & Invocation Instructions, A. Stage Velocity (`days_in_stage`), B. Follow-Up Task Automation (+11 more)
 
-### Community 66 - "Community 66"
-Cohesion: 0.11
-Nodes (17): 07. AI Agent & Automation System Specification — Apex Realty EcosystemRealty, 1. Agent Architecture & Role Definitions, 2. Aria Agent System Prompt & Directives, 3. Server Tools Suite & Zod Schemas (`aria-tools.ts`), 3. Tool Specifications & Zod Schemas, 4. Grounded Triad Architecture & Safety Contract, 4. Human-in-the-Loop Safety & Approval Gate, 5. Lost-Lead Resurrection Engine (+9 more)
+### Community 62 - "Community 62"
+Cohesion: 0.1
+Nodes (18): 01. Product Requirements Document (PRD) — Apex Realty EcosystemRealty, 1.1 The High-Ticket Real Estate Challenge, 1.2 The EcosystemRealty Solution, 1. Executive Summary & Problem Statement, 2. User Personas & Roles, 3.10 Autonomous AI Agent Suite (Aria & Resurrection Engine), 3.1 Master Contact Identity & Phone Deduplication, 3.2 7-Stage Luxury Sales Pipeline (+10 more)
 
-### Community 67 - "Community 67"
-Cohesion: 0.11
-Nodes (17): 09. UX & Product Specification — Apex Realty EcosystemRealty, 1. Core UX Principles, 2.1 Boss Executive Cockpit (`boss-overview.tsx`), 2.1 Boss Executive Cockpit (`/dashboard` & `/reports`), 2.2 Salesperson Action-First Home (`/dashboard` for reps), 2.2 Salesperson Daily Action Cockpit (`salesperson-home.tsx`), 2.3 7-Stage Interactive Pipeline Board (`/pipeline`), 2.3 Mobile CRM Cockpit & Role-Aware Bottom Navigation (+9 more)
+### Community 63 - "Community 63"
+Cohesion: 0.28
+Nodes (7): RootLoading(), Skeleton(), DashboardLoading(), LeadsLoading(), PipelineLoading(), ProjectsLoading(), Skeleton()
 
-### Community 68 - "Community 68"
-Cohesion: 0.11
-Nodes (18): 1. Color System & Semantic Tokens, 2. Typography Hierarchy & Number Formatting, 3. Elevation, Radius & Structural Lines, 4. Reusable Component Specifications, 5. Motion & Micro-Interaction Principles, 6. Accessibility & Contrast Standards, A. Core Neutral Ledger Palette, A. Primary Action Button (`Button.tsx`) (+10 more)
-
-### Community 69 - "Community 69"
-Cohesion: 0.11
-Nodes (18): 1. The 12-Beat Narrative Storytelling Arc, 2. Detailed Section Blueprint & Content Structure, 3. Global Navigation Taxonomy, Beat 10: Enterprise Trust, Security & Regional Desks, Beat 11: Transparent Subscription Pricing, Beat 12: Knowledge Base (FAQ) & Final CTA, Beat 1: The Hero (Clarity, Confidence, Restraint), Beat 2: The Core Problem (Why Generic CRMs Fail) (+10 more)
-
-### Community 70 - "Community 70"
+### Community 64 - "Community 64"
 Cohesion: 0.11
 Nodes (17): 1. High-Level Architectural Context, 2. Screen-by-Screen Technical Breakdown, 3. Database Schema for Contacts, Activities & AI Stream, 4. Summary Table for Investor Presentations, code:mermaid (graph TD), code:block2 (┌───────────────────────────────────────────────────────────), code:sql (CREATE UNIQUE INDEX idx_people_org_phone ON public.people(or), code:block4 (┌───────────────────────────────────────────────────────────) (+9 more)
 
-### Community 71 - "Community 71"
+### Community 65 - "Community 65"
 Cohesion: 0.11
 Nodes (18): 1. The 12-Beat Narrative Storytelling Arc, 2. Detailed Section Blueprint & Content Structure, 3. Global Navigation Taxonomy, Beat 10: Enterprise Trust, Security & Regional Desks, Beat 11: Transparent Subscription Pricing, Beat 12: Knowledge Base (FAQ) & Final CTA, Beat 1: The Hero (Clarity, Confidence, Restraint), Beat 2: The Core Problem (Why Generic CRMs Fail) (+10 more)
 
-### Community 72 - "Community 72"
+### Community 66 - "Community 66"
 Cohesion: 0.11
 Nodes (18): 1. Color System & Semantic Tokens, 2. Typography Hierarchy & Number Formatting, 3. Elevation, Radius & Structural Lines, 4. Reusable Component Specifications, 5. Motion & Micro-Interaction Principles, 6. Accessibility & Contrast Standards, A. Core Neutral Ledger Palette, A. Primary Action Button (`Button.tsx`) (+10 more)
 
-### Community 73 - "Community 73"
-Cohesion: 0.12
-Nodes (17): 02. System Architecture Document — Apex Realty EcosystemRealty, 02. System Architecture Document — EcosystemRealty 2.0, 1. High-Level Architecture Topology, 2.1 Web Application & Router (`Frontend/src/app/`), 2.2 Global State & Optimistic UI (`Frontend/src/context/crm-context.tsx`), 2.3 EcosystemRealty + n8n Integration Layer (`Frontend/src/lib/server/domain-event-bus.ts`), 2.3 Unified Data Service (`Frontend/src/lib/services/crm-data-service.ts`), 2.4 Enterprise Server Security Layer (`Frontend/src/lib/server/api-security.ts`) (+9 more)
+### Community 67 - "Community 67"
+Cohesion: 0.19
+Nodes (10): GET, POST, POST, PATCH, GET, POST, AuthenticatedHandlerContext, AuthenticatedRouteHandler (+2 more)
 
-### Community 74 - "Community 74"
-Cohesion: 0.21
-Nodes (6): RootLoading(), DashboardLoading(), LeadsLoading(), PipelineLoading(), ProjectsLoading(), Skeleton()
+### Community 68 - "Community 68"
+Cohesion: 0.11
+Nodes (18): 1. The 12-Beat Narrative Storytelling Arc, 2. Detailed Section Blueprint & Content Structure, 3. Global Navigation Taxonomy, Beat 10: Enterprise Trust, Security & Regional Desks, Beat 11: Transparent Subscription Pricing, Beat 12: Knowledge Base (FAQ) & Final CTA, Beat 1: The Hero (Clarity, Confidence, Restraint), Beat 2: The Core Problem (Why Generic CRMs Fail) (+10 more)
 
-### Community 75 - "Community 75"
+### Community 69 - "Community 69"
+Cohesion: 0.11
+Nodes (18): 1. Color System & Semantic Tokens, 2. Typography Hierarchy & Number Formatting, 3. Elevation, Radius & Structural Lines, 4. Reusable Component Specifications, 5. Motion & Micro-Interaction Principles, 6. Accessibility & Contrast Standards, A. Core Neutral Ledger Palette, A. Primary Action Button (`Button.tsx`) (+10 more)
+
+### Community 70 - "Community 70"
 Cohesion: 0.29
 Nodes (15): cancelled, completed, days, deriveTaskStatus(), entered10DaysAgo, enteredJustNow, evaluateDealHealth(), lost (+7 more)
 
-### Community 76 - "Community 76"
+### Community 71 - "Community 71"
+Cohesion: 0.11
+Nodes (17): CollectionsRow, Complaint, ComplaintPriority, ComplaintStatus, ComplaintType, ConstructionSite, Dealer, DealerPerformance (+9 more)
+
+### Community 72 - "Community 72"
 Cohesion: 0.12
 Nodes (16): 1. Architecture Overview, 2. Prerequisites, 3. Environment Configuration, 4. Starting the Application, 5. Domain Diversion & Testing, 6. Key URLs & Direct Routes, 7. Troubleshooting, A. Signup Diversion (+8 more)
 
-### Community 77 - "Community 77"
+### Community 73 - "Community 73"
 Cohesion: 0.12
-Nodes (15): 04. Database & Data Model Specification — Apex Realty EcosystemRealty, 1. Entity Relationship Diagram (Conceptual), 2.1 `public.organizations` (Tenant Partition), 2.2 `public.people` (Master Contact & Phone Dedup Anchor), 2.3 `public.projects` (Development Catalog), 2.4 `public.project_units` (Inventory Matrix), 2.5 `public.leads` (Sales Opportunities), 2.6 `public.activities` (Immutable Audit Stream) (+7 more)
+Nodes (15): 1. Simple / High-Velocity Mode (`simple`), 2. Deep / Enterprise Mode (`deep`), ⚡ Adaptive Operational Modes, code:block1 (┌───────────────────────────────────────────────────────────), code:block2 (building-ecosystem-crm/), code:typescript (export type EcosystemVertical =), code:typescript (electrical_plumbing: {), code:typescript (electrical_plumbing: {) (+7 more)
 
-### Community 78 - "Community 78"
+### Community 74 - "Community 74"
 Cohesion: 0.12
-Nodes (15): 1. Simple / High-Velocity Mode (`simple`), 2. Deep / Enterprise Mode (`deep`), ⚡ Adaptive Operational Modes, Building Ecosystem CRM — Multi-Vertical Architecture & Extensibility Guide, code:block1 (┌───────────────────────────────────────────────────────────), code:block2 (building-ecosystem-crm/), code:typescript (export type EcosystemVertical =), code:typescript (electrical_plumbing: {) (+7 more)
+Nodes (14): 04. Database & Data Model Specification — Apex Realty EcosystemRealty, 1. Entity Relationship Diagram (Conceptual), 2.1 `public.organizations` (Tenant Partition), 2.2 `public.people` (Master Contact & Phone Dedup Anchor), 2.3 `public.projects` (Development Catalog), 2.4 `public.project_units` (Inventory Matrix), 2.5 `public.leads` (Sales Opportunities), 2.6 `public.activities` (Immutable Audit Stream) (+6 more)
 
-### Community 79 - "Community 79"
-Cohesion: 0.12
-Nodes (14): 08. Test Strategy & Test Plan — Apex Realty EcosystemRealty, 1. Test Architecture & Strategy Pyramid, 2.1 `phone-dedup.test.ts` (Phone Normalization & Currency Formatting), 2.2 `rate-limiting.test.ts` (Token Bucket & Idempotency), 2.3 `validations.test.ts` (Zod Inbound Payload Verification), 2.4 `webhook-security.test.ts` (HMAC-SHA256 Cryptographic Verification), 2.5 `subscription.test.ts` (Plan Quotas & Feature Gating), 2.6 `crm-sync-mappers.test.ts` & Supporting Suites (+6 more)
-
-### Community 80 - "Community 80"
-Cohesion: 0.12
-Nodes (16): 28. Final Cheat Sheet, Biggest risks, Biggest strengths, Biggest weaknesses, Files I must understand before presenting, If I remember only 10 things, Main architecture, Main data flow (+8 more)
-
-### Community 81 - "Community 81"
+### Community 75 - "Community 75"
 Cohesion: 0.12
 Nodes (16): 28. Final Cheat Sheet, Biggest risks, Biggest strengths, Biggest weaknesses, Files I must understand before presenting (ranked), If I remember only 10 things, Main architecture, Main data flow (+8 more)
 
-### Community 82 - "Community 82"
-Cohesion: 0.13
-Nodes (13): 05. Security & Threat Model — Apex Realty EcosystemRealty, 1. Threat Modeling Overview (STRIDE Matrix), 2.1 Broken Object Level Authorization (BOLA / IDOR), 2.2 Broken Authentication & Session Management, 2.3 AI Agent Prompt Injection & Autonomous Action Attack, 2.4 Webhook Forgery & Replay Attacks, 2.4 Webhook Forgery, Replay Attacks & Idempotency, 2.5 Domain Event Outbox & Circuit Breaker Security (+5 more)
+### Community 76 - "Community 76"
+Cohesion: 0.12
+Nodes (16): 28. Final Cheat Sheet, Biggest risks, Biggest strengths, Biggest weaknesses, Files I must understand before presenting, If I remember only 10 things, Main architecture, Main data flow (+8 more)
 
-### Community 83 - "Community 83"
-Cohesion: 0.13
-Nodes (14): 1. Color Palette & Material Hierarchy, 2. Typography Hierarchy, 3. Spacing, Grid & Container Architecture, 4. UI Primitives & Button Tokens, 5. Imagery & Product UI Presentation, 6. Motion & Micro-Interactions, A. Primary Action Button (`[Start Free Trial]` / `[Request Private Walkthrough]`), B. Secondary Button (`[Explore Interactive Platform]`) (+6 more)
-
-### Community 84 - "Community 84"
+### Community 77 - "Community 77"
 Cohesion: 0.13
 Nodes (14): 1. System Architecture & Component Map, 2. Full Security & Isolation Matrix, 3. Data Integrity & Database Hardening (Migrations 0001–0021), 4. Verification & Test Suite Summary, 5. Production Deployment Runbook, code:mermaid (graph TD), code:block2 (============================================================), code:bash (make ci) (+6 more)
 
-### Community 85 - "Community 85"
+### Community 78 - "Community 78"
 Cohesion: 0.13
 Nodes (14): 1. Color Palette & Material Hierarchy, 2. Typography Hierarchy, 3. Spacing, Grid & Container Architecture, 4. UI Primitives & Button Tokens, 5. Imagery & Product UI Presentation, 6. Motion & Micro-Interactions, A. Primary Action Button (`[Start Free Trial]` / `[Request Private Walkthrough]`), B. Secondary Button (`[Explore Interactive Platform]`) (+6 more)
 
-### Community 86 - "Community 86"
-Cohesion: 0.14
-Nodes (13): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Inventory, 3. Deep Interaction & Usability Issues, 4. Architectural Ledger Design System Evaluation, A. Core Sales Surfaces, B. Property Intelligence Surfaces, C. Intelligence & Automation Surfaces, D. Management & Platform Surfaces (+5 more)
+### Community 79 - "Community 79"
+Cohesion: 0.13
+Nodes (13): 07. AI Agent & Automation System Specification — Apex Realty EcosystemRealty, 1. Agent Architecture & Role Definitions, 2. Aria Agent System Prompt & Directives, 3. Server Tools Suite & Zod Schemas (`aria-tools.ts`), 4. Grounded Triad Architecture & Safety Contract, 5. Voice Note Dictation & Transcription Structurer, 6. Lost-Lead Resurrection Engine, code:block1 (┌───────────────────────────────────────────────┐) (+5 more)
 
-### Community 87 - "Community 87"
+### Community 80 - "Community 80"
+Cohesion: 0.13
+Nodes (14): 1. Color Palette & Material Hierarchy, 2. Typography Hierarchy, 3. Spacing, Grid & Container Architecture, 4. UI Primitives & Button Tokens, 5. Imagery & Product UI Presentation, 6. Motion & Micro-Interactions, A. Primary Action Button (`[Start Free Trial]` / `[Request Private Walkthrough]`), B. Secondary Button (`[Explore Interactive Platform]`) (+6 more)
+
+### Community 81 - "Community 81"
 Cohesion: 0.14
 Nodes (13): 1. Core Health Model, 2. Factor Attribution Matrix, 3. Structured Output & Explainability, 4. Execution Architecture, 5. Aria 2.0 & UI Integration, Clamping & Invariants, code:block1 (Score: 0 – 100), code:json ({) (+5 more)
 
-### Community 88 - "Community 88"
+### Community 82 - "Community 82"
 Cohesion: 0.14
 Nodes (13): 1. Overview, 2. 100-Point Scoring Architecture, 3. Hard Exclusion Rules & Safety, 4. Re-Engagement Workflow, 5. API Endpoints, 6. Database Schema & RPCs, code:mermaid (flowchart TD), code:json ({) (+5 more)
+
+### Community 83 - "Community 83"
+Cohesion: 0.14
+Nodes (13): 1. Database Migration `0013_phase7_lead_ingestion.sql`, 2. Reusable Ingestion Engine (`Frontend/src/lib/server/lead-ingestion.ts`), 3. Meta Lead Ads Webhook (`Frontend/src/app/api/webhooks/meta-lead-ads/route.ts`), 4. WhatsApp Webhook (`Frontend/src/app/api/webhooks/whatsapp/route.ts`), 5. Webhook Retry & Dead-Letter Endpoint (`Frontend/src/app/api/webhooks/retry/route.ts`), 6. Enterprise n8n & Outbox Event Bus (`supabase/migrations/0021_n8n_event_bus_and_integration_outbox.sql`), code:mermaid (flowchart TD), EcosystemRealty — Phase 7: Lead Ingestion Automation (+5 more)
+
+### Community 84 - "Community 84"
+Cohesion: 0.14
+Nodes (12): 05. Security & Threat Model — Apex Realty EcosystemRealty, 1. Threat Modeling Overview (STRIDE Matrix), 2.1 Broken Object Level Authorization (BOLA / IDOR), 2.2 Broken Authentication & Session Management, 2.3 AI Agent Prompt Injection & Autonomous Action Attack, 2.4 Webhook Forgery, Replay Attacks & Idempotency, 2.5 Domain Event Outbox & Circuit Breaker Security, 2.6 Statutory Compliance & Financial Audit Trail (RERA & TDS 194H) (+4 more)
+
+### Community 85 - "Community 85"
+Cohesion: 0.14
+Nodes (12): 09. UX & Product Specification — Apex Realty EcosystemRealty, 1. Core UX Principles, 2.1 Boss Executive Cockpit (`boss-overview.tsx`), 2.2 Salesperson Daily Action Cockpit (`salesperson-home.tsx`), 2.3 Mobile CRM Cockpit & Role-Aware Bottom Navigation, 2.4 Visual Building Stacking Chart (`building-stacking-chart.tsx`), 2.5 Multi-Party Bidding & Negotiation Ledger (`lead-bidding-modal.tsx`), 2.6 Digital Site Visit Pass Modal (`site-visit-pass-modal.tsx`) (+4 more)
+
+### Community 86 - "Community 86"
+Cohesion: 0.14
+Nodes (13): 13. Cement Manufacturer — 7 MUST HAVEs (Ambuja Scale), code:block1 (Dealer Network (who sells)), Deferred (SHOULD later), Implementation Order, Lifecycle, MUST HAVE 1 — Dealer Network Master + Territory/Beat, MUST HAVE 2 — Construction Site (durable, not Lead), MUST HAVE 3 — Target vs Actual (MT/Bags) (+5 more)
+
+### Community 87 - "Community 87"
+Cohesion: 0.14
+Nodes (13): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Inventory, 3. Deep Interaction & Usability Issues, 4. Architectural Ledger Design System Evaluation, A. Core Sales Surfaces, B. Property Intelligence Surfaces, C. Intelligence & Automation Surfaces, D. Management & Platform Surfaces (+5 more)
+
+### Community 88 - "Community 88"
+Cohesion: 0.14
+Nodes (13): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Inventory, 3. Deep Interaction & Usability Issues, 4. Architectural Ledger Design System Evaluation, A. Core Sales Surfaces, B. Property Intelligence Surfaces, C. Intelligence & Automation Surfaces, D. Management & Platform Surfaces (+5 more)
 
 ### Community 89 - "Community 89"
 Cohesion: 0.14
 Nodes (13): 1. Database Migration `0013_phase7_lead_ingestion.sql`, 2. Reusable Ingestion Engine (`Frontend/src/lib/server/lead-ingestion.ts`), 3. Meta Lead Ads Webhook (`Frontend/src/app/api/webhooks/meta-lead-ads/route.ts`), 4. WhatsApp Webhook (`Frontend/src/app/api/webhooks/whatsapp/route.ts`), 5. Webhook Retry & Dead-Letter Endpoint (`Frontend/src/app/api/webhooks/retry/route.ts`), 6. Enterprise n8n & Outbox Event Bus (`supabase/migrations/0021_n8n_event_bus_and_integration_outbox.sql`), code:mermaid (flowchart TD), EcosystemRealty — Phase 7: Lead Ingestion Automation (+5 more)
 
 ### Community 90 - "Community 90"
-Cohesion: 0.36
-Nodes (11): aiAgentQualifySchema, phoneSchema, absurdBudget, badMetadata, injectionAttempt, invalidBudget, invalidPhone, oversizedNote (+3 more)
-
-### Community 91 - "Community 91"
-Cohesion: 0.14
-Nodes (13): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Inventory, 3. Deep Interaction & Usability Issues, 4. Architectural Ledger Design System Evaluation, A. Core Sales Surfaces, B. Property Intelligence Surfaces, C. Intelligence & Automation Surfaces, D. Management & Platform Surfaces (+5 more)
-
-### Community 92 - "Community 92"
-Cohesion: 0.14
-Nodes (13): 1. Database Migration `0013_phase7_lead_ingestion.sql`, 2. Reusable Ingestion Engine (`Frontend/src/lib/server/lead-ingestion.ts`), 3. Meta Lead Ads Webhook (`Frontend/src/app/api/webhooks/meta-lead-ads/route.ts`), 4. WhatsApp Webhook (`Frontend/src/app/api/webhooks/whatsapp/route.ts`), 5. Webhook Retry & Dead-Letter Endpoint (`Frontend/src/app/api/webhooks/retry/route.ts`), 6. Enterprise n8n & Outbox Event Bus (`supabase/migrations/0021_n8n_event_bus_and_integration_outbox.sql`), code:mermaid (flowchart TD), EcosystemRealty — Phase 7: Lead Ingestion Automation (+5 more)
-
-### Community 93 - "Community 93"
 Cohesion: 0.14
 Nodes (13): 1. Core Health Model, 2. Factor Attribution Matrix, 3. Structured Output & Explainability, 4. Execution Architecture, 5. Aria 2.0 & UI Integration, Clamping & Invariants, code:block1 (Score: 0 – 100), code:json ({) (+5 more)
 
-### Community 94 - "Community 94"
+### Community 91 - "Community 91"
 Cohesion: 0.14
 Nodes (13): 1. Overview, 2. 100-Point Scoring Architecture, 3. Hard Exclusion Rules & Safety, 4. Re-Engagement Workflow, 5. API Endpoints, 6. Database Schema & RPCs, code:mermaid (flowchart TD), code:json ({) (+5 more)
 
-### Community 95 - "Community 95"
+### Community 92 - "Community 92"
 Cohesion: 0.15
 Nodes (11): 11. Architecture Decision Records (ADRs) — Apex Realty EcosystemRealty, ADR 001: Next.js 15 App Router & React 19 as the Core Full-Stack Framework, ADR 002: PostgreSQL Row-Level Security (RLS) for Multi-Tenant Data Isolation, ADR 003: Master `people` Table as the E.164 Phone Deduplication Anchor, ADR 004: Human-in-the-Loop Approval Gate for AI Lead Qualification, ADR 005: Graphify AST Knowledge Graph for Zero-Token Codebase Navigation, ADR 006: EcosystemRealty + n8n Separation of Responsibilities & Transactional Domain Event Outbox, ADR 007: Digital Site Visit Pass & Geofenced Check-in Protocol (+3 more)
 
-### Community 96 - "Community 96"
-Cohesion: 0.15
-Nodes (13): 25. Presentation Preparation, Architecture, Business/value highlights, Data flow, Demo flow, Future improvements, Limitations, Main features (+5 more)
-
-### Community 97 - "Community 97"
+### Community 93 - "Community 93"
 Cohesion: 0.15
 Nodes (13): 25. Presentation Preparation, Architecture (how to say it verbally), Business/value highlights, Data flow (verbally), Demo flow (ideal order), Features to demonstrate (pick these, in this order), Future improvements (present the roadmap), Limitations to acknowledge honestly (+5 more)
 
-### Community 98 - "Community 98"
-Cohesion: 0.45
-Nodes (6): mapDbRoleToClient(), CanonicalRole, isManagerRole(), isOwnerRole(), mapCanonicalRole(), TEAM_ASSIGNABLE_ROLES
+### Community 94 - "Community 94"
+Cohesion: 0.15
+Nodes (13): 25. Presentation Preparation, Architecture, Business/value highlights, Data flow, Demo flow, Future improvements, Limitations, Main features (+5 more)
 
-### Community 99 - "Community 99"
-Cohesion: 0.18
-Nodes (10): [0.5.0] - 2026-08-20 — Frontend Visual MVP Release, 12. Changelog & Release Notes — Apex Realty EcosystemRealty, [1.0.0] - 2026-08-22 — Enterprise Production Release, [2.0.0] - 2026-08-31 — EcosystemRealty 2.0 & n8n Separation of Responsibilities Architecture, 🚀 Added, 🚀 Added, 🚀 Added, 🚀 Added (+2 more)
-
-### Community 100 - "Community 100"
+### Community 95 - "Community 95"
 Cohesion: 0.17
 Nodes (11): 1. Overview & Architecture, 2. Data Model & Migrations, 3. Multi-Tenant Privacy & Strict Row Level Security, 4. Notification Emission & Idempotency, 5. Client UI & Realtime Integration, 6. Endpoints, Centralized Notifications, Real-Time Alert Center & Notification System, code:block1 (┌──────────────────────────────────────────────────────────┐) (+3 more)
 
-### Community 101 - "Community 101"
+### Community 96 - "Community 96"
 Cohesion: 0.17
 Nodes (11): 1. Architectural Highlights, 1. Database Hardening & Concurrency Protection (`0017_phase11_production_hardening.sql`), 2. Structured Production Logger & PII/Secret Redaction (`Frontend/src/lib/server/logger.ts`), 2. Validation & Quality Gates, 3. Billing UI & Authoritative Verification Polish (`Frontend/src/components/crm/pages/billing-page.tsx` & `billing-success-view.tsx`), EcosystemRealty — Phase 11: Final Production Hardening & Security Audit, EcosystemRealty — Phase 8 Walkthrough & Verification Report, Executive Overview (+3 more)
 
-### Community 102 - "Community 102"
+### Community 97 - "Community 97"
 Cohesion: 0.17
 Nodes (11): 1. Overview & Architecture, 2. Data Model & Migrations, 3. Multi-Tenant Privacy & Strict Row Level Security, 4. Notification Emission & Idempotency, 5. Client UI & Realtime Integration, 6. Endpoints, Centralized Notifications, Real-Time Alert Center & Notification System, code:block1 (┌──────────────────────────────────────────────────────────┐) (+3 more)
 
-### Community 103 - "Community 103"
+### Community 98 - "Community 98"
 Cohesion: 0.2
 Nodes (12): 5. Core Entities & Database Schema (32 Public Tables), 5. Core Entities & Database Schema (34 Public Tables), 5. End-to-End Data Flow, 8. Testing & Quality Verification, code:mermaid (erDiagram), code:bash ($ npm test), code:bash ($ npm run build), Flow 1 — Stage change on the pipeline board (the canonical optimistic flow) (+4 more)
 
-### Community 104 - "Community 104"
-Cohesion: 0.47
-Nodes (8): AUTH_FLOW_PREFIXES, config, isAuthFlow(), isProtected(), MANAGER_PAGE_PREFIXES, middleware(), OWNER_ONLY_PREFIXES, PROTECTED_PREFIXES
-
-### Community 105 - "Community 105"
-Cohesion: 0.4
-Nodes (4): Error(), ErrorMeta, forwardToReporter(), reportError()
-
-### Community 106 - "Community 106"
+### Community 99 - "Community 99"
 Cohesion: 0.18
-Nodes (11): 2.5 Broker Commission & Payout Engine API, 2.6 Enterprise Financials & Cost Sheet Calculator API, 2.8 Autonomous AI Agent APIs, 2. API Endpoints Catalog, code:json ({), code:json ({), `GET /api/commissions`, `POST /api/agent/resurrect` (+3 more)
+Nodes (10): 1. Overview, 1. `public.get_pipeline_analytics`, 2. PostgreSQL Analytics RPCs (`supabase/migrations/0015_phase9_server_side_analytics.sql`), 2. `public.get_rep_performance_analytics`, 3. `public.get_time_series_analytics`, 3. Server Endpoints, 4. Deterministic Forecasting Methodology, 4. `public.get_pipeline_velocity_analytics` (+2 more)
 
-### Community 107 - "Community 107"
+### Community 100 - "Community 100"
 Cohesion: 0.18
-Nodes (10): 1. Implementation Phases & Execution Order, 2. Detailed Screen-by-Screen Specifications, code:mermaid (flowchart LR), EcosystemRealty 2.0 — Screen-by-Screen UI/UX Redesign Plan, Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Screen 4: Leads Directory & Slide-Over Dossier (`leads-page.tsx`, `lead-detail-modal.tsx`) (+2 more)
+Nodes (10): 1. Executive Transformation Matrix, 2. Section-by-Section Detailed Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty — Marketing Website Before & After Transformation Map, Section 1: Hero Section (+2 more)
 
-### Community 108 - "Community 108"
-Cohesion: 0.18
-Nodes (10): 1. Executive Comparison Summary, 2. Detailed Screen Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty 2.0 — Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home (+2 more)
-
-### Community 109 - "Community 109"
+### Community 101 - "Community 101"
 Cohesion: 0.18
 Nodes (11): 2. Complete Screen-by-Screen Technical Breakdown, A. What You See on the Screen:, A. What You See on the Screen:, A. What You See on the Screen:, A. What You See on the Screen:, A. What You See on the Screen:, 👤 Module 10: Team Users & RBAC (`/users`), 📍 Module 11: Regional Desks (`/regions`) (+3 more)
 
-### Community 110 - "Community 110"
+### Community 102 - "Community 102"
 Cohesion: 0.18
-Nodes (10): 1. Executive Transformation Matrix, 2. Section-by-Section Detailed Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty — Marketing Website Before & After Transformation Map, Section 1: Hero Section (+2 more)
+Nodes (11): 2.1 Leads Management API, 2.6 Enterprise Financials & Cost Sheet Calculator API, 2.8 Autonomous AI Agent APIs, 2. API Endpoints Catalog, code:json ({), code:json ({), `GET /api/leads`, `POST /api/agent/resurrect` (+3 more)
 
-### Community 111 - "Community 111"
-Cohesion: 0.18
-Nodes (10): 1. Overview, 1. `public.get_pipeline_analytics`, 2. PostgreSQL Analytics RPCs (`supabase/migrations/0015_phase9_server_side_analytics.sql`), 2. `public.get_rep_performance_analytics`, 3. `public.get_time_series_analytics`, 3. Server Endpoints, 4. Deterministic Forecasting Methodology, 4. `public.get_pipeline_velocity_analytics` (+2 more)
+### Community 103 - "Community 103"
+Cohesion: 0.2
+Nodes (9): [0.5.0] - 2026-08-20 — Frontend Visual MVP Release, 12. Changelog & Release Notes — Apex Realty EcosystemRealty, [1.0.0] - 2026-08-22 — Enterprise Production Release, [2.0.0] - 2026-08-31 — EcosystemRealty 2.0 & n8n Separation of Responsibilities Architecture, 🚀 Added, 🚀 Added, 🚀 Added, 🔒 Security Hardening (+1 more)
 
-### Community 112 - "Community 112"
-Cohesion: 0.18
-Nodes (10): 1. Executive Comparison Summary, 2. Detailed Screen Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty 2.0 — Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home (+2 more)
-
-### Community 113 - "Community 113"
+### Community 104 - "Community 104"
 Cohesion: 0.18
 Nodes (10): 1. Implementation Phases & Execution Order, 2. Detailed Screen-by-Screen Specifications, code:mermaid (flowchart LR), EcosystemRealty 2.0 — Screen-by-Screen UI/UX Redesign Plan, Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Screen 4: Leads Directory & Slide-Over Dossier (`leads-page.tsx`, `lead-detail-modal.tsx`) (+2 more)
 
-### Community 114 - "Community 114"
+### Community 105 - "Community 105"
+Cohesion: 0.18
+Nodes (10): 1. Executive Comparison Summary, 2. Detailed Screen Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty 2.0 — Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home (+2 more)
+
+### Community 106 - "Community 106"
+Cohesion: 0.4
+Nodes (4): Error(), ErrorMeta, forwardToReporter(), reportError()
+
+### Community 107 - "Community 107"
+Cohesion: 0.18
+Nodes (10): 1. Executive Comparison Summary, 2. Detailed Screen Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty 2.0 — Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home (+2 more)
+
+### Community 108 - "Community 108"
+Cohesion: 0.18
+Nodes (10): 1. Implementation Phases & Execution Order, 2. Detailed Screen-by-Screen Specifications, code:mermaid (flowchart LR), EcosystemRealty 2.0 — Screen-by-Screen UI/UX Redesign Plan, Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Screen 4: Leads Directory & Slide-Over Dossier (`leads-page.tsx`, `lead-detail-modal.tsx`) (+2 more)
+
+### Community 109 - "Community 109"
 Cohesion: 0.18
 Nodes (10): 1. Executive Transformation Matrix, 2. Section-by-Section Detailed Transformations, code:block1 (------------------------------------------------------------), code:block2 (============================================================), code:block3 (============================================================), code:block4 (============================================================), EcosystemRealty — Marketing Website Before & After Transformation Map, Section 1: Hero Section (+2 more)
 
-### Community 115 - "Community 115"
+### Community 110 - "Community 110"
 Cohesion: 0.18
 Nodes (10): 1. Overview, 1. `public.get_pipeline_analytics`, 2. PostgreSQL Analytics RPCs (`supabase/migrations/0015_phase9_server_side_analytics.sql`), 2. `public.get_rep_performance_analytics`, 3. `public.get_time_series_analytics`, 3. Server Endpoints, 4. Deterministic Forecasting Methodology, 4. `public.get_pipeline_velocity_analytics` (+2 more)
 
-### Community 116 - "Community 116"
+### Community 111 - "Community 111"
 Cohesion: 0.18
 Nodes (11): 9. Feature Deep Dive, What APIs are involved?, What could be improved?, What data is involved?, What database operations occur?, What does the user do?, What happens if it fails?, What happens technically? (+3 more)
 
-### Community 117 - "Community 117"
+### Community 112 - "Community 112"
+Cohesion: 0.2
+Nodes (10): 14. Salesperson Daily Priority Cockpit, 15. Flat 360° Master Property Dossier, 16. Executive Boss Cockpit & Risk Radar, 17. Leads Directory & Slide-Over Dossier, 18. Society Inventory Matrix & Tower Explorer, 19. Proactive Seller Intelligence & Verification Modal, 20. CRM Screen Priority Matrix (P0–P3), 21. Component Architecture & Modal Consolidation Strategy (+2 more)
+
+### Community 113 - "Community 113"
+Cohesion: 0.2
+Nodes (10): 1. Salesperson Workspace (Action-First), 2. Sales Manager Workspace (Intervention-First), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), 6. Complete CRM Surface Inventory & Friction Audit, 7. Information Architecture & 4-Tier Navigation Taxonomy, 8. Role-Specific Workspaces, 9. End-to-End User Journeys & Morning Action Routines, code:mermaid (graph TD) (+2 more)
+
+### Community 114 - "Community 114"
+Cohesion: 0.2
+Nodes (10): 1. Color System & Semantic Tokens, 2. Typography Hierarchy & Number Formatting, 3. Elevation, Radius & Structural Lines, A. Core Neutral Ledger Palette, B. Heritage Accent Palette, C. Semantic Status Indicators, code:block5 (Font Stack:), code:css (/* Elevation Tiers */) (+2 more)
+
+### Community 115 - "Community 115"
 Cohesion: 0.53
 Nodes (6): clone, data, fetchPromise, options, STATIC_ASSETS, url
 
-### Community 118 - "Community 118"
+### Community 116 - "Community 116"
+Cohesion: 0.33
+Nodes (4): createDispatchSchema, GET(), n8nInboundPayloadSchema, POST()
+
+### Community 117 - "Community 117"
 Cohesion: 0.2
 Nodes (10): 1. Color System & Semantic Tokens, 2. Typography Hierarchy & Number Formatting, 3. Elevation, Radius & Structural Lines, A. Core Neutral Ledger Palette, B. Heritage Accent Palette, C. Semantic Status Indicators, code:block5 (Font Stack:), code:css (/* Elevation Tiers */) (+2 more)
+
+### Community 118 - "Community 118"
+Cohesion: 0.2
+Nodes (10): 14. Salesperson Daily Priority Cockpit, 15. Flat 360° Master Property Dossier, 16. Executive Boss Cockpit & Risk Radar, 17. Leads Directory & Slide-Over Dossier, 18. Society Inventory Matrix & Tower Explorer, 19. Proactive Seller Intelligence & Verification Modal, 20. CRM Screen Priority Matrix (P0–P3), 21. Component Architecture & Modal Consolidation Strategy (+2 more)
 
 ### Community 119 - "Community 119"
 Cohesion: 0.2
-Nodes (10): 14. Salesperson Daily Priority Cockpit, 15. Flat 360° Master Property Dossier, 16. Executive Boss Cockpit & Risk Radar, 17. Leads Directory & Slide-Over Dossier, 18. Society Inventory Matrix & Tower Explorer, 19. Proactive Seller Intelligence & Verification Modal, 20. CRM Screen Priority Matrix (P0–P3), 21. Component Architecture & Modal Consolidation Strategy (+2 more)
+Nodes (10): 1. Salesperson Workspace (Action-First), 2. Sales Manager Workspace (Intervention-First), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), 6. Complete CRM Surface Inventory & Friction Audit, 7. Information Architecture & 4-Tier Navigation Taxonomy, 8. Role-Specific Workspaces, 9. End-to-End User Journeys & Morning Action Routines, code:mermaid (graph TD) (+2 more)
 
 ### Community 120 - "Community 120"
-Cohesion: 0.2
-Nodes (10): 1. Salesperson Workspace (Action-First), 2. Sales Manager Workspace (Intervention-First), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), 6. Complete CRM Surface Inventory & Friction Audit, 7. Information Architecture & 4-Tier Navigation Taxonomy, 8. Role-Specific Workspaces, 9. End-to-End User Journeys & Morning Action Routines, code:mermaid (graph TD) (+2 more)
+Cohesion: 0.22
+Nodes (8): 1. Project Overview & Role, 2. Essential Commands, 3. Strict Operating Rules & Architectural Invariants, 4. Architecture & Directory Layout, 5. Verification & Testing Standards, CLAUDE.md — EcosystemRealty 2.0 Developer & AI Agent Guidelines, code:bash (# ── Makefile targets (from repo root) ─────────────────────), code:block2 (Real-estate/)
 
 ### Community 121 - "Community 121"
-Cohesion: 0.2
-Nodes (10): 1. Color System & Semantic Tokens, 2. Typography Hierarchy & Number Formatting, 3. Elevation, Radius & Structural Lines, A. Core Neutral Ledger Palette, B. Heritage Accent Palette, C. Semantic Status Indicators, code:block5 (Font Stack:), code:css (/* Elevation Tiers */) (+2 more)
+Cohesion: 0.22
+Nodes (9): 23. Marketing Website Visual & Experience Audit, 24. Marketing Architectural Editorial Design System, 25. The 12-Beat Narrative Storytelling Architecture, 26. Screen-by-Screen Landing Page Redesign Specification, 27. Marketing Component Architecture & Asset Refactoring, 28. Marketing Before & After Transformation Map, 29. Marketing Implementation Sequence & Verification Strategy, code:css (:root {) (+1 more)
 
 ### Community 122 - "Community 122"
-Cohesion: 0.2
-Nodes (10): 14. Salesperson Daily Priority Cockpit, 15. Flat 360° Master Property Dossier, 16. Executive Boss Cockpit & Risk Radar, 17. Leads Directory & Slide-Over Dossier, 18. Society Inventory Matrix & Tower Explorer, 19. Proactive Seller Intelligence & Verification Modal, 20. CRM Screen Priority Matrix (P0–P3), 21. Component Architecture & Modal Consolidation Strategy (+2 more)
+Cohesion: 0.22
+Nodes (9): 1. Executive Summary & Problem Space, 2. 30-Second Elevator Pitch & 2-Minute Presentation, 2-Minute Full Presentation Script, 30-Second Elevator Pitch, 3. Competitive Differentiation Matrix, 4. The Indian Real Estate Domain: Flat/Unit as Atomic Asset, 5. 100-Point Bi-Directional Matcher Algorithm, code:mermaid (flowchart TD) (+1 more)
 
 ### Community 123 - "Community 123"
-Cohesion: 0.2
-Nodes (10): 1. Salesperson Workspace (Action-First), 2. Sales Manager Workspace (Intervention-First), 3. Boss / Agency Founder Workspace (Macro Health & Revenue-First), 6. Complete CRM Surface Inventory & Friction Audit, 7. Information Architecture & 4-Tier Navigation Taxonomy, 8. Role-Specific Workspaces, 9. End-to-End User Journeys & Morning Action Routines, code:mermaid (graph TD) (+2 more)
+Cohesion: 0.22
+Nodes (7): 1. Global Architectural Foundation, 3. Global Header & Overlay Components, 4. Verification Matrix: 100% Non-Overlapping & Orthogonal Features, 5. Technical Investor Pitch Summary, code:mermaid (graph TD), code:block8 (┌───────────────────────────────────────────────────────────), 📖 EcosystemRealty Master Feature, Screen & Data Flow Encyclopedia
 
 ### Community 124 - "Community 124"
 Cohesion: 0.22
-Nodes (6): APPS_DIR, CORE_SRC, FRONTEND_DIR, PACKAGES_DIR, ROOT, UI_SRC
+Nodes (7): 08. Test Strategy & Test Plan — Apex Realty EcosystemRealty, 1. Test Architecture & Strategy Pyramid, 2. Automated Test Suites Catalog (28 Suites, 239 Tests), 3. Running Test Suites, 4. Continuous Integration (CI) Test Pipeline, code:block1 (┌─────────────────────────────────┐), code:bash (# Run all 239 tests in root)
 
 ### Community 125 - "Community 125"
-Cohesion: 0.5
-Nodes (6): calculateIndianCommissionLedger(), calculateNegotiationMetrics(), CommissionInput, input, ledger, metrics
-
-### Community 126 - "Community 126"
-Cohesion: 0.53
-Nodes (6): candidate, existingPeople, findDuplicatePerson(), normalizeIndianPhone(), PersonRecord, result
-
-### Community 127 - "Community 127"
-Cohesion: 0.22
-Nodes (9): 2.14 Global Search & Telemetry API, 2.3 Multi-Party Bidding & Negotiation API, 2.6 System Telemetry API, code:json ({), code:json ({), `GET /api/health`, `GET /api/leads/[id]/bids`, `GET /api/search/global` (+1 more)
-
-### Community 128 - "Community 128"
 Cohesion: 0.22
 Nodes (8): 1. Component Layering Architecture, 2. Component Inventory & Classification, 3. Consolidation & Deprecation Strategy, 4. State Management & Performance Boundary, code:mermaid (graph TD), EcosystemRealty 2.0 — Component Strategy & Architecture, Layer 1: Core Primitives (`src/components/ui/*`), Layer 2: Domain Composite Components (`src/components/crm/*`)
 
+### Community 126 - "Community 126"
+Cohesion: 0.5
+Nodes (6): calculateIndianCommissionLedger(), calculateNegotiationMetrics(), CommissionInput, input, ledger, metrics
+
+### Community 127 - "Community 127"
+Cohesion: 0.53
+Nodes (6): candidate, existingPeople, findDuplicatePerson(), normalizeIndianPhone(), PersonRecord, result
+
+### Community 128 - "Community 128"
+Cohesion: 0.42
+Nodes (3): makeEvent(), props, actionCardProps()
+
 ### Community 129 - "Community 129"
 Cohesion: 0.22
-Nodes (7): 1. Global Architectural Foundation, 3. Global Header & Overlay Components, 4. Verification Matrix: 100% Non-Overlapping & Orthogonal Features, 5. Technical Investor Pitch Summary, code:mermaid (graph TD), code:block8 (┌───────────────────────────────────────────────────────────), 📖 EcosystemRealty Master Feature, Screen & Data Flow Encyclopedia
+Nodes (6): APPS_DIR, CORE_SRC, FRONTEND_DIR, PACKAGES_DIR, ROOT, UI_SRC
 
 ### Community 130 - "Community 130"
 Cohesion: 0.22
@@ -796,43 +795,43 @@ Nodes (9): 23. Marketing Website Visual & Experience Audit, 24. Marketing Archit
 
 ### Community 132 - "Community 132"
 Cohesion: 0.22
-Nodes (9): 23. Marketing Website Visual & Experience Audit, 24. Marketing Architectural Editorial Design System, 25. The 12-Beat Narrative Storytelling Architecture, 26. Screen-by-Screen Landing Page Redesign Specification, 27. Marketing Component Architecture & Asset Refactoring, 28. Marketing Before & After Transformation Map, 29. Marketing Implementation Sequence & Verification Strategy, code:css (:root {) (+1 more)
+Nodes (8): 1. Component Layering Architecture, 2. Component Inventory & Classification, 3. Consolidation & Deprecation Strategy, 4. State Management & Performance Boundary, code:mermaid (graph TD), EcosystemRealty 2.0 — Component Strategy & Architecture, Layer 1: Core Primitives (`src/components/ui/*`), Layer 2: Domain Composite Components (`src/components/crm/*`)
 
 ### Community 133 - "Community 133"
 Cohesion: 0.22
-Nodes (9): 1. Executive Summary & Problem Space, 2. 30-Second Elevator Pitch & 2-Minute Presentation, 2-Minute Full Presentation Script, 30-Second Elevator Pitch, 3. Competitive Differentiation Matrix, 4. The Indian Real Estate Domain: Flat/Unit as Atomic Asset, 5. 100-Point Bi-Directional Matcher Algorithm, code:mermaid (flowchart TD) (+1 more)
+Nodes (9): 1. Executive Pitch & Selling Playbook, 1. Executive Understanding, 2-minute explanation (presentation-friendly), 2-Minute Full Presentation Script (For Pitching Investors, Clients, or Partners), 30-Second Elevator Pitch (Say this to any Real Estate Founder or Sales Director), 30-second explanation (say this if someone asks "What is this project?"), Competitive Differentiation Matrix, Technical explanation (+1 more)
 
 ### Community 134 - "Community 134"
 Cohesion: 0.22
-Nodes (8): 1. Component Layering Architecture, 2. Component Inventory & Classification, 3. Consolidation & Deprecation Strategy, 4. State Management & Performance Boundary, code:mermaid (graph TD), EcosystemRealty 2.0 — Component Strategy & Architecture, Layer 1: Core Primitives (`src/components/ui/*`), Layer 2: Domain Composite Components (`src/components/crm/*`)
-
-### Community 135 - "Community 135"
-Cohesion: 0.22
 Nodes (9): 20. Implementation Status Audit, Broken, Fully implemented, Missing, Mocked, Partially implemented, Placeholder, Unclear (+1 more)
 
+### Community 135 - "Community 135"
+Cohesion: 0.25
+Nodes (7): 1. Component Layering Architecture, 2. Component Inventory & Classification, 3. Visual Asset Refactoring & Consolidation, code:mermaid (graph TD), EcosystemRealty — Marketing Component Strategy & Architecture, Layer 1: Marketing Primitives (`src/components/marketing/primitives/*`), Layer 2: Product Showcase Containers (`src/components/marketing/showcases/*`)
+
 ### Community 136 - "Community 136"
-Cohesion: 0.22
-Nodes (9): 1. Executive Pitch & Selling Playbook, 1. Executive Understanding, 2-minute explanation (presentation-friendly), 2-Minute Full Presentation Script (For Pitching Investors, Clients, or Partners), 30-Second Elevator Pitch (Say this to any Real Estate Founder or Sales Director), 30-second explanation (say this if someone asks "What is this project?"), Competitive Differentiation Matrix, Technical explanation (+1 more)
-
-### Community 137 - "Community 137"
-Cohesion: 0.25
-Nodes (6): 03. API Documentation — Apex Realty EcosystemRealty, 1.1 Standard Success Envelope (`200 OK`, `201 Created`), 1.2 Standard Error Envelope (`400`, `401`, `403`, `422`, `429`, `500`), 1. Global API Standards & Envelopes, code:json ({), code:json ({)
-
-### Community 138 - "Community 138"
-Cohesion: 0.25
-Nodes (8): 1. Core Information Architecture Principles, 2. Global Navigation Taxonomy & Structure, 3. Role-Specific Workspaces, A. Salesperson Workspace (Action-First), B. Sales Manager Workspace (Exception & Intervention-First), C. Boss / Agency Founder Workspace (Macro Health & Revenue-First), code:mermaid (graph TD), Section 2: UX Information Architecture & User Journeys
-
-### Community 139 - "Community 139"
-Cohesion: 0.36
-Nodes (7): 13.1 Core Architecture Axiom, 13.2 Enterprise Domain Hierarchy & Database Schema (Migration 0020 & 0021), 13.3 AI Safety Protocol, 13. CALLCRM 2.0 ENTERPRISE DOMAIN LAYER & N8N INTEGRATION ARCHITECTURE, 13. CALLCRM 2.0 ENTERPRISE DOMAIN LAYER & N8N INTEGRATION ARCHITECTURE, EcosystemRealty 2.0 — Master Frontend & System Encyclopedia, Master Table of Contents
-
-### Community 140 - "Community 140"
 Cohesion: 0.25
 Nodes (8): 10. Neutral Ledger & Heritage Accent Palettes, 11. Typography Scale & Tabular Financial Numerals, 12. Elevation Tiers, Structural Dividers & Spacing, 13. Motion, Accessibility & WCAG Contrast Standards, code:css (/* Core Neutral Ledger Palette */), code:block5 (Font Stack:), code:css (/* Elevation Tiers */), Part III: Architectural Ledger Design System (CRM Core)
 
-### Community 141 - "Community 141"
+### Community 137 - "Community 137"
 Cohesion: 0.25
-Nodes (7): 1. Component Layering Architecture, 2. Component Inventory & Classification, 3. Visual Asset Refactoring & Consolidation, code:mermaid (graph TD), EcosystemRealty — Marketing Component Strategy & Architecture, Layer 1: Marketing Primitives (`src/components/marketing/primitives/*`), Layer 2: Product Showcase Containers (`src/components/marketing/showcases/*`)
+Nodes (7): 02. System Architecture Document — EcosystemRealty 2.0, 1. High-Level Architecture Topology, 2.1 Web Application & Router (`Frontend/src/app/`), 2.2 Global State & Optimistic UI (`Frontend/src/context/crm-context.tsx`), 2.3 EcosystemRealty + n8n Integration Layer (`Frontend/src/lib/server/domain-event-bus.ts`), 2. Component Subsystems & Responsibilities, code:block1 (┌───────────────────────────────────────────────────────────)
+
+### Community 138 - "Community 138"
+Cohesion: 0.25
+Nodes (8): 2.14 Global Search & Telemetry API, 2.3 Multi-Party Bidding & Negotiation API, code:json ({), code:json ({), `GET /api/health`, `GET /api/leads/[id]/bids`, `GET /api/search/global`, `POST /api/leads/[id]/bids`
+
+### Community 139 - "Community 139"
+Cohesion: 0.25
+Nodes (6): 03. API Documentation — Apex Realty EcosystemRealty, 1.1 Standard Success Envelope (`200 OK`, `201 Created`), 1.2 Standard Error Envelope (`400`, `401`, `403`, `422`, `429`, `500`), 1. Global API Standards & Envelopes, code:json ({), code:json ({)
+
+### Community 140 - "Community 140"
+Cohesion: 0.25
+Nodes (8): 1. Core Information Architecture Principles, 2. Global Navigation Taxonomy & Structure, 3. Role-Specific Workspaces, A. Salesperson Workspace (Action-First), B. Sales Manager Workspace (Exception & Intervention-First), C. Boss / Agency Founder Workspace (Macro Health & Revenue-First), code:mermaid (graph TD), Section 2: UX Information Architecture & User Journeys
+
+### Community 141 - "Community 141"
+Cohesion: 0.46
+Nodes (3): useVoiceRecorder(), VoiceLanguage, VoiceRecorderState
 
 ### Community 142 - "Community 142"
 Cohesion: 0.25
@@ -848,27 +847,27 @@ Nodes (7): 1. Component Layering Architecture, 2. Component Inventory & Classifi
 
 ### Community 145 - "Community 145"
 Cohesion: 0.25
-Nodes (8): 29. Final Audit Verdict, Best answer, Final Requirement, Most important thing I should demonstrate, Most important thing I should fix, Most important thing I should understand, Most likely question I will be asked, Overall verdict
+Nodes (8): 20. Implementation Status Audit, Broken / unclear, Configured but unused, Fully implemented (verified by code + green lint/test/build today), Missing entirely, Mocked / demo behavior (by design, but be honest in demos), Partially implemented, Referenced but missing
 
 ### Community 146 - "Community 146"
 Cohesion: 0.25
-Nodes (8): 20. Implementation Status Audit, Broken / unclear, Configured but unused, Fully implemented (verified by code + green lint/test/build today), Missing entirely, Mocked / demo behavior (by design, but be honest in demos), Partially implemented, Referenced but missing
+Nodes (8): 29. Final Audit Verdict, Best answer, Final Requirement, Most important thing I should demonstrate, Most important thing I should fix, Most important thing I should understand, Most likely question I will be asked, Overall verdict
 
 ### Community 147 - "Community 147"
 Cohesion: 0.29
-Nodes (5): 10. Environment & Configuration Reference — Apex Realty EcosystemRealty, 1. Environment Variables Matrix, 2. Zero-Setup Local Development Resilience, 3. Sample Configuration File (`.env.local`), code:bash (# ==========================================================)
+Nodes (6): 1. Core Architectural Pillars, 2. PostgreSQL Row-Level Security Matrix, 3. Separation of Responsibilities Architecture, 4. Verification & Hardening, code:block1 (┌───────────────────────────────────────────────────────────), Enterprise Multi-Tenant SaaS Backend Architecture — EcosystemRealty 2.0
 
 ### Community 148 - "Community 148"
 Cohesion: 0.29
-Nodes (7): 2.12 Server-Side Analytics & Reports API, `GET /api/analytics/dashboard`, `GET /api/analytics/pipeline`, `GET /api/analytics/reps`, `GET /api/analytics/timeseries`, `GET /api/analytics/velocity`, `GET /api/reports/export`
+Nodes (6): 13.1 Core Architecture Axiom, 13.2 Enterprise Domain Hierarchy & Database Schema (Migration 0020 & 0021), 13.3 AI Safety Protocol, 13. CALLCRM 2.0 ENTERPRISE DOMAIN LAYER & N8N INTEGRATION ARCHITECTURE, EcosystemRealty 2.0 — Master Frontend & System Encyclopedia, Master Table of Contents
 
 ### Community 149 - "Community 149"
 Cohesion: 0.29
-Nodes (7): 4. End-to-End User Journeys, code:mermaid (sequenceDiagram), code:mermaid (sequenceDiagram), code:mermaid (sequenceDiagram), Journey 1: Morning Action Routine (Salesperson — 3 Minutes), Journey 2: On-Site Client Visit Cockpit (Salesperson on Mobile — 30 Seconds), Journey 3: Seller Resale Signal $\rightarrow$ Exclusive Mandate (Manager — 2 Minutes)
+Nodes (7): 2.12 Server-Side Analytics & Reports API, `GET /api/analytics/dashboard`, `GET /api/analytics/pipeline`, `GET /api/analytics/reps`, `GET /api/analytics/timeseries`, `GET /api/analytics/velocity`, `GET /api/reports/export`
 
 ### Community 150 - "Community 150"
 Cohesion: 0.29
-Nodes (6): EcosystemRealty 2.0 — Complete UX/UI Master Redesign Blueprint, Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Section 4: Screen-by-Screen UI Redesign Implementation Plan, Section 5: Screen Priority & Impact Matrix (P0–P3)
+Nodes (5): 10. Environment & Configuration Reference — Apex Realty EcosystemRealty, 1. Environment Variables Matrix, 2. Zero-Setup Local Development Resilience, 3. Sample Configuration File (`.env.local`), code:bash (# ==========================================================)
 
 ### Community 151 - "Community 151"
 Cohesion: 0.29
@@ -876,15 +875,15 @@ Nodes (7): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Invento
 
 ### Community 152 - "Community 152"
 Cohesion: 0.29
-Nodes (6): 1. Core Architectural Pillars, 2. PostgreSQL Row-Level Security Matrix, 3. Separation of Responsibilities Architecture, 4. Verification & Hardening, code:block1 (┌───────────────────────────────────────────────────────────), Enterprise Multi-Tenant SaaS Backend Architecture — EcosystemRealty 2.0
+Nodes (7): 4. End-to-End User Journeys, code:mermaid (sequenceDiagram), code:mermaid (sequenceDiagram), code:mermaid (sequenceDiagram), Journey 1: Morning Action Routine (Salesperson — 3 Minutes), Journey 2: On-Site Client Visit Cockpit (Salesperson on Mobile — 30 Seconds), Journey 3: Seller Resale Signal $\rightarrow$ Exclusive Mandate (Manager — 2 Minutes)
 
 ### Community 153 - "Community 153"
 Cohesion: 0.29
-Nodes (7): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Inventory, A. Core Sales Surfaces, B. Property Intelligence Surfaces, C. Intelligence & Automation Surfaces, D. Management & Platform Surfaces, Section 1: Complete Surface Inventory & Friction Audit
+Nodes (6): code:block10 (PHASE 0: Design Tokens & Foundations (P0)), EcosystemRealty 2.0 — Complete UX/UI Master Redesign Blueprint, EcosystemRealty UX Scorecard, Phased Implementation Roadmap, Section 5: Screen Priority & Impact Matrix (P0–P3), Section 8: EcosystemRealty UX Scorecard & Phased Execution Roadmap
 
 ### Community 154 - "Community 154"
 Cohesion: 0.29
-Nodes (6): 1. Component Layering Architecture, 2. Consolidation & Deprecation Strategy, code:mermaid (graph TD), EcosystemRealty 2.0 — Complete UX/UI Master Redesign Blueprint, Section 5: Screen Priority & Impact Matrix (P0–P3), Section 6: Component Strategy & Consolidation Architecture
+Nodes (6): EcosystemRealty 2.0 — Complete UX/UI Master Redesign Blueprint, Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Section 4: Screen-by-Screen UI Redesign Implementation Plan, Section 5: Screen Priority & Impact Matrix (P0–P3)
 
 ### Community 155 - "Community 155"
 Cohesion: 0.29
@@ -892,31 +891,35 @@ Nodes (7): 4. End-to-End User Journeys, code:mermaid (sequenceDiagram), code:mer
 
 ### Community 156 - "Community 156"
 Cohesion: 0.29
-Nodes (6): 30. EcosystemRealty UX Scorecard, 31. Complete 11-Phase Implementation Roadmap, code:block8 (PHASE 0: Design Tokens & Foundations (P0)), EcosystemRealty 2.0 — Master Frontend & System Encyclopedia, Master Table of Contents, Part VI: Scorecard & Master Execution Roadmap
+Nodes (7): 1. Executive Summary & Core UX Diagnosis, 2. Complete Surface Inventory, A. Core Sales Surfaces, B. Property Intelligence Surfaces, C. Intelligence & Automation Surfaces, D. Management & Platform Surfaces, Section 1: Complete Surface Inventory & Friction Audit
 
 ### Community 157 - "Community 157"
 Cohesion: 0.29
-Nodes (7): 26. Presentation Q&A Preparation, Developer/architect, Non-technical audience, Product/business audience, Project owner, Security reviewer, Technical audience
+Nodes (6): 13.1 Core Architecture Axiom, 13.2 Enterprise Domain Hierarchy & Database Schema (Migration 0020 & 0021), 13.3 AI Safety Protocol, 13. CALLCRM 2.0 ENTERPRISE DOMAIN LAYER & N8N INTEGRATION ARCHITECTURE, EcosystemRealty 2.0 — Master Frontend & System Encyclopedia, Master Table of Contents
 
 ### Community 158 - "Community 158"
 Cohesion: 0.29
-Nodes (7): 6. User Experience, First-time user journey, Loading / success / error / empty states, Returning user, Role-specific experiences, Screens inventory, UX gaps found (with evidence)
+Nodes (7): 26. Presentation Q&A Preparation, Developer/architect, Non-technical audience, Product/business audience, Project owner, Security reviewer, Technical audience
 
 ### Community 159 - "Community 159"
 Cohesion: 0.29
-Nodes (7): 26. Presentation Q&A Preparation, Developer/architect, Non-technical audience, Product/business audience, Project owner, Security reviewer, Technical audience
+Nodes (7): 29. Final Audit Verdict, Best answer, Most important thing I should demonstrate, Most important thing I should fix, Most important thing I should understand, Most likely question I will be asked, Overall verdict
 
 ### Community 160 - "Community 160"
 Cohesion: 0.29
-Nodes (7): 29. Final Audit Verdict, Best answer, Most important thing I should demonstrate, Most important thing I should fix, Most important thing I should understand, Most likely question I will be asked, Overall verdict
+Nodes (7): 6. User Experience, First-time user journey, Loading / success / error / empty states, Returning user, Role-specific experiences, Screens inventory, UX gaps found (with evidence)
 
 ### Community 161 - "Community 161"
-Cohesion: 0.6
-Nodes (3): BillingSuccessView(), BillingSuccessPage(), metadata
+Cohesion: 0.29
+Nodes (7): 26. Presentation Q&A Preparation, Developer/architect, Non-technical audience, Product/business audience, Project owner, Security reviewer, Technical audience
+
+### Community 162 - "Community 162"
+Cohesion: 0.33
+Nodes (5): 1. Executive Summary & Brand Positioning Diagnosis, 2. Complete Section Inventory & Friction Audit, 3. Brand Tone & Visual Language Diagnosis, code:block1 (------------------------------------------------------------), EcosystemRealty — Marketing Website Visual & Experience Audit
 
 ### Community 163 - "Community 163"
 Cohesion: 0.33
-Nodes (6): 2.11 Projects & Unit Matrix API, `GET /api/projects`, `GET & PATCH /api/projects/[id]`, `GET & PATCH /api/projects/[id]/units/[unitId]`, `GET & POST /api/projects/[id]/units`, `POST /api/projects/[id]/units/bulk-import`
+Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (SELECT t.id, t.title, t.due_date, t.due_time, t.status, p.fu), D. Non-Repetition Proof:, ⚡ Module 4: Follow-up & Outreach Queue (`/tasks`)
 
 ### Community 164 - "Community 164"
 Cohesion: 0.33
@@ -924,183 +927,187 @@ Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C
 
 ### Community 165 - "Community 165"
 Cohesion: 0.33
-Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (SELECT t.id, t.title, t.due_date, t.due_time, t.status, p.fu), D. Non-Repetition Proof:, ⚡ Module 4: Follow-up & Outreach Queue (`/tasks`)
+Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (SELECT u.id, u.unit_number, u.floor_number, u.configuration,), D. Non-Repetition Proof:, 🏢 Module 5: Projects & Unit Inventory Matrix (`/projects`)
 
 ### Community 166 - "Community 166"
 Cohesion: 0.33
-Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics & Algorithms:, code:sql (-- Gross Pipeline Value), D. Non-Repetition Proof:, 🏛️ Module 1: Executive Overview (`/dashboard`)
+Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (UPDATE public.leads), D. Non-Repetition Proof:, 🗂️ Module 3: Deal Pipeline (`/pipeline`)
 
 ### Community 167 - "Community 167"
 Cohesion: 0.33
-Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (SELECT), D. Non-Repetition Proof:, 👥 Module 2: All Leads Directory (`/leads`)
+Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics & Algorithms:, code:sql (-- Gross Pipeline Value), D. Non-Repetition Proof:, 🏛️ Module 1: Executive Overview (`/dashboard`)
 
 ### Community 168 - "Community 168"
 Cohesion: 0.33
-Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (SELECT u.id, u.unit_number, u.floor_number, u.configuration,), D. Non-Repetition Proof:, 🏢 Module 5: Projects & Unit Inventory Matrix (`/projects`)
+Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (SELECT), D. Non-Repetition Proof:, 👥 Module 2: All Leads Directory (`/leads`)
 
 ### Community 169 - "Community 169"
 Cohesion: 0.33
-Nodes (6): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, code:sql (UPDATE public.leads), D. Non-Repetition Proof:, 🗂️ Module 3: Deal Pipeline (`/pipeline`)
-
-### Community 170 - "Community 170"
-Cohesion: 0.33
-Nodes (5): 1. Executive Summary & Brand Positioning Diagnosis, 2. Complete Section Inventory & Friction Audit, 3. Brand Tone & Visual Language Diagnosis, code:block1 (------------------------------------------------------------), EcosystemRealty — Marketing Website Visual & Experience Audit
+Nodes (6): 2.11 Projects & Unit Matrix API, `GET /api/projects`, `GET & PATCH /api/projects/[id]`, `GET & PATCH /api/projects/[id]/units/[unitId]`, `GET & POST /api/projects/[id]/units`, `POST /api/projects/[id]/units/bulk-import`
 
 ### Community 171 - "Community 171"
+Cohesion: 0.73
+Nodes (3): synthesizeSiteVisitBriefing(), GET(), POST()
+
+### Community 172 - "Community 172"
+Cohesion: 0.6
+Nodes (3): BillingSuccessView(), BillingSuccessPage(), metadata
+
+### Community 173 - "Community 173"
 Cohesion: 0.33
 Nodes (5): 1. Executive Summary & Brand Positioning Diagnosis, 2. Complete Section Inventory & Friction Audit, 3. Brand Tone & Visual Language Diagnosis, code:block1 (------------------------------------------------------------), EcosystemRealty — Marketing Website Visual & Experience Audit
 
-### Community 172 - "Community 172"
+### Community 174 - "Community 174"
 Cohesion: 0.4
 Nodes (6): 4. Architecture, 4. Normalized Indian Real Estate Hierarchy, 4. Normalized Real Estate Architecture & Hierarchy, code:mermaid (flowchart TD), System boundaries, The 6-Level Hierarchy:
 
-### Community 173 - "Community 173"
-Cohesion: 0.4
-Nodes (5): 2.10 Centralized Notifications API, `GET /api/notifications`, `GET & PATCH /api/notifications/preferences`, `PATCH /api/notifications/[id]/read`, `POST /api/notifications/mark-all-read`
-
-### Community 174 - "Community 174"
-Cohesion: 0.5
-Nodes (5): 2.4 Webhooks API (Inbound Event Receivers), 2.9 Webhooks API (Inbound Event Receivers), `GET & POST /api/webhooks/meta-lead-ads`, `GET & POST /api/webhooks/retry`, `GET & POST /api/webhooks/whatsapp`
-
 ### Community 175 - "Community 175"
-Cohesion: 0.4
-Nodes (5): code:block8 (============================================================), code:block9 (============================================================), Section 7: Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home, Surface 2: Flat 360° Master Property Dossier
-
-### Community 176 - "Community 176"
-Cohesion: 0.4
-Nodes (4): 1. Complete Screen Priority Matrix, 2. Resource & Phasing Allocation, code:block1 (Total Scope Breakdown:), EcosystemRealty 2.0 — Screen Priority & Impact Matrix
-
-### Community 177 - "Community 177"
 Cohesion: 0.4
 Nodes (5): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, D. Non-Repetition Proof:, 🤖 Module 8: Aria AI Autonomous Sales & Lead Qualification Engine (`/aria`)
 
-### Community 178 - "Community 178"
+### Community 176 - "Community 176"
 Cohesion: 0.4
 Nodes (5): A. What You See on the Screen:, B. Data Source & SQL Table Origin:, C. Technical Mechanics:, D. Non-Repetition Proof:, 📝 Module 7: Touchpoint Activity & Timeline (`/activities`)
 
-### Community 179 - "Community 179"
+### Community 177 - "Community 177"
 Cohesion: 0.4
-Nodes (4): 1. Ask BFS natural language questions about codebase connections:, 2. Find the shortest call-path between any two symbols:, 3. Get plain-language explanation of a component and its callers:, 4. Refresh after code updates (automatic on git commit):
+Nodes (5): 2.10 Centralized Notifications API, `GET /api/notifications`, `GET & PATCH /api/notifications/preferences`, `PATCH /api/notifications/[id]/read`, `POST /api/notifications/mark-all-read`
 
-### Community 180 - "Community 180"
+### Community 178 - "Community 178"
 Cohesion: 0.4
 Nodes (5): code:block8 (============================================================), code:block9 (============================================================), Section 7: Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home, Surface 2: Flat 360° Master Property Dossier
 
-### Community 181 - "Community 181"
+### Community 179 - "Community 179"
 Cohesion: 0.4
 Nodes (4): 1. Complete Screen Priority Matrix, 2. Resource & Phasing Allocation, code:block1 (Total Scope Breakdown:), EcosystemRealty 2.0 — Screen Priority & Impact Matrix
 
-### Community 182 - "Community 182"
+### Community 181 - "Community 181"
 Cohesion: 0.4
 Nodes (4): 1. Ask BFS natural language questions about codebase connections:, 2. Find the shortest call-path between any two symbols:, 3. Get plain-language explanation of a component and its callers:, 4. Refresh after code updates (automatic on git commit):
 
+### Community 182 - "Community 182"
+Cohesion: 0.4
+Nodes (5): code:block8 (============================================================), code:block9 (============================================================), Section 7: Screen-by-Screen Before & After Map, Surface 1: Salesperson Daily Home, Surface 2: Flat 360° Master Property Dossier
+
 ### Community 183 - "Community 183"
 Cohesion: 0.4
-Nodes (5): 24. Improvement Roadmap, P0 — Fix immediately, P1 — High-value improvements, P2 — Medium-term improvements, P3 — Nice-to-have improvements
+Nodes (4): 1. Complete Screen Priority Matrix, 2. Resource & Phasing Allocation, code:block1 (Total Scope Breakdown:), EcosystemRealty 2.0 — Screen Priority & Impact Matrix
 
 ### Community 184 - "Community 184"
 Cohesion: 0.4
-Nodes (5): 1. Executive Understanding, 2-minute explanation, 30-second explanation, Technical explanation, What is this project?
+Nodes (4): 1. Ask BFS natural language questions about codebase connections:, 2. Find the shortest call-path between any two symbols:, 3. Get plain-language explanation of a component and its callers:, 4. Refresh after code updates (automatic on git commit):
 
 ### Community 185 - "Community 185"
 Cohesion: 0.4
-Nodes (5): 24. Improvement Roadmap, P0 — Fix immediately (before any real-money or real-customer exposure), P1 — High value, P2 — Medium term, P3 — Nice to have
+Nodes (5): 14. Workflow Analysis, code:text (Trigger: inbound webhook / manual create / CSV import), code:text (Trigger: Vercel cron 0 */2 * * *  (vercel.json) or manual /a), Workflow A — Lead lifecycle (business), Workflow B — SLA / deal-health automation (technical, scheduled)
 
 ### Community 186 - "Community 186"
 Cohesion: 0.4
-Nodes (5): 14. Workflow Analysis, code:text (Trigger: inbound webhook / manual create / CSV import), code:text (Trigger: Vercel cron 0 */2 * * *  (vercel.json) or manual /a), Workflow A — Lead lifecycle (business), Workflow B — SLA / deal-health automation (technical, scheduled)
+Nodes (5): 24. Improvement Roadmap, P0 — Fix immediately (before any real-money or real-customer exposure), P1 — High value, P2 — Medium term, P3 — Nice to have
 
 ### Community 187 - "Community 187"
 Cohesion: 0.4
 Nodes (5): 9.1 Lead pipeline & quick logging, 9.2 Aria AI agent (chat + qualification), 9.3 Resurrection engine, 9.4 Billing & entitlements, 9. Feature Deep Dive (major features)
 
 ### Community 188 - "Community 188"
+Cohesion: 0.4
+Nodes (5): 1. Executive Understanding, 2-minute explanation, 30-second explanation, Technical explanation, What is this project?
+
+### Community 189 - "Community 189"
+Cohesion: 0.4
+Nodes (5): 24. Improvement Roadmap, P0 — Fix immediately, P1 — High-value improvements, P2 — Medium-term improvements, P3 — Nice-to-have improvements
+
+### Community 190 - "Community 190"
 Cohesion: 0.5
-Nodes (3): TabsContent, TabsList, TabsTrigger
+Nodes (4): 30. EcosystemRealty UX Scorecard, 31. Complete 11-Phase Implementation Roadmap, code:block8 (PHASE 0: Design Tokens & Foundations (P0)), Part VI: Scorecard & Master Execution Roadmap
 
-### Community 192 - "Community 192"
-Cohesion: 0.67
-Nodes (4): 2.13 Billing & Subscriptions API, 2.5 Billing & Subscriptions API, `POST /api/billing/checkout`, `POST /api/billing/webhook`
-
-### Community 193 - "Community 193"
+### Community 191 - "Community 191"
 Cohesion: 0.5
 Nodes (4): 2.2 Activity & Audit Stream API, code:json ({), `GET /api/activities`, `POST /api/activities`
 
-### Community 194 - "Community 194"
-Cohesion: 0.5
-Nodes (4): 2.1 Leads Management API, code:json ({), `GET /api/leads`, `POST /api/leads`
-
-### Community 195 - "Community 195"
+### Community 192 - "Community 192"
 Cohesion: 0.5
 Nodes (4): 2.7 Integration & Domain Event Outbox API, code:json ({), `GET /api/integrations/status`, `POST /api/integrations/outbox/process`
 
-### Community 196 - "Community 196"
+### Community 193 - "Community 193"
+Cohesion: 0.5
+Nodes (4): 2.5 Broker Commission & Payout Engine API, code:json ({), `GET /api/commissions`, `POST /api/commissions`
+
+### Community 194 - "Community 194"
+Cohesion: 0.5
+Nodes (4): 2.3 Autonomous AI Agent APIs, code:json ({), `POST /api/agent/resurrect`, `POST /api/chat`
+
+### Community 195 - "Community 195"
 Cohesion: 0.5
 Nodes (4): 2.4 Digital Site Visit Pass API, code:json ({), `GET /api/leads/[id]/site-visit-pass`, `POST /api/leads/[id]/site-visit-pass`
 
+### Community 196 - "Community 196"
+Cohesion: 0.5
+Nodes (4): 2.9 Webhooks API (Inbound Event Receivers), `GET & POST /api/webhooks/meta-lead-ads`, `GET & POST /api/webhooks/retry`, `GET & POST /api/webhooks/whatsapp`
+
 ### Community 197 - "Community 197"
 Cohesion: 0.5
-Nodes (4): 2.3 Autonomous AI Agent APIs, code:json ({), `POST /api/agent/resurrect`, `POST /api/chat`
+Nodes (4): Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Section 4: Screen-by-Screen UI Redesign Implementation Plan
 
 ### Community 198 - "Community 198"
 Cohesion: 0.5
 Nodes (4): 1. Component Layering Architecture, 2. Consolidation & Deprecation Strategy, code:mermaid (graph TD), Section 6: Component Strategy & Consolidation Architecture
 
-### Community 199 - "Community 199"
-Cohesion: 0.5
-Nodes (4): code:block10 (PHASE 0: Design Tokens & Foundations (P0)), EcosystemRealty UX Scorecard, Phased Implementation Roadmap, Section 8: EcosystemRealty UX Scorecard & Phased Execution Roadmap
-
-### Community 200 - "Community 200"
-Cohesion: 0.5
-Nodes (4): 30. EcosystemRealty UX Scorecard, 31. Complete 11-Phase Implementation Roadmap, code:block8 (PHASE 0: Design Tokens & Foundations (P0)), Part VI: Scorecard & Master Execution Roadmap
-
-### Community 201 - "Community 201"
-Cohesion: 0.5
-Nodes (4): code:block10 (PHASE 0: Design Tokens & Foundations (P0)), EcosystemRealty UX Scorecard, Phased Implementation Roadmap, Section 8: EcosystemRealty UX Scorecard & Phased Execution Roadmap
-
 ### Community 202 - "Community 202"
 Cohesion: 0.5
-Nodes (4): Screen 1: Salesperson Daily Priority Cockpit (`salesperson-home.tsx`), Screen 2: Flat 360° Master Property Dossier (`unit-detail-modal.tsx` $\rightarrow$ `UnitDossierSheet.tsx`), Screen 3: Executive Boss & Agency Founder Cockpit (`boss-overview.tsx`), Section 4: Screen-by-Screen UI Redesign Implementation Plan
+Nodes (3): TabsContent, TabsList, TabsTrigger
 
 ### Community 203 - "Community 203"
 Cohesion: 0.5
-Nodes (4): 13.1 Core Architecture Axiom, 13.2 Enterprise Domain Hierarchy & Database Schema (Migration 0020 & 0021), 13.3 AI Safety Protocol, 13. CALLCRM 2.0 ENTERPRISE DOMAIN LAYER & N8N INTEGRATION ARCHITECTURE
+Nodes (4): code:block10 (PHASE 0: Design Tokens & Foundations (P0)), EcosystemRealty UX Scorecard, Phased Implementation Roadmap, Section 8: EcosystemRealty UX Scorecard & Phased Execution Roadmap
 
 ### Community 204 - "Community 204"
 Cohesion: 0.5
-Nodes (4): 6. User Experience, First-time user, Main user journeys, Returning user
+Nodes (4): 1. Component Layering Architecture, 2. Consolidation & Deprecation Strategy, code:mermaid (graph TD), Section 6: Component Strategy & Consolidation Architecture
 
 ### Community 205 - "Community 205"
 Cohesion: 0.5
-Nodes (4): 10. Database & Data Model, code:mermaid (erDiagram), Constraints & integrity observations, Entity relationship (core entities)
+Nodes (4): 30. EcosystemRealty UX Scorecard, 31. Complete 11-Phase Implementation Roadmap, code:block8 (PHASE 0: Design Tokens & Foundations (P0)), Part VI: Scorecard & Master Execution Roadmap
 
 ### Community 206 - "Community 206"
+Cohesion: 0.5
+Nodes (4): 10. Database & Data Model, code:mermaid (erDiagram), Constraints & integrity observations, Entity relationship (core entities)
+
+### Community 207 - "Community 207"
+Cohesion: 0.5
+Nodes (4): 6. User Experience, First-time user, Main user journeys, Returning user
+
+### Community 208 - "Community 208"
+Cohesion: 0.67
+Nodes (3): 2.13 Billing & Subscriptions API, `POST /api/billing/checkout`, `POST /api/billing/webhook`
+
+### Community 212 - "Community 212"
 Cohesion: 0.67
 Nodes (3): cleanup(), ownerIdRef(), psql()
 
-### Community 215 - "Community 215"
+### Community 214 - "Community 214"
 Cohesion: 0.67
 Nodes (3): 2. Project Discovery, Repository map, Top 20 files you should know
 
 ## Knowledge Gaps
-- **1413 isolated node(s):** `puppeteer`, `__dirname`, `MIGRATIONS_DIR`, `PG`, `results` (+1408 more)
+- **1408 isolated node(s):** `1. Project Overview & Role`, `code:bash (# ── Makefile targets (from repo root) ─────────────────────)`, `3. Strict Operating Rules & Architectural Invariants`, `code:block2 (Real-estate/)`, `5. Verification & Testing Standards` (+1403 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `isLiveSupabaseAvailable` connect `Community 3` to `Community 32`, `Community 2`, `Community 4`, `Community 37`, `Community 7`, `Community 8`, `Community 10`, `Community 13`, `Community 18`, `Community 20`, `Community 21`, `Community 31`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `apiError()` connect `Community 4` to `Community 2`, `Community 3`, `Community 37`, `Community 7`, `Community 8`, `Community 105`, `Community 10`, `Community 13`, `Community 20`, `Community 31`?**
+- **Why does `isLiveSupabaseAvailable` connect `Community 11` to `Community 2`, `Community 3`, `Community 67`, `Community 34`, `Community 7`, `Community 9`, `Community 10`, `Community 171`, `Community 13`, `Community 17`, `Community 180`, `Community 21`, `Community 116`, `Community 20`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Why does `getServiceRoleClient()` connect `Community 3` to `Community 32`, `Community 2`, `Community 4`, `Community 37`, `Community 7`, `Community 8`, `Community 10`, `Community 13`, `Community 18`, `Community 20`, `Community 21`, `Community 31`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **What connects `puppeteer`, `__dirname`, `MIGRATIONS_DIR` to the rest of the system?**
-  _1413 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `apiError()` connect `Community 13` to `Community 2`, `Community 3`, `Community 67`, `Community 7`, `Community 9`, `Community 10`, `Community 11`, `Community 171`, `Community 106`, `Community 180`, `Community 21`, `Community 116`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `useCRM()` connect `Community 4` to `Community 32`, `Community 0`, `Community 1`, `Community 5`, `Community 9`, `Community 46`, `Community 17`, `Community 18`, `Community 19`, `Community 29`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **What connects `1. Project Overview & Role`, `code:bash (# ── Makefile targets (from repo root) ─────────────────────)`, `3. Strict Operating Rules & Architectural Invariants` to the rest of the system?**
+  _1408 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
